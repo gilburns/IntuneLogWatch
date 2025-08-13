@@ -1,0 +1,924 @@
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007856 | FullSyncWorkflow | Starting sidecar gateway service checkin
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007856 | SyncActivityRunner | Started executing sync activity Context: apply script policies
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007856 | SyncActivityTracer | Retrieving data Context: apply script policies
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007862 | SyncActivityRunner | Started executing sync activity Context: apply log upload policies
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007856 | SidecarService | Getting script policies from GW
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007862 | SyncActivityTracer | Retrieving data Context: apply log upload policies
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007862 | SidecarService | Getting generic policies from GW
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007865 | SyncActivityRunner | Started executing sync activity Context: apply mac app policies
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007865 | SyncActivityTracer | Retrieving data Context: apply mac app policies
+2025-08-11 16:27:57:288 | IntuneMDM-Daemon | I | 89007865 | SidecarService | Getting mac app policies from GW
+2025-08-11 16:27:57:289 | IntuneMDM-Daemon | I | 89007862 | HttpClientLogger | Priming connection for data upload Size: 2
+2025-08-11 16:27:57:289 | IntuneMDM-Daemon | I | 89007865 | HttpClientLogger | Priming connection for data upload Size: 2
+2025-08-11 16:27:57:289 | IntuneMDM-Daemon | I | 89007856 | HttpClientLogger | Priming connection for data upload Size: 2
+2025-08-11 16:27:57:845 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: HEAD, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('21D663F4-2A2C-4DAA-AA98-9E535EACA7BC')?api-version=1.1, ClientRequestId: 35C8FD01-DE7A-4D3B-BD41-05BBBE0932EC
+2025-08-11 16:27:57:862 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: HEAD, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('3D1D48B7-7A05-419C-A21C-BD64D85D8AA5')?api-version=1.1, ClientRequestId: B73C968F-DEF4-444D-9C0F-4D042B04E149
+2025-08-11 16:27:57:864 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: HEAD, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('CCD7113D-C694-48AB-9AF4-394B6D808CF6')?api-version=1.1, ClientRequestId: C6F0C5BC-583E-4D5C-A54D-DE4C8416B2B3
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: PUT, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('CCD7113D-C694-48AB-9AF4-394B6D808CF6')?api-version=1.1, ClientRequestId: C6F0C5BC-583E-4D5C-A54D-DE4C8416B2B3
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | 89007863 | SidecarService | Successfully received response from Sidecar GW service.
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | 89007863 | SyncActivityTracer | Validating data Context: apply log upload policies, Count: 0, PolicyID: []
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | 89007863 | SyncActivityTracer | Processing data Context: apply log upload policies, Count: 0, PolicyID: []
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | 89007863 | SyncActivityTracer | Reporting results Context: apply log upload policies, Count: 0, PolicyID: []
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | 89007863 | SyncActivityRunner | Finished executing sync activity Context: apply log upload policies
+2025-08-11 16:27:58:202 | IntuneMDM-Daemon | I | 89007863 | ExecutionClock | Activity measurement. ID: E8A60835-A4FC-4494-BF7E-FE1DEB4E8CB9, Context: apply log upload policies, Duration: 0.9138530492782593, Status: success
+2025-08-11 16:27:58:269 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: PUT, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('21D663F4-2A2C-4DAA-AA98-9E535EACA7BC')?api-version=1.1, ClientRequestId: 35C8FD01-DE7A-4D3B-BD41-05BBBE0932EC
+2025-08-11 16:27:58:270 | IntuneMDM-Daemon | I | 89007890 | SidecarService | Successfully received response from Sidecar GW service.
+2025-08-11 16:27:58:270 | IntuneMDM-Daemon | I | 89007890 | SyncActivityTracer | Validating data Context: apply mac app policies, Count: 10, PolicyID: ["1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e", "2cab453d-9c86-4834-ba51-c5b96886e0e7", "4a4b431d-4cd1-4965-8b18-2ca38c8ab119", "80f4c7e2-15c1-46d9-900a-574332849086", "a6a07cfd-1f03-4748-b57a-4da6832d6a35", "cd86907b-3b40-4472-9f5f-e673a832b77d", "f2567800-c0a3-4742-ab42-567dc1450776", "b69eea78-ae15-400c-ba0b-5fe91e1f96db", "e33551de-0398-4441-98b4-d8b6de28a4cd", "e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81"]
+2025-08-11 16:27:58:270 | IntuneMDM-Daemon | I | 89007890 | SyncActivityTracer | Processing data Context: apply mac app policies, Count: 10, PolicyID: ["1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e", "2cab453d-9c86-4834-ba51-c5b96886e0e7", "4a4b431d-4cd1-4965-8b18-2ca38c8ab119", "80f4c7e2-15c1-46d9-900a-574332849086", "a6a07cfd-1f03-4748-b57a-4da6832d6a35", "cd86907b-3b40-4472-9f5f-e673a832b77d", "f2567800-c0a3-4742-ab42-567dc1450776", "b69eea78-ae15-400c-ba0b-5fe91e1f96db", "e33551de-0398-4441-98b4-d8b6de28a4cd", "e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81"]
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007856 | AppPolicyHandler | Handling app policy. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, Primary BundleID: dockutil.cli.tool, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007863 | AppPolicyHandler | Handling app policy. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, Primary BundleID: au.csiro.dialog, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007890 | AppPolicyHandler | Handling app policy. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, Primary BundleID: com.soma-zone.LaunchControl, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007863 | AppPolicyHandler | Handling app policy. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, Primary BundleID: com.amazon.Amazon-Chime, IgnoreVersion: false, Count: 1, AppType: DMG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007890 | AppPolicyHandler | Handling app policy. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, Primary BundleID: com.spotify.client, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007856 | AppDetector | Detecting app with specific bundle ID. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, BundleID: dockutil.cli.tool, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007890 | AppPolicyHandler | Handling app policy. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, Primary BundleID: com.fatcatsoftware.pledpro, IgnoreVersion: false, Count: 1, AppType: DMG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007865 | AppPolicyHandler | Handling app policy. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, Primary BundleID: com.adobe.acc.AdobeCreativeCloud, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: Available
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007890 | AppPolicyHandler | Handling app policy. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, Primary BundleID: ch.sudo.cyberduck, IgnoreVersion: false, Count: 1, AppType: DMG, App Policy Intent: Available
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007862 | AppPolicyHandler | Handling app policy. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, Primary BundleID: com.coconut-flavour.coconutBattery, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: Available
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007862 | AppPolicyHandler | Handling app policy. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, Primary BundleID: com.spotify.client, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007890 | AppDetector | Detecting app with specific bundle ID. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, AppName: Dialog 2.5.6, BundleID: au.csiro.dialog, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Detecting app with specific bundle ID. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, AppName: LaunchControl 2.8.4, BundleID: com.soma-zone.LaunchControl, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007865 | AppDetector | Detecting app with specific bundle ID. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, AppName: Amazon Chime 5.23.22318, BundleID: com.amazon.Amazon-Chime, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Detecting app with specific bundle ID. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, AppName: Spotify 1.2.69.449, BundleID: com.spotify.client, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Detecting app with specific bundle ID. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, AppName: PlistEdit Pro 1.9.7, BundleID: com.fatcatsoftware.pledpro, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007860 | AppDetector | Detecting app with specific bundle ID. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, BundleID: com.adobe.acc.AdobeCreativeCloud, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007860 | AppDetector | Detecting app with specific bundle ID. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, BundleID: ch.sudo.cyberduck, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007860 | AppDetector | Detecting app with specific bundle ID. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, BundleID: com.coconut-flavour.coconutBattery, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:271 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Detecting app with specific bundle ID. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, AppName: Spotify 1.2.65.255, BundleID: com.spotify.client, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:273 | IntuneMDM-Daemon | I | 89007856 | ScriptOrchestrationLogger | Running system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:273 | IntuneMDM-Daemon | I | 89007865 | SpotlightSearcher | Found app with NSWorkspace PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, AppName: Dialog 2.5.6, AppType: PKG, BundleID: au.csiro.dialog
+2025-08-11 16:27:58:273 | IntuneMDM-Daemon | I | 89007865 | AppDetector | Found bundle path URL for PKG app. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, AppName: Dialog 2.5.6, BundleID: au.csiro.dialog, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:273 | IntuneMDM-Daemon | I | 89007862 | SpotlightSearcher | Found app with NSWorkspace PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, AppName: LaunchControl 2.8.4, AppType: PKG, BundleID: com.soma-zone.LaunchControl
+2025-08-11 16:27:58:273 | IntuneMDM-Daemon | I | 89007862 | AppDetector | Found bundle path URL for PKG app. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, AppName: LaunchControl 2.8.4, BundleID: com.soma-zone.LaunchControl, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:274 | IntuneMDM-Daemon | I | 89007890 | SpotlightSearcher | Found app with NSWorkspace PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, AppName: Amazon Chime 5.23.22318, AppType: DMG, BundleID: com.amazon.Amazon-Chime
+2025-08-11 16:27:58:274 | IntuneMDM-Daemon | I | 89007890 | AppDetector | Found bundle path URL for DMG app. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, AppName: Amazon Chime 5.23.22318, BundleID: com.amazon.Amazon-Chime, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:274 | IntuneMDM-Daemon | I | 89007865 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, AppName: Dialog 2.5.6, BundleID: au.csiro.dialog, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:274 | IntuneMDM-Daemon | I | 89007865 | AppInstallManager | App is not required to be installed PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, AppName: Dialog 2.5.6, AppType: PKG, BundleID: au.csiro.dialog
+2025-08-11 16:27:58:275 | IntuneMDM-Daemon | I | 89007890 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, AppName: Amazon Chime 5.23.22318, BundleID: com.amazon.Amazon-Chime, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:275 | IntuneMDM-Daemon | I | 89007890 | AppInstallManager | App is not required to be installed PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, AppName: Amazon Chime 5.23.22318, AppType: DMG, BundleID: com.amazon.Amazon-Chime
+2025-08-11 16:27:58:276 | IntuneMDM-Daemon | I | 89007862 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, AppName: LaunchControl 2.8.4, BundleID: com.soma-zone.LaunchControl, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:276 | IntuneMDM-Daemon | I | 89007862 | AppInstallManager | App is not required to be installed PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, AppName: LaunchControl 2.8.4, AppType: PKG, BundleID: com.soma-zone.LaunchControl
+2025-08-11 16:27:58:280 | IntuneMDM-Daemon | I | 89007866 | SpotlightSearcher | Found app with NSWorkspace PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, AppName: Spotify 1.2.69.449, AppType: PKG, BundleID: com.spotify.client
+2025-08-11 16:27:58:280 | IntuneMDM-Daemon | I | 89007866 | AppDetector | Found bundle path URL for PKG app. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, AppName: Spotify 1.2.69.449, BundleID: com.spotify.client, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007856 | SpotlightSearcher | Found app with NSWorkspace PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, AppName: PlistEdit Pro 1.9.7, AppType: DMG, BundleID: com.fatcatsoftware.pledpro
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007856 | AppDetector | Found bundle path URL for DMG app. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, AppName: PlistEdit Pro 1.9.7, BundleID: com.fatcatsoftware.pledpro, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007863 | SpotlightSearcher | Found app with NSWorkspace PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, AppType: PKG, BundleID: com.adobe.acc.AdobeCreativeCloud
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007863 | AppDetector | Found bundle path URL for PKG app. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, BundleID: com.adobe.acc.AdobeCreativeCloud, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007862 | SpotlightSearcher | Found app with NSWorkspace PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, AppType: DMG, BundleID: ch.sudo.cyberduck
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007862 | AppDetector | Found bundle path URL for DMG app. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, BundleID: ch.sudo.cyberduck, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007861 | SpotlightSearcher | Found app with NSWorkspace PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, AppType: PKG, BundleID: com.coconut-flavour.coconutBattery
+2025-08-11 16:27:58:281 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Found bundle path URL for PKG app. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, BundleID: com.coconut-flavour.coconutBattery, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007863 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, BundleID: com.adobe.acc.AdobeCreativeCloud, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007863 | AppInstallManager | Available app detect only, skipping installation PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, AppType: PKG, BundleID: com.adobe.acc.AdobeCreativeCloud
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007863 | AppInstallManager | App is not required to be installed PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, AppType: PKG, BundleID: com.adobe.acc.AdobeCreativeCloud
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007866 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, AppName: Spotify 1.2.69.449, BundleID: com.spotify.client, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007866 | AppInstallManager | App is not required to be installed PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, AppName: Spotify 1.2.69.449, AppType: PKG, BundleID: com.spotify.client
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007861 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, BundleID: com.coconut-flavour.coconutBattery, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007861 | AppInstallManager | Available app detect only, skipping installation PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, AppType: PKG, BundleID: com.coconut-flavour.coconutBattery
+2025-08-11 16:27:58:282 | IntuneMDM-Daemon | I | 89007861 | AppInstallManager | App is not required to be installed PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, AppType: PKG, BundleID: com.coconut-flavour.coconutBattery
+2025-08-11 16:27:58:283 | IntuneMDM-Daemon | I | 89007856 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, AppName: PlistEdit Pro 1.9.7, BundleID: com.fatcatsoftware.pledpro, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:283 | IntuneMDM-Daemon | I | 89007856 | AppInstallManager | App is not required to be installed PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, AppName: PlistEdit Pro 1.9.7, AppType: DMG, BundleID: com.fatcatsoftware.pledpro
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007860 | SpotlightSearcher | Found app with NSWorkspace PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, AppName: Spotify 1.2.65.255, AppType: PKG, BundleID: com.spotify.client
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007860 | AppDetector | Found bundle path URL for PKG app. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, AppName: Spotify 1.2.65.255, BundleID: com.spotify.client, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007860 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, AppName: Spotify 1.2.65.255, BundleID: com.spotify.client, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007865 | SpotlightSearcher | Found app with NSWorkspace PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, AppName: Dialog 2.5.6, AppType: PKG, BundleID: au.csiro.dialog
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007860 | AppInstallManager | App is not required to be installed PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, AppName: Spotify 1.2.65.255, AppType: PKG, BundleID: com.spotify.client
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007860 | SpotlightSearcher | Found app with NSWorkspace PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, AppName: Amazon Chime 5.23.22318, AppType: DMG, BundleID: com.amazon.Amazon-Chime
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007861 | SpotlightSearcher | Found app with NSWorkspace PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, AppName: LaunchControl 2.8.4, AppType: PKG, BundleID: com.soma-zone.LaunchControl
+2025-08-11 16:27:58:284 | IntuneMDM-Daemon | I | 89007856 | SpotlightSearcher | Found app with NSWorkspace PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, AppName: CreativeCloud 6.7.0.278 arm64, AppType: PKG, BundleID: com.adobe.acc.AdobeCreativeCloud
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007862 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, BundleID: ch.sudo.cyberduck, AppType: DMG, IgnoreVersion: false
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007865 | AppPolicyHandler | Handling app policy finished. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, Primary BundleID: au.csiro.dialog, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007865 | ExecutionClock | Policy measurement. ID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, Context: macAppInstall, Duration: 0.014280915260314941, Status: success
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007856 | AppPolicyHandler | Handling app policy finished. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, Primary BundleID: com.amazon.Amazon-Chime, IgnoreVersion: false, Count: 1, AppType: DMG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007856 | ExecutionClock | Policy measurement. ID: cd86907b-3b40-4472-9f5f-e673a832b77d, Context: macAppInstall, Duration: 0.01447904109954834, Status: success
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007865 | AppPolicyHandler | Handling app policy finished. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, Primary BundleID: com.soma-zone.LaunchControl, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007865 | ExecutionClock | Policy measurement. ID: 80f4c7e2-15c1-46d9-900a-574332849086, Context: macAppInstall, Duration: 0.014636993408203125, Status: success
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007856 | AppInstallManager | Available app detect only, skipping installation PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, AppType: DMG, BundleID: ch.sudo.cyberduck
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007862 | AppPolicyHandler | Handling app policy finished. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, Primary BundleID: com.adobe.acc.AdobeCreativeCloud, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: Available
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007856 | AppInstallManager | App is not required to be installed PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, AppType: DMG, BundleID: ch.sudo.cyberduck
+2025-08-11 16:27:58:285 | IntuneMDM-Daemon | I | 89007862 | ExecutionClock | Policy measurement. ID: e33551de-0398-4441-98b4-d8b6de28a4cd, Context: macAppInstall, Duration: 0.014816999435424805, Status: success
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007861 | SpotlightSearcher | Found app with NSWorkspace PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, AppName: Spotify 1.2.69.449, AppType: PKG, BundleID: com.spotify.client
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007862 | SpotlightSearcher | Found app with NSWorkspace PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, AppName: coconutBattery 4.0.4, AppType: PKG, BundleID: com.coconut-flavour.coconutBattery
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007862 | SpotlightSearcher | Found app with NSWorkspace PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, AppName: PlistEdit Pro 1.9.7, AppType: DMG, BundleID: com.fatcatsoftware.pledpro
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007861 | AppPolicyHandler | Handling app policy finished. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, Primary BundleID: com.spotify.client, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007861 | ExecutionClock | Policy measurement. ID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, Context: macAppInstall, Duration: 0.016588926315307617, Status: success
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007862 | AppPolicyHandler | Handling app policy finished. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, Primary BundleID: com.coconut-flavour.coconutBattery, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: Available
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007862 | ExecutionClock | Policy measurement. ID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, Context: macAppInstall, Duration: 0.01677405834197998, Status: success
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007866 | AppPolicyHandler | Handling app policy finished. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, Primary BundleID: com.fatcatsoftware.pledpro, IgnoreVersion: false, Count: 1, AppType: DMG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:287 | IntuneMDM-Daemon | I | 89007866 | ExecutionClock | Policy measurement. ID: f2567800-c0a3-4742-ab42-567dc1450776, Context: macAppInstall, Duration: 0.01695096492767334, Status: success
+2025-08-11 16:27:58:290 | IntuneMDM-Daemon | I | 89007865 | SpotlightSearcher | Found app with NSWorkspace PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, AppName: Spotify 1.2.65.255, AppType: PKG, BundleID: com.spotify.client
+2025-08-11 16:27:58:290 | IntuneMDM-Daemon | I | 89007866 | SpotlightSearcher | Found app with NSWorkspace PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, AppName: Cyberduck 9.1.6, AppType: DMG, BundleID: ch.sudo.cyberduck
+2025-08-11 16:27:58:290 | IntuneMDM-Daemon | I | 89007865 | AppPolicyHandler | Handling app policy finished. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, Primary BundleID: com.spotify.client, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:290 | IntuneMDM-Daemon | I | 89007865 | ExecutionClock | Policy measurement. ID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, Context: macAppInstall, Duration: 0.01935100555419922, Status: success
+2025-08-11 16:27:58:290 | IntuneMDM-Daemon | I | 89007862 | AppPolicyHandler | Handling app policy finished. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, Primary BundleID: ch.sudo.cyberduck, IgnoreVersion: false, Count: 1, AppType: DMG, App Policy Intent: Available
+2025-08-11 16:27:58:290 | IntuneMDM-Daemon | I | 89007862 | ExecutionClock | Policy measurement. ID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, Context: macAppInstall, Duration: 0.019544005393981934, Status: success
+2025-08-11 16:27:58:301 | IntuneMDM-Daemon | I | 89007866 | ScriptOrchestrationLogger | Finished system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:301 | IntuneMDM-Daemon | W | 89007866 | AppDetector | Error detecting install path for app. Error: BundleInfoProviderError.bundleNotFound, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, AppType: PKG, BundleID: dockutil.cli.tool, IgnoreVersion: false
+2025-08-11 16:27:58:301 | IntuneMDM-Daemon | I | 89007866 | AppDetector | App not found on disk, trying to detect app receipt PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, BundleID: dockutil.cli.tool, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:301 | IntuneMDM-Daemon | I | 89007866 | ScriptOrchestrationLogger | Running system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:343 | IntuneMDM-Daemon | I | 89007861 | ScriptOrchestrationLogger | Finished system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:343 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Found receipt for PKG app. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, BundleID: dockutil.cli.tool, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:343 | IntuneMDM-Daemon | I | 89007861 | AppDetector | Successfully detected app install through app receipt PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, BundleID: dockutil.cli.tool, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:343 | IntuneMDM-Daemon | I | 89007861 | AppDetector | App with specific bundle ID is installed on the device. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, BundleID: dockutil.cli.tool, AppType: PKG, IgnoreVersion: false
+2025-08-11 16:27:58:343 | IntuneMDM-Daemon | I | 89007861 | AppInstallManager | App is not required to be installed PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, AppName: dockutil 3.1.3, AppType: PKG, BundleID: dockutil.cli.tool
+2025-08-11 16:27:58:343 | IntuneMDM-Daemon | I | 89007861 | ScriptOrchestrationLogger | Running system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:356 | IntuneMDM-Daemon | I | 89007853 | ScriptOrchestrationLogger | Finished system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:357 | IntuneMDM-Daemon | I | 89007853 | ScriptOrchestrationLogger | Running system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:368 | IntuneMDM-Daemon | I | 89007862 | ScriptOrchestrationLogger | Finished system script. Domain: apps, User: root, PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:368 | IntuneMDM-Daemon | I | 89007862 | AppPolicyHandler | Handling app policy finished. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, Primary BundleID: dockutil.cli.tool, IgnoreVersion: false, Count: 1, AppType: PKG, App Policy Intent: RequiredInstall
+2025-08-11 16:27:58:368 | IntuneMDM-Daemon | I | 89007862 | ExecutionClock | Policy measurement. ID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, Context: macAppInstall, Duration: 0.09788405895233154, Status: success
+2025-08-11 16:27:58:368 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:369 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, PolicyResult: ["ResultCreatedTimeUTC": 2025-08-11T21:27:58Z, "PolicyId": 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, "PolicyVersion": 1, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "3.1.3";
+            BundleId = "dockutil.cli.tool";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "dockutil 3.1.3";
+    ApplicationRequirements =     {
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "dockutil.cli.tool";
+    TargetType = 2;
+}, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "3.1.3";
+    TargetType = 2;
+}, "PolicyType": 12, "ApplicationName": dockutil 3.1.3, "Intent": 3], CachedPolicyResult: ["Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "3.1.3";
+            BundleId = "dockutil.cli.tool";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "dockutil 3.1.3";
+    ApplicationRequirements =     {
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "dockutil.cli.tool";
+    TargetType = 2;
+}, "PolicyVersion": 1, "PolicyType": 12, "ApplicationName": dockutil 3.1.3, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "3.1.3";
+    TargetType = 2;
+}, "PolicyId": 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e, "ResultCreatedTimeUTC": 2025-07-06T20:10:25Z, "Intent": 3]
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:370 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: a6a07cfd-1f03-4748-b57a-4da6832d6a35, PolicyResult: ["PolicyVersion": 1, "PolicyId": a6a07cfd-1f03-4748-b57a-4da6832d6a35, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "1.2.69.449";
+            BundleId = "com.spotify.client";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "Spotify 1.2.69.449";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 11;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "a6a07cfd-1f03-4748-b57a-4da6832d6a35";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.spotify.client";
+    TargetType = 2;
+}, "ApplicationName": Spotify 1.2.69.449, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "1.2.69.449";
+    TargetType = 2;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["PolicyId": a6a07cfd-1f03-4748-b57a-4da6832d6a35, "PolicyType": 12, "ApplicationName": Spotify 1.2.69.449, "PolicyVersion": 1, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "1.2.69.449";
+            BundleId = "com.spotify.client";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "Spotify 1.2.69.449";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 11;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "a6a07cfd-1f03-4748-b57a-4da6832d6a35";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.spotify.client";
+    TargetType = 2;
+}, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "ResultCreatedTimeUTC": 2025-07-31T19:46:19Z, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "1.2.69.449";
+    TargetType = 2;
+}]
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:371 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, PolicyResult: ["PolicyVersion": 1, "PolicyId": e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "4.0.4";
+            BundleId = "com.coconut-flavour.coconutBattery";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "coconutBattery 4.0.4";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 12;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 1;
+    IgnoreVersioning = 0;
+    Intent = 1;
+    PolicyId = "e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.coconut-flavour.coconutBattery";
+    TargetType = 1;
+}, "ApplicationName": coconutBattery 4.0.4, "Intent": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 4;
+    InstallContext = 2;
+    ProductVersion = "4.0.4";
+    TargetType = 1;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["ResultCreatedTimeUTC": 2025-07-06T20:40:48Z, "PolicyId": e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, "PolicyVersion": 1, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "4.0.4";
+            BundleId = "com.coconut-flavour.coconutBattery";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "coconutBattery 4.0.4";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 12;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 1;
+    PolicyId = "e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.coconut-flavour.coconutBattery";
+    TargetType = 1;
+}, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 4;
+    InstallContext = 2;
+    ProductVersion = "4.0.4";
+    TargetType = 1;
+}, "PolicyType": 12, "ApplicationName": coconutBattery 4.0.4, "Intent": 1]
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: 2cab453d-9c86-4834-ba51-c5b96886e0e7, PolicyResult: ["PolicyVersion": 1, "PolicyId": 2cab453d-9c86-4834-ba51-c5b96886e0e7, "PolicyType": 12, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "1.2.65.255";
+            BundleId = "com.spotify.client";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "Spotify 1.2.65.255";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 11;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "2cab453d-9c86-4834-ba51-c5b96886e0e7";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.spotify.client";
+    TargetType = 2;
+}, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "ApplicationName": Spotify 1.2.65.255, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "1.2.65.255";
+    TargetType = 2;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["PolicyVersion": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "1.2.65.255";
+    TargetType = 2;
+}, "Intent": 3, "ResultCreatedTimeUTC": 2025-06-04T18:34:46Z, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "1.2.65.255";
+            BundleId = "com.spotify.client";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "Spotify 1.2.65.255";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 11;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "2cab453d-9c86-4834-ba51-c5b96886e0e7";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.spotify.client";
+    TargetType = 2;
+}, "ApplicationName": Spotify 1.2.65.255, "PolicyType": 12, "PolicyId": 2cab453d-9c86-4834-ba51-c5b96886e0e7]
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:372 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: cd86907b-3b40-4472-9f5f-e673a832b77d, PolicyResult: ["PolicyVersion": 1, "PolicyId": cd86907b-3b40-4472-9f5f-e673a832b77d, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "5.23.22318";
+            BundleId = "com.amazon.Amazon-Chime";
+        }
+    );
+    AppType = 0;
+    ApplicationName = "Amazon Chime 5.23.22318";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 10;
+            MinorVersion = 15;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "cd86907b-3b40-4472-9f5f-e673a832b77d";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.amazon.Amazon-Chime";
+    TargetType = 2;
+}, "ApplicationName": Amazon Chime 5.23.22318, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "5.23.22318";
+    TargetType = 2;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["ResultCreatedTimeUTC": 2025-05-18T06:33:57Z, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "5.23.22318";
+            BundleId = "com.amazon.Amazon-Chime";
+        }
+    );
+    AppType = 0;
+    ApplicationName = "Amazon Chime 5.23.22318";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 10;
+            MinorVersion = 15;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "cd86907b-3b40-4472-9f5f-e673a832b77d";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.amazon.Amazon-Chime";
+    TargetType = 2;
+}, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "PolicyVersion": 1, "ApplicationName": Amazon Chime 5.23.22318, "PolicyType": 12, "PolicyId": cd86907b-3b40-4472-9f5f-e673a832b77d, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "5.23.22318";
+    TargetType = 2;
+}]
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:373 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: e33551de-0398-4441-98b4-d8b6de28a4cd, PolicyResult: ["PolicyVersion": 1, "PolicyId": e33551de-0398-4441-98b4-d8b6de28a4cd, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "6.7.0.278";
+            BundleId = "com.adobe.acc.AdobeCreativeCloud";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "CreativeCloud 6.7.0.278 arm64";
+    ApplicationRequirements =     {
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 1;
+    IgnoreVersioning = 0;
+    Intent = 1;
+    PolicyId = "e33551de-0398-4441-98b4-d8b6de28a4cd";
+    PolicyVersion = 1;
+    PostInstallScript =     {
+        ScriptContent = "IyEvYmluL3pzaAoKIz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiMgQWRkX1RvX0RvY2suc2gKIz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiMgCiMgUHVycG9zZTogQWRkcyBhbiBhcHBsaWNhdGlvbiB0byB0aGUgbWFjT1MgRG9jayBmb3IgYWxsIHVzZXIgYWNjb3VudHMKIyAgICAgICAgICBvbiB0aGUgc3lzdGVtLiBUaGlzIGlzIGNvbW1vbmx5IHVzZWQgYXMgYSBwb3N0aW5zdGFsbCBzY3JpcHQKIyAgICAgICAgICB0byBlbnN1cmUgbmV3bHkgaW5zdGFsbGVkIGFwcGxpY2F0aW9ucyBhcHBlYXIgaW4gdXNlcnMnCiMgICAgICAgICAgRG9ja3MgYXV0b21hdGljYWxseS4KIwojIFJlcXVpcmVtZW50czogZG9ja3V0aWwgbXVzdCBiZSBpbnN0YWxsZWQgYXQgL3Vzci9sb2NhbC9iaW4vZG9ja3V0aWwKIyAgICAgICAgICAgICAgIChodHRwczovL2dpdGh1Yi5jb20va2NyYXdmb3JkL2RvY2t1dGlsKQojCiMgVXNhZ2U6ICAgU2V0IEFQUF9OQU1FIHRvIHRoZSB0YXJnZXQgYXBwbGljYXRpb24ncyBmdWxsIHBhdGgKIyAgICAgICAgICBUaGUgc2NyaXB0IHdpbGwgYWRkIHRoZSBhcHAgdG8gYWxsIHVzZXIgRG9ja3MgYW5kIHJlc3RhcnQgRG9jawojCiMgRXhpdCBDb2RlczoKIyAgIDAgLSBTdWNjZXNzZnVsbHkgYWRkZWQgYXBwbGljYXRpb24gdG8gRG9jayhzKQojICAgMSAtIEFwcGxpY2F0aW9uIG5vdCBmb3VuZCBvciBkb2NrdXRpbCBub3QgYXZhaWxhYmxlCiMKIz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgojIFBhdGggdG8gdGhlIGFwcCB5b3Ugd2FudCB0byBhZGQgdG8gdGhlIERvY2sKQVBQX1BBVEg9Ii9BcHBsaWNhdGlvbnMvQWRvYmUgQ3JlYXRpdmUgQ2xvdWQvQWRvYmUgQ3JlYXRpdmUgQ2xvdWQuYXBwIgoKIyBDaGVjayB0aGF0IHRoZSBhcHAgZXhpc3RzCmlmIFtbICEgLWQgIiRBUFBfUEFUSCIgXV07IHRoZW4KICAgIGVjaG8gIkFwcCBub3QgZm91bmQgYXQgJEFQUF9QQVRIIgogICAgZXhpdCAxCmZpCgojIFBhdGggdG8gZG9ja3V0aWwKRE9DS1VUSUw9Ii91c3IvbG9jYWwvYmluL2RvY2t1dGlsIgoKIyBDaGVjayB0aGF0IGRvY2t1dGlsIGV4aXN0cwppZiBbWyAhIC1mICIkRE9DS1VUSUwiIF1dOyB0aGVuCiAgICBlY2hvICJkb2NrdXRpbCBub3QgZm91bmQgYXQgJERPQ0tVVElMIgogICAgZXhpdCAxCmZpCgojIFRyYWNrIHVzZXJzIHdobyBoYWQgZG9jayBjaGFuZ2VzClVTRVJTX0NIQU5HRUQ9KCkKCiMgTG9vcCB0aHJvdWdoIGFsbCB1c2VyIGhvbWUgZGlyZWN0b3JpZXMKZm9yIFVTRVJfSE9NRSBpbiAvVXNlcnMvKjsgZG8KICAgICMgU2tpcCBpZiBub3QgYSBkaXJlY3RvcnkKICAgIGlmIFtbICEgLWQgIiRVU0VSX0hPTUUiIF1dOyB0aGVuCiAgICAgICAgY29udGludWUKICAgIGZpCiAgICAKICAgIFVTRVJfTkFNRT0kKGJhc2VuYW1lICIkVVNFUl9IT01FIikKICAgIGVjaG8gIlByb2Nlc3NpbmcgdXNlcjogJFVTRVJfTkFNRSIKCiAgICAjIFNraXAgc3lzdGVtIGRpcmVjdG9yaWVzIGFuZCB2YWxpZGF0ZSB1c2VyIGRpcmVjdG9yeQogICAgaWYgW1sgIiRVU0VSX05BTUUiID09ICJTaGFyZWQiIHx8ICIkVVNFUl9OQU1FIiA9PSAiLmxvY2FsaXplZCIgXV07IHRoZW4KICAgICAgICBlY2hvICJTa2lwcGluZyBzeXN0ZW0gZGlyZWN0b3J5OiAkVVNFUl9OQU1FIgogICAgICAgIGNvbnRpbnVlCiAgICBmaQogICAgCiAgICAjIFNraXAgaWYgbm90IGEgcmVhbCB1c2VyIGRpcmVjdG9yeSAoY2hlY2sgZm9yIFVJRCA+IDUwMCkKICAgIFVTRVJfSUQ9JChpZCAtdSAiJFVTRVJfTkFNRSIgMj4vZGV2L251bGwpCiAgICBpZiBbWyAkPyAtbmUgMCB8fCAkVVNFUl9JRCAtbHQgNTAwIF1dOyB0aGVuCiAgICAgICAgZWNobyAiU2tpcHBpbmcgc3lzdGVtIHVzZXI6ICRVU0VSX05BTUUgKFVJRDogJFVTRVJfSUQpIgogICAgICAgIGNvbnRpbnVlCiAgICBmaQoKICAgICMgQ2hlY2sgaWYgdXNlciBoYXMgZG9jayBwcmVmZXJlbmNlcyAoc2tpcCBzZXJ2aWNlIGFjY291bnRzIHRoYXQgbmV2ZXIgbG9nZ2VkIGluKQogICAgRE9DS19QTElTVD0iJFVTRVJfSE9NRS9MaWJyYXJ5L1ByZWZlcmVuY2VzL2NvbS5hcHBsZS5kb2NrLnBsaXN0IgogICAgaWYgW1sgISAtZiAiJERPQ0tfUExJU1QiIF1dOyB0aGVuCiAgICAgICAgZWNobyAiTm8gZG9jayBwcmVmZXJlbmNlcyBmb3VuZCBmb3IgJFVTRVJfTkFNRSwgc2tpcHBpbmcgKGxpa2VseSBzZXJ2aWNlIGFjY291bnQ/KSIKICAgICAgICBjb250aW51ZQogICAgZmkKCiAgICAjIENoZWNrIGlmIGFwcCBhbHJlYWR5IGV4aXN0cyBpbiBkb2NrLCBpZiBzbyBza2lwCiAgICBFWElTVElOR19DSEVDSz0kKHN1ICIkVVNFUl9OQU1FIiAtbCAtYyAiJERPQ0tVVElMIC0tbGlzdCIgfCBncmVwIC1jICIkKGJhc2VuYW1lICIkQVBQX1BBVEgiIC5hcHApIikKICAgIAogICAgaWYgW1sgJEVYSVNUSU5HX0NIRUNLIC1ndCAwIF1dOyB0aGVuCiAgICAgICAgZWNobyAiQXBwIGFscmVhZHkgZXhpc3RzIGluICRVU0VSX05BTUUncyBEb2NrLCBza2lwcGluZy4uLiIKICAgICAgICBjb250aW51ZQogICAgZmkKICAgIAogICAgIyBBZGQgdGhlIGFwcCB0byBkb2NrCiAgICBpZiBzdSAiJFVTRVJfTkFNRSIgLWwgLWMgIiRET0NLVVRJTCAtLWFkZCBcIiRBUFBfUEFUSFwiIC0tbm8tcmVzdGFydCI7IHRoZW4KICAgICAgICBlY2hvICJTdWNjZXNzZnVsbHkgYWRkZWQgJEFQUF9QQVRIIHRvICRVU0VSX05BTUUncyBEb2NrIgogICAgICAgIFVTRVJTX0NIQU5HRUQrPSgiJFVTRVJfTkFNRSIpCiAgICBlbHNlCiAgICAgICAgZWNobyAiRmFpbGVkIHRvIGFkZCAkQVBQX1BBVEggdG8gJFVTRVJfTkFNRSdzIERvY2siCiAgICBmaQpkb25lCgojIFJlc3RhcnQgRG9jayBvbmx5IGZvciB1c2VycyB3aG8gaGFkIGNoYW5nZXMgbWFkZQppZiBbWyAkeyNVU0VSU19DSEFOR0VEW0BdfSAtZ3QgMCBdXTsgdGhlbgogICAgZWNobyAiUmVzdGFydGluZyBEb2NrIGZvciB1c2VycyB3aXRoIGNoYW5nZXM6ICR7VVNFUlNfQ0hBTkdFRFsqXX0iCiAgICBmb3IgQ0hBTkdFRF9VU0VSIGluICIke1VTRVJTX0NIQU5HRURbQF19IjsgZG8KICAgICAgICAjIENoZWNrIGlmIHVzZXIgaXMgY3VycmVudGx5IGxvZ2dlZCBpbgogICAgICAgIGlmIHdobyB8IGdyZXAgLXEgIl4kQ0hBTkdFRF9VU0VSICI7IHRoZW4KICAgICAgICAgICAgc3UgIiRDSEFOR0VEX1VTRVIiIC1sIC1jICJwa2lsbCBEb2NrIiAyPi9kZXYvbnVsbCAmJiBlY2hvICJSZXN0YXJ0ZWQgRG9jayBmb3IgJENIQU5HRURfVVNFUiIKICAgICAgICBlbHNlCiAgICAgICAgICAgIGVjaG8gIiRDSEFOR0VEX1VTRVIgbm90IGN1cnJlbnRseSBsb2dnZWQgaW4sIGRvY2sgd2lsbCB1cGRhdGUgb24gbmV4dCBsb2dpbiIKICAgICAgICBmaQogICAgZG9uZQplbHNlCiAgICBlY2hvICJObyBkb2NrIGNoYW5nZXMgbWFkZSwgc2tpcHBpbmcgRG9jayByZXN0YXJ0IgpmaQoKZXhpdCAw";
+    };
+    PrimaryApplicationBundleId = "com.adobe.acc.AdobeCreativeCloud";
+    TargetType = 1;
+}, "ApplicationName": CreativeCloud 6.7.0.278 arm64, "Intent": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 4;
+    InstallContext = 2;
+    ProductVersion = "6.7.0.278";
+    TargetType = 1;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["ResultCreatedTimeUTC": 2025-07-06T20:44:24Z, "PolicyType": 12, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 4;
+    InstallContext = 2;
+    ProductVersion = "6.7.0.278";
+    TargetType = 1;
+}, "PolicyVersion": 1, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "6.7.0.278";
+            BundleId = "com.adobe.acc.AdobeCreativeCloud";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "CreativeCloud 6.7.0.278 arm64";
+    ApplicationRequirements =     {
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 1;
+    PolicyId = "e33551de-0398-4441-98b4-d8b6de28a4cd";
+    PolicyVersion = 1;
+    PostInstallScript =     {
+        ScriptContent = "IyEvYmluL3pzaAoKIz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiMgQWRkX1RvX0RvY2suc2gKIz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiMgCiMgUHVycG9zZTogQWRkcyBhbiBhcHBsaWNhdGlvbiB0byB0aGUgbWFjT1MgRG9jayBmb3IgYWxsIHVzZXIgYWNjb3VudHMKIyAgICAgICAgICBvbiB0aGUgc3lzdGVtLiBUaGlzIGlzIGNvbW1vbmx5IHVzZWQgYXMgYSBwb3N0aW5zdGFsbCBzY3JpcHQKIyAgICAgICAgICB0byBlbnN1cmUgbmV3bHkgaW5zdGFsbGVkIGFwcGxpY2F0aW9ucyBhcHBlYXIgaW4gdXNlcnMnCiMgICAgICAgICAgRG9ja3MgYXV0b21hdGljYWxseS4KIwojIFJlcXVpcmVtZW50czogZG9ja3V0aWwgbXVzdCBiZSBpbnN0YWxsZWQgYXQgL3Vzci9sb2NhbC9iaW4vZG9ja3V0aWwKIyAgICAgICAgICAgICAgIChodHRwczovL2dpdGh1Yi5jb20va2NyYXdmb3JkL2RvY2t1dGlsKQojCiMgVXNhZ2U6ICAgU2V0IEFQUF9OQU1FIHRvIHRoZSB0YXJnZXQgYXBwbGljYXRpb24ncyBmdWxsIHBhdGgKIyAgICAgICAgICBUaGUgc2NyaXB0IHdpbGwgYWRkIHRoZSBhcHAgdG8gYWxsIHVzZXIgRG9ja3MgYW5kIHJlc3RhcnQgRG9jawojCiMgRXhpdCBDb2RlczoKIyAgIDAgLSBTdWNjZXNzZnVsbHkgYWRkZWQgYXBwbGljYXRpb24gdG8gRG9jayhzKQojICAgMSAtIEFwcGxpY2F0aW9uIG5vdCBmb3VuZCBvciBkb2NrdXRpbCBub3QgYXZhaWxhYmxlCiMKIz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgojIFBhdGggdG8gdGhlIGFwcCB5b3Ugd2FudCB0byBhZGQgdG8gdGhlIERvY2sKQVBQX1BBVEg9Ii9BcHBsaWNhdGlvbnMvQWRvYmUgQ3JlYXRpdmUgQ2xvdWQvQWRvYmUgQ3JlYXRpdmUgQ2xvdWQuYXBwIgoKIyBDaGVjayB0aGF0IHRoZSBhcHAgZXhpc3RzCmlmIFtbICEgLWQgIiRBUFBfUEFUSCIgXV07IHRoZW4KICAgIGVjaG8gIkFwcCBub3QgZm91bmQgYXQgJEFQUF9QQVRIIgogICAgZXhpdCAxCmZpCgojIFBhdGggdG8gZG9ja3V0aWwKRE9DS1VUSUw9Ii91c3IvbG9jYWwvYmluL2RvY2t1dGlsIgoKIyBDaGVjayB0aGF0IGRvY2t1dGlsIGV4aXN0cwppZiBbWyAhIC1mICIkRE9DS1VUSUwiIF1dOyB0aGVuCiAgICBlY2hvICJkb2NrdXRpbCBub3QgZm91bmQgYXQgJERPQ0tVVElMIgogICAgZXhpdCAxCmZpCgojIFRyYWNrIHVzZXJzIHdobyBoYWQgZG9jayBjaGFuZ2VzClVTRVJTX0NIQU5HRUQ9KCkKCiMgTG9vcCB0aHJvdWdoIGFsbCB1c2VyIGhvbWUgZGlyZWN0b3JpZXMKZm9yIFVTRVJfSE9NRSBpbiAvVXNlcnMvKjsgZG8KICAgICMgU2tpcCBpZiBub3QgYSBkaXJlY3RvcnkKICAgIGlmIFtbICEgLWQgIiRVU0VSX0hPTUUiIF1dOyB0aGVuCiAgICAgICAgY29udGludWUKICAgIGZpCiAgICAKICAgIFVTRVJfTkFNRT0kKGJhc2VuYW1lICIkVVNFUl9IT01FIikKICAgIGVjaG8gIlByb2Nlc3NpbmcgdXNlcjogJFVTRVJfTkFNRSIKCiAgICAjIFNraXAgc3lzdGVtIGRpcmVjdG9yaWVzIGFuZCB2YWxpZGF0ZSB1c2VyIGRpcmVjdG9yeQogICAgaWYgW1sgIiRVU0VSX05BTUUiID09ICJTaGFyZWQiIHx8ICIkVVNFUl9OQU1FIiA9PSAiLmxvY2FsaXplZCIgXV07IHRoZW4KICAgICAgICBlY2hvICJTa2lwcGluZyBzeXN0ZW0gZGlyZWN0b3J5OiAkVVNFUl9OQU1FIgogICAgICAgIGNvbnRpbnVlCiAgICBmaQogICAgCiAgICAjIFNraXAgaWYgbm90IGEgcmVhbCB1c2VyIGRpcmVjdG9yeSAoY2hlY2sgZm9yIFVJRCA+IDUwMCkKICAgIFVTRVJfSUQ9JChpZCAtdSAiJFVTRVJfTkFNRSIgMj4vZGV2L251bGwpCiAgICBpZiBbWyAkPyAtbmUgMCB8fCAkVVNFUl9JRCAtbHQgNTAwIF1dOyB0aGVuCiAgICAgICAgZWNobyAiU2tpcHBpbmcgc3lzdGVtIHVzZXI6ICRVU0VSX05BTUUgKFVJRDogJFVTRVJfSUQpIgogICAgICAgIGNvbnRpbnVlCiAgICBmaQoKICAgICMgQ2hlY2sgaWYgdXNlciBoYXMgZG9jayBwcmVmZXJlbmNlcyAoc2tpcCBzZXJ2aWNlIGFjY291bnRzIHRoYXQgbmV2ZXIgbG9nZ2VkIGluKQogICAgRE9DS19QTElTVD0iJFVTRVJfSE9NRS9MaWJyYXJ5L1ByZWZlcmVuY2VzL2NvbS5hcHBsZS5kb2NrLnBsaXN0IgogICAgaWYgW1sgISAtZiAiJERPQ0tfUExJU1QiIF1dOyB0aGVuCiAgICAgICAgZWNobyAiTm8gZG9jayBwcmVmZXJlbmNlcyBmb3VuZCBmb3IgJFVTRVJfTkFNRSwgc2tpcHBpbmcgKGxpa2VseSBzZXJ2aWNlIGFjY291bnQ/KSIKICAgICAgICBjb250aW51ZQogICAgZmkKCiAgICAjIENoZWNrIGlmIGFwcCBhbHJlYWR5IGV4aXN0cyBpbiBkb2NrLCBpZiBzbyBza2lwCiAgICBFWElTVElOR19DSEVDSz0kKHN1ICIkVVNFUl9OQU1FIiAtbCAtYyAiJERPQ0tVVElMIC0tbGlzdCIgfCBncmVwIC1jICIkKGJhc2VuYW1lICIkQVBQX1BBVEgiIC5hcHApIikKICAgIAogICAgaWYgW1sgJEVYSVNUSU5HX0NIRUNLIC1ndCAwIF1dOyB0aGVuCiAgICAgICAgZWNobyAiQXBwIGFscmVhZHkgZXhpc3RzIGluICRVU0VSX05BTUUncyBEb2NrLCBza2lwcGluZy4uLiIKICAgICAgICBjb250aW51ZQogICAgZmkKICAgIAogICAgIyBBZGQgdGhlIGFwcCB0byBkb2NrCiAgICBpZiBzdSAiJFVTRVJfTkFNRSIgLWwgLWMgIiRET0NLVVRJTCAtLWFkZCBcIiRBUFBfUEFUSFwiIC0tbm8tcmVzdGFydCI7IHRoZW4KICAgICAgICBlY2hvICJTdWNjZXNzZnVsbHkgYWRkZWQgJEFQUF9QQVRIIHRvICRVU0VSX05BTUUncyBEb2NrIgogICAgICAgIFVTRVJTX0NIQU5HRUQrPSgiJFVTRVJfTkFNRSIpCiAgICBlbHNlCiAgICAgICAgZWNobyAiRmFpbGVkIHRvIGFkZCAkQVBQX1BBVEggdG8gJFVTRVJfTkFNRSdzIERvY2siCiAgICBmaQpkb25lCgojIFJlc3RhcnQgRG9jayBvbmx5IGZvciB1c2VycyB3aG8gaGFkIGNoYW5nZXMgbWFkZQppZiBbWyAkeyNVU0VSU19DSEFOR0VEW0BdfSAtZ3QgMCBdXTsgdGhlbgogICAgZWNobyAiUmVzdGFydGluZyBEb2NrIGZvciB1c2VycyB3aXRoIGNoYW5nZXM6ICR7VVNFUlNfQ0hBTkdFRFsqXX0iCiAgICBmb3IgQ0hBTkdFRF9VU0VSIGluICIke1VTRVJTX0NIQU5HRURbQF19IjsgZG8KICAgICAgICAjIENoZWNrIGlmIHVzZXIgaXMgY3VycmVudGx5IGxvZ2dlZCBpbgogICAgICAgIGlmIHdobyB8IGdyZXAgLXEgIl4kQ0hBTkdFRF9VU0VSICI7IHRoZW4KICAgICAgICAgICAgc3UgIiRDSEFOR0VEX1VTRVIiIC1sIC1jICJwa2lsbCBEb2NrIiAyPi9kZXYvbnVsbCAmJiBlY2hvICJSZXN0YXJ0ZWQgRG9jayBmb3IgJENIQU5HRURfVVNFUiIKICAgICAgICBlbHNlCiAgICAgICAgICAgIGVjaG8gIiRDSEFOR0VEX1VTRVIgbm90IGN1cnJlbnRseSBsb2dnZWQgaW4sIGRvY2sgd2lsbCB1cGRhdGUgb24gbmV4dCBsb2dpbiIKICAgICAgICBmaQogICAgZG9uZQplbHNlCiAgICBlY2hvICJObyBkb2NrIGNoYW5nZXMgbWFkZSwgc2tpcHBpbmcgRG9jayByZXN0YXJ0IgpmaQoKZXhpdCAw";
+    };
+    PrimaryApplicationBundleId = "com.adobe.acc.AdobeCreativeCloud";
+    TargetType = 1;
+}, "Intent": 1, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "ApplicationName": CreativeCloud 6.7.0.278 arm64, "PolicyId": e33551de-0398-4441-98b4-d8b6de28a4cd]
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, PolicyResult: ["PolicyVersion": 1, "PolicyId": 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "2.5.6";
+            BundleId = "au.csiro.dialog";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "Dialog 2.5.6";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 12;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "4a4b431d-4cd1-4965-8b18-2ca38c8ab119";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "au.csiro.dialog";
+    TargetType = 2;
+}, "ApplicationName": Dialog 2.5.6, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "2.5.6";
+    TargetType = 2;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["PolicyVersion": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "2.5.6";
+    TargetType = 2;
+}, "Intent": 3, "ResultCreatedTimeUTC": 2025-05-19T13:51:07Z, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "2.5.6";
+            BundleId = "au.csiro.dialog";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "Dialog 2.5.6";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 12;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "4a4b431d-4cd1-4965-8b18-2ca38c8ab119";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "au.csiro.dialog";
+    TargetType = 2;
+}, "ApplicationName": Dialog 2.5.6, "PolicyType": 12, "PolicyId": 4a4b431d-4cd1-4965-8b18-2ca38c8ab119]
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:374 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: 80f4c7e2-15c1-46d9-900a-574332849086, PolicyResult: ["PolicyVersion": 1, "PolicyId": 80f4c7e2-15c1-46d9-900a-574332849086, "PolicyType": 12, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "2.8.4";
+            BundleId = "com.soma-zone.LaunchControl";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "LaunchControl 2.8.4";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 11;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "80f4c7e2-15c1-46d9-900a-574332849086";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.soma-zone.LaunchControl";
+    TargetType = 2;
+}, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "ApplicationName": LaunchControl 2.8.4, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "2.8.4";
+    TargetType = 2;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["PolicyVersion": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "2.8.4";
+    TargetType = 2;
+}, "Intent": 3, "ResultCreatedTimeUTC": 2025-07-27T14:02:05Z, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "2.8.4";
+            BundleId = "com.soma-zone.LaunchControl";
+        }
+    );
+    AppType = 1;
+    ApplicationName = "LaunchControl 2.8.4";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 11;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "80f4c7e2-15c1-46d9-900a-574332849086";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.soma-zone.LaunchControl";
+    TargetType = 2;
+}, "ApplicationName": LaunchControl 2.8.4, "PolicyType": 12, "PolicyId": 80f4c7e2-15c1-46d9-900a-574332849086]
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:375 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: f2567800-c0a3-4742-ab42-567dc1450776, PolicyResult: ["PolicyVersion": 1, "PolicyId": f2567800-c0a3-4742-ab42-567dc1450776, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "1.9.7";
+            BundleId = "com.fatcatsoftware.pledpro";
+        }
+    );
+    AppType = 0;
+    ApplicationName = "PlistEdit Pro 1.9.7";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 12;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "f2567800-c0a3-4742-ab42-567dc1450776";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.fatcatsoftware.pledpro";
+    TargetType = 2;
+}, "ApplicationName": PlistEdit Pro 1.9.7, "Intent": 3, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "1.9.7";
+    TargetType = 2;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["PolicyVersion": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 2;
+    InstallContext = 2;
+    ProductVersion = "1.9.7";
+    TargetType = 2;
+}, "Intent": 3, "ResultCreatedTimeUTC": 2025-06-16T01:22:20Z, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "1.9.7";
+            BundleId = "com.fatcatsoftware.pledpro";
+        }
+    );
+    AppType = 0;
+    ApplicationName = "PlistEdit Pro 1.9.7";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 12;
+            MinorVersion = 0;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 3;
+    PolicyId = "f2567800-c0a3-4742-ab42-567dc1450776";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "com.fatcatsoftware.pledpro";
+    TargetType = 2;
+}, "ApplicationName": PlistEdit Pro 1.9.7, "PolicyType": 12, "PolicyId": f2567800-c0a3-4742-ab42-567dc1450776]
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | I | 89007862 | AppResultStateChangeManager | Cached app policy result matches the current policy result. PolicyID: b69eea78-ae15-400c-ba0b-5fe91e1f96db, PolicyResult: ["PolicyVersion": 1, "PolicyId": b69eea78-ae15-400c-ba0b-5fe91e1f96db, "PolicyType": 12, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "9.1.6";
+            BundleId = "ch.sudo.cyberduck";
+        }
+    );
+    AppType = 0;
+    ApplicationName = "Cyberduck 9.1.6";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 10;
+            MinorVersion = 13;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 1;
+    IgnoreVersioning = 0;
+    Intent = 1;
+    PolicyId = "b69eea78-ae15-400c-ba0b-5fe91e1f96db";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "ch.sudo.cyberduck";
+    TargetType = 1;
+}, "ApplicationName": Cyberduck 9.1.6, "Intent": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 4;
+    InstallContext = 2;
+    ProductVersion = "9.1.6";
+    TargetType = 1;
+}, "ResultCreatedTimeUTC": 2025-08-11T21:27:58Z], CachedPolicyResult: ["PolicyVersion": 1, "ComplianceStateMessage": {
+    Applicability = 0;
+    ComplianceState = 1;
+    DesiredState = 4;
+    InstallContext = 2;
+    ProductVersion = "9.1.6";
+    TargetType = 1;
+}, "Intent": 1, "ResultCreatedTimeUTC": 2025-07-06T20:21:52Z, "EnforcementStateMessage": {
+    EnforcementState = 1000;
+}, "Policy": {
+    AppInfos =     (
+                {
+            AppVersion = "9.1.6";
+            BundleId = "ch.sudo.cyberduck";
+        }
+    );
+    AppType = 0;
+    ApplicationName = "Cyberduck 9.1.6";
+    ApplicationRequirements =     {
+        MinOSVersion =         {
+            MajorVersion = 10;
+            MinorVersion = 13;
+        };
+        SupportedArchitecture = 0;
+    };
+    AvailableAppEnforcement = 0;
+    IgnoreVersioning = 0;
+    Intent = 1;
+    PolicyId = "b69eea78-ae15-400c-ba0b-5fe91e1f96db";
+    PolicyVersion = 1;
+    PrimaryApplicationBundleId = "ch.sudo.cyberduck";
+    TargetType = 1;
+}, "ApplicationName": Cyberduck 9.1.6, "PolicyType": 12, "PolicyId": b69eea78-ae15-400c-ba0b-5fe91e1f96db]
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | I | 89007862 | CoreDataAppStateChangePersistence | Fetch app policy state change records. PolicyID: []
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:376 | IntuneMDM-Daemon | E | 89007862 | CoreDataAppStateChangePersistence | Failed to process AppStateChangeItem Error: AppStateChangeError.decodingFailure
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | AppPolicyResultsReporter | Deciding whether to submit full sync report or app state change report based on oldest gateway upload Date: 2025-05-17 19:05:36 +0000, Duration: 86, Result: submitting full sync report
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | AppPolicyResultsReporter | Create full sync report for app policies PolicyType: macAppInstall, Count: 10, PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, cd86907b-3b40-4472-9f5f-e673a832b77d, 80f4c7e2-15c1-46d9-900a-574332849086, e33551de-0398-4441-98b4-d8b6de28a4cd, a6a07cfd-1f03-4748-b57a-4da6832d6a35, e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, f2567800-c0a3-4742-ab42-567dc1450776, 2cab453d-9c86-4834-ba51-c5b96886e0e7, b69eea78-ae15-400c-ba0b-5fe91e1f96db, 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | AppPolicyResultsReporter | Number of app policies executed PolicyType: macAppInstall, Count: 10, PolicyID: 4a4b431d-4cd1-4965-8b18-2ca38c8ab119, cd86907b-3b40-4472-9f5f-e673a832b77d, 80f4c7e2-15c1-46d9-900a-574332849086, e33551de-0398-4441-98b4-d8b6de28a4cd, a6a07cfd-1f03-4748-b57a-4da6832d6a35, e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81, f2567800-c0a3-4742-ab42-567dc1450776, 2cab453d-9c86-4834-ba51-c5b96886e0e7, b69eea78-ae15-400c-ba0b-5fe91e1f96db, 1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | AppPolicyResultsReporter | Reporting results for mac app policies PolicyType: macAppInstall, Count: 10
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | SyncActivityTracer | Reporting results Context: apply mac app policies, Count: 10, PolicyID: ["4a4b431d-4cd1-4965-8b18-2ca38c8ab119", "cd86907b-3b40-4472-9f5f-e673a832b77d", "80f4c7e2-15c1-46d9-900a-574332849086", "e33551de-0398-4441-98b4-d8b6de28a4cd", "a6a07cfd-1f03-4748-b57a-4da6832d6a35", "e6bc7909-8b41-4a16-b0bd-a7fdc6fdae81", "f2567800-c0a3-4742-ab42-567dc1450776", "2cab453d-9c86-4834-ba51-c5b96886e0e7", "b69eea78-ae15-400c-ba0b-5fe91e1f96db", "1fa0c54e-bb20-4ba3-8fc0-e9b6990d7a3e"]
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | SidecarService | Reporting results for mac app policies. Count: 10
+2025-08-11 16:27:58:377 | IntuneMDM-Daemon | I | 89007862 | HttpClientLogger | Priming connection for data upload Size: 12899
+2025-08-11 16:27:58:906 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: HEAD, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('4E210016-5879-4EA1-99F9-C07BE8385CD8')?api-version=1.1, ClientRequestId: 30E76A74-1DF5-4818-8ACB-A745640A3AD4
+2025-08-11 16:27:59:113 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: PUT, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('4E210016-5879-4EA1-99F9-C07BE8385CD8')?api-version=1.1, ClientRequestId: 30E76A74-1DF5-4818-8ACB-A745640A3AD4
+2025-08-11 16:27:59:113 | IntuneMDM-Daemon | I | 89007861 | SidecarService | Successfully received response from Sidecar GW service.
+2025-08-11 16:27:59:193 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: PUT, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('3D1D48B7-7A05-419C-A21C-BD64D85D8AA5')?api-version=1.1, ClientRequestId: B73C968F-DEF4-444D-9C0F-4D042B04E149
+2025-08-11 16:27:59:194 | IntuneMDM-Daemon | I | 89007866 | SidecarService | Successfully received response from Sidecar GW service.
+2025-08-11 16:27:59:239 | IntuneMDM-Daemon | I | 89007866 | SyncActivityTracer | Validating data Context: apply script policies, Count: 8, PolicyID: ["870e52d8-bca7-4aa8-a800-e62cadfc7894", "9100a3da-2242-4904-a082-6b533ff6556b", "4bf61777-be74-48fd-b18b-373b792ef062", "08bbfc65-38c5-48b2-9141-e266476c35dc", "7b2f31ee-00fc-435f-bb02-ba54e1501a62", "3a74b18e-3099-49a6-910a-ea66a6cfec6c", "dada4340-d7c1-4f78-9f85-a60191665b6b", "43511f7c-8c89-4c70-9ea9-8a15c094ddba"]
+2025-08-11 16:27:59:239 | IntuneMDM-Daemon | I | 89007866 | SyncActivityTracer | Processing data Context: apply script policies, Count: 8, PolicyID: ["870e52d8-bca7-4aa8-a800-e62cadfc7894", "9100a3da-2242-4904-a082-6b533ff6556b", "4bf61777-be74-48fd-b18b-373b792ef062", "08bbfc65-38c5-48b2-9141-e266476c35dc", "7b2f31ee-00fc-435f-bb02-ba54e1501a62", "3a74b18e-3099-49a6-910a-ea66a6cfec6c", "dada4340-d7c1-4f78-9f85-a60191665b6b", "43511f7c-8c89-4c70-9ea9-8a15c094ddba"]
+2025-08-11 16:27:59:239 | IntuneMDM-Daemon | I | 89007866 | RecurringScriptPolicyCoordinator | Found scripts to schedule Count: 2, PolicyID: ["870e52d8-bca7-4aa8-a800-e62cadfc7894", "08bbfc65-38c5-48b2-9141-e266476c35dc"]
+2025-08-11 16:27:59:240 | IntuneMDM-Daemon | I | 89007856 | AdHocScriptProcessor | Not running script policy because this policy has already been run. PolicyID: 9100a3da-2242-4904-a082-6b533ff6556b
+2025-08-11 16:27:59:240 | IntuneMDM-Daemon | I | 89007856 | ExecutionClock | Policy measurement. ID: 9100a3da-2242-4904-a082-6b533ff6556b, Context: shellScript, Duration: 0.0007899999618530273, Status: success
+2025-08-11 16:27:59:240 | IntuneMDM-Daemon | I | 89007866 | ScriptPolicyRunner | Running recurring script policy PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894, ExecutionContext: root, ExecutionFrequency: 1800, RetryCount: 0, BlockExecutionNotifications: true
+2025-08-11 16:27:59:240 | IntuneMDM-Daemon | I | 89007860 | ScriptPolicyRunner | Running custom attribute policy PolicyID: 3a74b18e-3099-49a6-910a-ea66a6cfec6c, ExecutionContext: root, ExecutionFrequency: 0, RetryCount: 0, BlockExecutionNotifications: true
+2025-08-11 16:27:59:240 | IntuneMDM-Daemon | I | 89007865 | ScriptPolicyRunner | Running custom attribute policy PolicyID: 7b2f31ee-00fc-435f-bb02-ba54e1501a62, ExecutionContext: root, ExecutionFrequency: 0, RetryCount: 0, BlockExecutionNotifications: true
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007863 | ScriptPolicyRunner | Running custom attribute policy PolicyID: 43511f7c-8c89-4c70-9ea9-8a15c094ddba, ExecutionContext: root, ExecutionFrequency: 0, RetryCount: 0, BlockExecutionNotifications: true
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007866 | ScriptOrchestrationLogger | Running management script. Domain: policy, User: root, PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007853 | ScriptPolicyRunner | Running recurring script policy PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc, ExecutionContext: user, ExecutionFrequency: 86400, RetryCount: 3, BlockExecutionNotifications: true
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007958 | AdHocScriptProcessor | Not running script policy because this policy has already been run. PolicyID: 4bf61777-be74-48fd-b18b-373b792ef062
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007958 | ExecutionClock | Policy measurement. ID: 4bf61777-be74-48fd-b18b-373b792ef062, Context: shellScript, Duration: 0.0015670061111450195, Status: success
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007862 | ScriptPolicyRunner | Running custom attribute policy PolicyID: dada4340-d7c1-4f78-9f85-a60191665b6b, ExecutionContext: root, ExecutionFrequency: 0, RetryCount: 0, BlockExecutionNotifications: true
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007958 | ScriptOrchestrationLogger | Running management script. Domain: policy, User: root, PolicyID: 7b2f31ee-00fc-435f-bb02-ba54e1501a62
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007860 | ScriptOrchestrationLogger | Running management script. Domain: policy, User: root, PolicyID: 3a74b18e-3099-49a6-910a-ea66a6cfec6c
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007862 | ScriptOrchestrationLogger | Running management script. Domain: policy, User: root, PolicyID: dada4340-d7c1-4f78-9f85-a60191665b6b
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | W | 89007863 | ScriptPolicyRunner | Script advisory on custom attribute policy PolicyID: 43511f7c-8c89-4c70-9ea9-8a15c094ddba, Description: [zsh usage]
+2025-08-11 16:27:59:241 | IntuneMDM-Daemon | I | 89007863 | ScriptOrchestrationLogger | Running management script. Domain: policy, User: root, PolicyID: 43511f7c-8c89-4c70-9ea9-8a15c094ddba
+2025-08-11 16:27:59:242 | IntuneMDM-Daemon | W | 89007853 | ScriptPolicyRunner | Script advisory on recurring script policy PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc, Description: [zsh usage]
+2025-08-11 16:27:59:242 | IntuneMDM-Daemon | I | 89007890 | ScriptOrchestrationLogger | Running management script. Domain: policy, User: 502, PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc
+2025-08-11 16:27:59:341 | IntuneMDM-Daemon | I | 89007862 | ScriptOrchestrationLogger | Finished management script. Domain: policy, User: root, PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894
+2025-08-11 16:27:59:343 | IntuneMDM-Daemon | I | 89007862 | ScriptPolicyRunner | Recurring script policy ran PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894, TotalRetries: 0, Status: Success, ExitCode: 0
+2025-08-11 16:27:59:343 | IntuneMDM-Daemon | I | 89007856 | ScriptOrchestrationLogger | Finished management script. Domain: policy, User: root, PolicyID: 7b2f31ee-00fc-435f-bb02-ba54e1501a62
+2025-08-11 16:27:59:343 | IntuneMDM-Daemon | I | 89007958 | ScriptOrchestrationLogger | Finished management script. Domain: policy, User: root, PolicyID: dada4340-d7c1-4f78-9f85-a60191665b6b
+2025-08-11 16:27:59:344 | IntuneMDM-Daemon | I | 89007862 | ScriptStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894
+2025-08-11 16:27:59:345 | IntuneMDM-Daemon | I | 89007862 | ScriptStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894
+2025-08-11 16:27:59:345 | IntuneMDM-Daemon | I | 89007862 | ScriptStateChangeManager | Cached script policy result matches the current policy result PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894
+2025-08-11 16:27:59:345 | IntuneMDM-Daemon | I | 89007862 | RecurringScriptPolicyCoordinator | Adding script to scheduler PolicyID: 870e52d8-bca7-4aa8-a800-e62cadfc7894
+2025-08-11 16:27:59:345 | IntuneMDM-Daemon | I | 89007862 | ExecutionClock | Policy measurement. ID: 870e52d8-bca7-4aa8-a800-e62cadfc7894, Context: shellScript, Duration: 0.10597097873687744, Status: success
+2025-08-11 16:27:59:346 | IntuneMDM-Daemon | I | 89007856 | ScriptPolicyRunner | Custom attribute policy ran PolicyID: 7b2f31ee-00fc-435f-bb02-ba54e1501a62, TotalRetries: 0, Status: Success, ExitCode: 0
+2025-08-11 16:27:59:346 | IntuneMDM-Daemon | I | 89007856 | ExecutionClock | Policy measurement. ID: 7b2f31ee-00fc-435f-bb02-ba54e1501a62, Context: customAttribute, Duration: 0.10651993751525879, Status: success
+2025-08-11 16:27:59:347 | IntuneMDM-Daemon | I | 89007856 | ScriptPolicyRunner | Custom attribute policy ran PolicyID: dada4340-d7c1-4f78-9f85-a60191665b6b, TotalRetries: 0, Status: Success, ExitCode: 0
+2025-08-11 16:27:59:347 | IntuneMDM-Daemon | I | 89007856 | ExecutionClock | Policy measurement. ID: dada4340-d7c1-4f78-9f85-a60191665b6b, Context: customAttribute, Duration: 0.10782003402709961, Status: success
+2025-08-11 16:27:59:372 | IntuneMDM-Daemon | I | 89007856 | ScriptOrchestrationLogger | Finished management script. Domain: policy, User: 502, PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc
+2025-08-11 16:27:59:384 | IntuneMDM-Daemon | I | 89007860 | ScriptPolicyRunner | Recurring script policy ran PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc, TotalRetries: 0, Status: Success, ExitCode: 0
+2025-08-11 16:27:59:385 | IntuneMDM-Daemon | I | 89007860 | ScriptStateChangeManager | This policy has been executed on this device before the current check-in. PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc
+2025-08-11 16:27:59:385 | IntuneMDM-Daemon | I | 89007860 | ScriptStateChangeManager | Compare current result object to the result object stored in the cache. PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc
+2025-08-11 16:27:59:385 | IntuneMDM-Daemon | I | 89007860 | ScriptStateChangeManager | Cached script policy result matches the current policy result PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc
+2025-08-11 16:27:59:385 | IntuneMDM-Daemon | I | 89007860 | RecurringScriptPolicyCoordinator | Adding script to scheduler PolicyID: 08bbfc65-38c5-48b2-9141-e266476c35dc
+2025-08-11 16:27:59:385 | IntuneMDM-Daemon | I | 89007860 | ExecutionClock | Policy measurement. ID: 08bbfc65-38c5-48b2-9141-e266476c35dc, Context: shellScript, Duration: 0.1462559700012207, Status: success
+2025-08-11 16:27:59:441 | IntuneMDM-Daemon | I | 89008072 | ScriptOrchestrationLogger | Finished management script. Domain: policy, User: root, PolicyID: 43511f7c-8c89-4c70-9ea9-8a15c094ddba
+2025-08-11 16:27:59:442 | IntuneMDM-Daemon | I | 89008072 | ScriptPolicyRunner | Custom attribute policy ran PolicyID: 43511f7c-8c89-4c70-9ea9-8a15c094ddba, TotalRetries: 0, Status: Success, ExitCode: 0
+2025-08-11 16:27:59:442 | IntuneMDM-Daemon | I | 89008072 | ExecutionClock | Policy measurement. ID: 43511f7c-8c89-4c70-9ea9-8a15c094ddba, Context: customAttribute, Duration: 0.20275890827178955, Status: success
+2025-08-11 16:27:59:461 | IntuneMDM-Daemon | I | 89007861 | SyncActivityRunner | Finished executing sync activity Context: apply mac app policies
+2025-08-11 16:27:59:461 | IntuneMDM-Daemon | I | 89007861 | ExecutionClock | Activity measurement. ID: 0E75A531-9B77-4AD5-A994-BFCCA8D1AC6A, Context: apply mac app policies, Duration: 2.1726900339126587, Status: success
+2025-08-11 16:28:00:452 | IntuneMDM-Daemon | I | 89007863 | ScriptOrchestrationLogger | Finished management script. Domain: policy, User: root, PolicyID: 3a74b18e-3099-49a6-910a-ea66a6cfec6c
+2025-08-11 16:28:00:453 | IntuneMDM-Daemon | I | 89007863 | ScriptPolicyRunner | Custom attribute policy ran PolicyID: 3a74b18e-3099-49a6-910a-ea66a6cfec6c, TotalRetries: 0, Status: Success, ExitCode: 0
+2025-08-11 16:28:00:453 | IntuneMDM-Daemon | I | 89007863 | ExecutionClock | Policy measurement. ID: 3a74b18e-3099-49a6-910a-ea66a6cfec6c, Context: customAttribute, Duration: 1.2140289545059204, Status: success
+2025-08-11 16:28:00:453 | IntuneMDM-Daemon | I | 89007863 | SyncActivityTracer | Reporting results Context: apply script policies, Count: 8, PolicyID: ["9100a3da-2242-4904-a082-6b533ff6556b", "4bf61777-be74-48fd-b18b-373b792ef062", "870e52d8-bca7-4aa8-a800-e62cadfc7894", "7b2f31ee-00fc-435f-bb02-ba54e1501a62", "dada4340-d7c1-4f78-9f85-a60191665b6b", "08bbfc65-38c5-48b2-9141-e266476c35dc", "43511f7c-8c89-4c70-9ea9-8a15c094ddba", "3a74b18e-3099-49a6-910a-ea66a6cfec6c"]
+2025-08-11 16:28:00:454 | IntuneMDM-Daemon | I | 89007863 | ScriptStateChangeReporter | Deciding whether to submit full sync report or script state change report based on oldest gateway upload Date: 2025-08-05 12:16:12 +0000, Duration: 6, Result: submitting script state change report
+2025-08-11 16:28:00:454 | IntuneMDM-Daemon | I | 89007863 | ScriptStateChangeReporter | Create state change report for script policies PolicyType: shellScript, Count: 0, PolicyID: 
+2025-08-11 16:28:00:454 | IntuneMDM-Daemon | I | 89007863 | ScriptStateChangeReporter | Reporting results for script policies PolicyType: shellScript, Count: 0
+2025-08-11 16:28:00:454 | IntuneMDM-Daemon | W | 89007863 | CoreDataScriptStateChangePersistence | Could not find ScriptStateChangeItems to update LastUploadResultTimestamp on PolicyID: []
+2025-08-11 16:28:00:455 | IntuneMDM-Daemon | W | 89007863 | CoreDataScriptStateChangePersistence | Could not find ScriptStateChangeItem to update resultChanged PolicyID: []
+2025-08-11 16:28:00:455 | IntuneMDM-Daemon | I | 89007863 | SidecarService | Reporting policy results. Count: 6
+2025-08-11 16:28:00:455 | IntuneMDM-Daemon | I | 89007863 | HttpClientLogger | Priming connection for data upload Size: 1616
+2025-08-11 16:28:01:188 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: HEAD, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('F0C40A65-6484-43B5-8BC6-98E19A691877')?api-version=1.1, ClientRequestId: 3AD28383-B559-4A24-87F5-41D455ECEA71
+2025-08-11 16:28:01:314 | IntuneMDM-Daemon | I | *89007833 | HttpClientLogger | Network request succeeded. Method: PUT, StatusCode: 200, Description: ok, URL: https://agents.msua08.manage.microsoft.com/TrafficGateway/TrafficRoutingService/SideCar/StatelessSideCarGatewayService/SideCarGatewaySessions('F0C40A65-6484-43B5-8BC6-98E19A691877')?api-version=1.1, ClientRequestId: 3AD28383-B559-4A24-87F5-41D455ECEA71
+2025-08-11 16:28:01:314 | IntuneMDM-Daemon | I | 89007860 | SidecarService | Successfully received response from Sidecar GW service.
+2025-08-11 16:28:01:314 | IntuneMDM-Daemon | I | 89007860 | SyncActivityRunner | Finished executing sync activity Context: apply script policies
+2025-08-11 16:28:01:314 | IntuneMDM-Daemon | I | 89007860 | ExecutionClock | Activity measurement. ID: 5766454D-5F20-411C-AD36-44CE83BEAAE5, Context: apply script policies, Duration: 4.0254950523376465, Status: success
+2025-08-11 16:28:01:314 | IntuneMDM-Daemon | I | 89007860 | FullSyncWorkflow | Finished sidecar gateway service checkin
