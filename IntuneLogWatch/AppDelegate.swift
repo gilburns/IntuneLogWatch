@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  IntuneLogWatch
 //
-//  Created by Gil Burns on 8/11/25.
+//  Created by Gil Burns on 8/10/25.
 //
 
 import Cocoa
