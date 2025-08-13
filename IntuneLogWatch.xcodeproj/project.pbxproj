@@ -10,9 +10,22 @@
 		1B02C1442E4A9FDD0085B8CB /* IntuneLogWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IntuneLogWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1B02C1602E4AAF410085B8CB /* Exceptions for "IntuneLogWatch" folder in "IntuneLogWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppDelegate.swift,
+			);
+			target = 1B02C1432E4A9FDD0085B8CB /* IntuneLogWatch */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1B02C1462E4A9FDD0085B8CB /* IntuneLogWatch */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1B02C1602E4AAF410085B8CB /* Exceptions for "IntuneLogWatch" folder in "IntuneLogWatch" target */,
+			);
 			path = IntuneLogWatch;
 			sourceTree = "<group>";
 		};
@@ -262,6 +275,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gilburns.IntuneLogWatch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -289,6 +303,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gilburns.IntuneLogWatch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
