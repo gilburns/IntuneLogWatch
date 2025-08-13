@@ -2,7 +2,7 @@
 
 **A macOS application for analyzing Microsoft Intune logs with human-readable insights**
 
-![IntuneLogWatch App Icon](images/app-icon.png)
+![IntuneLogWatch App Icon](https://github.com/gilburns/IntuneLogWatch/blob/main/Images/app-icon.png?raw=true)
 
 ---
 
