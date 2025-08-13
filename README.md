@@ -15,4 +15,4 @@ See the [Wiki](https://github.com/gilburns/IntuneLogWatch/wiki) for full details
 
 *IntuneLogWatch - Making Intune logs human-readable*
 
-![Footer Logo](images/footer-logo.png)
+![Footer Logo](https://github.com/gilburns/IntuneLogWatch/blob/main/Images/footer-logo.png?raw=true)
