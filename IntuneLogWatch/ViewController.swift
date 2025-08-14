@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var selectedSyncEvent: SyncEvent?
     @State private var selectedPolicy: PolicyExecution?
     @State private var showingFilePicker = false
+    @State private var sortNewestFirst = false
     
     var body: some View {
         NavigationSplitView {
@@ -80,7 +81,9 @@ struct ContentView: View {
             } else if let analysis = parser.analysis {
                 analysisHeader(analysis)
                 
-                List(analysis.syncEvents, selection: $selectedSyncEvent) { syncEvent in
+                sortControls
+                
+                List(sortedSyncEvents(analysis.syncEvents), selection: $selectedSyncEvent) { syncEvent in
                     SyncEventRow(syncEvent: syncEvent)
                         .tag(syncEvent)
                 }
@@ -196,6 +199,51 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+    }
+    
+    private var sortControls: some View {
+        HStack {
+            Text("Sort:")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            Button(action: { sortNewestFirst = false }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.up")
+                        .font(.caption)
+                    Text("Oldest First")
+                        .font(.caption)
+                }
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(sortNewestFirst ? .secondary : .blue)
+            .fontWeight(sortNewestFirst ? .regular : .medium)
+            
+            Button(action: { sortNewestFirst = true }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.down")
+                        .font(.caption)
+                    Text("Newest First")
+                        .font(.caption)
+                }
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(sortNewestFirst ? .blue : .secondary)
+            .fontWeight(sortNewestFirst ? .medium : .regular)
+            
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color(NSColor.controlBackgroundColor))
+    }
+    
+    private func sortedSyncEvents(_ syncEvents: [SyncEvent]) -> [SyncEvent] {
+        if sortNewestFirst {
+            return syncEvents.sorted { $0.startTime > $1.startTime }
+        } else {
+            return syncEvents.sorted { $0.startTime < $1.startTime }
         }
     }
 }
