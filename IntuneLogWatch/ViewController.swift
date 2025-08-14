@@ -71,6 +71,12 @@ struct ContentView: View {
             parser.error = nil
             showingFilePicker = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .reloadLocalLogs)) { _ in
+            // Trigger the same action as the reload button
+            selectedSyncEvent = nil
+            selectedPolicy = nil
+            parser.loadLocalIntuneLogs()
+        }
     }
     
     private var sidebar: some View {
