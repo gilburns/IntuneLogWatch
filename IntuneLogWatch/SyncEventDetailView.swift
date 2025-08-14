@@ -192,6 +192,7 @@ struct SyncEventDetailView: View {
 
 struct PolicyRow: View {
     let policy: PolicyExecution
+    @Environment(\.controlActiveState) private var controlActiveState
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -212,8 +213,8 @@ struct PolicyRow: View {
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.1))
-                        .foregroundColor(.blue)
+                        .background(selectionAwareColor(.blue, fallback: .cyan).opacity(0.3))
+                        .foregroundColor(selectionAwareColor(.blue, fallback: .cyan))
                         .cornerRadius(4)
                     
                     // App type indicator (PKG/DMG)
@@ -222,7 +223,7 @@ struct PolicyRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 1)
-                            .background(appType == "PKG" ? Color.green.opacity(0.1) : Color.purple.opacity(0.1))
+                            .background(appType == "PKG" ? Color.green.opacity(enhancedBackgroundOpacity(0.1)) : Color.purple.opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(appType == "PKG" ? .green : .purple)
                             .cornerRadius(3)
                     }
@@ -233,7 +234,7 @@ struct PolicyRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 1)
-                            .background(intentColor(appIntent).opacity(0.1))
+                            .background(intentColor(appIntent).opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(intentColor(appIntent))
                             .cornerRadius(3)
                     }
@@ -244,7 +245,7 @@ struct PolicyRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 1)
-                            .background(scriptType == "Custom Attribute" ? Color.orange.opacity(0.1) : Color.teal.opacity(0.1))
+                            .background(scriptType == "Custom Attribute" ? Color.orange.opacity(enhancedBackgroundOpacity(0.1)) : Color.teal.opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(scriptType == "Custom Attribute" ? .orange : .teal)
                             .cornerRadius(3)
                     }
@@ -255,7 +256,7 @@ struct PolicyRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 1)
-                            .background(contextColor(executionContext).opacity(0.1))
+                            .background(contextColor(executionContext).opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(contextColor(executionContext))
                             .cornerRadius(3)
                     }
@@ -323,7 +324,7 @@ struct PolicyRow: View {
             .font(.caption2)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(statusColor.opacity(0.2))
+            .background(statusColor.opacity(enhancedBackgroundOpacity(0.2)))
             .foregroundColor(statusColor)
             .cornerRadius(4)
     }
@@ -337,7 +338,7 @@ struct PolicyRow: View {
         case .warning:
             return .orange
         case .running:
-            return .blue
+            return selectionAwareColor(.blue, fallback: .teal)
         case .pending:
             return .secondary
         }
@@ -379,7 +380,7 @@ struct PolicyRow: View {
         case "RequiredInstall":
             return .red // Required = must install
         case "Available":
-            return .blue // Available = optional
+            return selectionAwareColor(.blue, fallback: .cyan) // Available = optional
         case "Uninstall":
             return .brown // Uninstall = removal
         default:
@@ -392,9 +393,21 @@ struct PolicyRow: View {
         case "root":
             return .red // Root = administrative/system level
         case "user":
-            return .blue // User = user context
+            return selectionAwareColor(.blue, fallback: .cyan) // User = user context
         default:
             return .gray
         }
+    }
+    
+    // Helper method to provide selection-aware colors
+    private func selectionAwareColor(_ originalColor: Color, fallback: Color) -> Color {
+        // Use fallback color for better contrast when item might be selected
+        return fallback
+    }
+    
+    // Helper method to provide enhanced background opacity for better visibility
+    private func enhancedBackgroundOpacity(_ baseOpacity: Double) -> Double {
+        // Increase opacity slightly for better visibility on selection
+        return min(baseOpacity + 0.1, 0.4)
     }
 }
