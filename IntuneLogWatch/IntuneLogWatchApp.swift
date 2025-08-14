@@ -22,6 +22,12 @@ struct IntuneLogWatchApp: App {
                     NotificationCenter.default.post(name: .openLogFile, object: nil)
                 }
                 .keyboardShortcut("o", modifiers: .command)
+                
+                Button("Reload Local Logs") {
+                    // Post notification to trigger local logs reload
+                    NotificationCenter.default.post(name: .reloadLocalLogs, object: nil)
+                }
+                .keyboardShortcut("r", modifiers: .command)
             }
         }
     }
@@ -29,6 +35,7 @@ struct IntuneLogWatchApp: App {
 
 extension Notification.Name {
     static let openLogFile = Notification.Name("openLogFile")
+    static let reloadLocalLogs = Notification.Name("reloadLocalLogs")
 }
 
 extension UTType {
