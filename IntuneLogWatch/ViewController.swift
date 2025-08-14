@@ -165,6 +165,7 @@ struct ContentView: View {
                 }
                 .padding(.top, 2)
             }
+            Divider()
         }
         .padding()
         .background(Color(NSColor.controlBackgroundColor))
