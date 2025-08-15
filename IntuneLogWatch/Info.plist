@@ -4,5 +4,7 @@
 <dict>
 	<key>SUFeedURL</key>
 	<string>https://intuneomator.org/intunelogwatch/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>hRolY2EIcxYuEYgVCkCyS2DQzvXHplU7BHIthJdtyqg=</string>
 </dict>
 </plist>
