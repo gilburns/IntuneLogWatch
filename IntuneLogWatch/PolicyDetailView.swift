@@ -13,6 +13,7 @@ struct PolicyDetailView: View {
     @State private var showingRawLogs = false
     @State private var detailLogEntry: LogEntry?
     @State private var policyIdCopied = false
+    @State private var copiedText: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -197,13 +198,20 @@ struct PolicyDetailView: View {
                 
                 Spacer()
                 
-                Button(action: copyPolicyId) {
+                Button(action: {
+                    // Detect if option key is pressed
+                    if NSEvent.modifierFlags.contains(.option) {
+                        copyGraphApiUrl()
+                    } else {
+                        copyPolicyId()
+                    }
+                }) {
                     Image(systemName: policyIdCopied ? "checkmark" : "doc.on.clipboard")
                         .font(.caption2)
                         .foregroundColor(policyIdCopied ? .green : .secondary)
                 }
                 .buttonStyle(BorderlessButtonStyle())
-                .help(policyIdCopied ? "Copied!" : "Copy Policy ID")
+                .help(policyIdCopied ? "Copied \(copiedText)!" : "Copy Policy ID (⌥-click for Graph API URL)")
             }
             Text(policy.policyId)
                 .font(.caption)
@@ -213,8 +221,19 @@ struct PolicyDetailView: View {
     }
     
     private func copyPolicyId() {
+        copyToClipboard(text: policy.policyId, displayText: "Policy ID")
+    }
+    
+    private func copyGraphApiUrl() {
+        let apiUrl = generateGraphApiUrl(for: policy)
+        copyToClipboard(text: apiUrl, displayText: "Graph API URL")
+    }
+    
+    private func copyToClipboard(text: String, displayText: String) {
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(policy.policyId, forType: .string)
+        NSPasteboard.general.setString(text, forType: .string)
+        
+        copiedText = displayText
         
         withAnimation(.easeInOut(duration: 0.2)) {
             policyIdCopied = true
@@ -224,6 +243,26 @@ struct PolicyDetailView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 policyIdCopied = false
             }
+        }
+    }
+    
+    private func generateGraphApiUrl(for policy: PolicyExecution) -> String {
+        let baseUrl = "https://graph.microsoft.com/beta"
+        let guid = policy.policyId
+        
+        switch policy.type {
+        case .app:
+            return "\(baseUrl)/deviceAppManagement/mobileApps/\(guid)"
+        case .script:
+            // Check if it's a custom attribute or regular script based on scriptType
+            if let scriptType = policy.scriptType, scriptType == "Custom Attribute" {
+                return "\(baseUrl)/deviceManagement/deviceCustomAttributeShellScripts/\(guid)"
+            } else {
+                return "\(baseUrl)/deviceManagement/deviceShellScripts/\(guid)"
+            }
+        case .unknown:
+            // Default to shell script endpoint for unknown types
+            return "\(baseUrl)/deviceManagement/deviceShellScripts/\(guid)"
         }
     }
     
