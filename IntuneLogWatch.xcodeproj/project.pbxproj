@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1B2718BA2E4EAE4E00C85ABB /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 1B2718B92E4EAE4E00C85ABB /* Sparkle */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		1B02C1442E4A9FDD0085B8CB /* IntuneLogWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IntuneLogWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -15,6 +19,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppDelegate.swift,
+				Info.plist,
 			);
 			target = 1B02C1432E4A9FDD0085B8CB /* IntuneLogWatch */;
 		};
@@ -36,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B2718BA2E4EAE4E00C85ABB /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +84,7 @@
 			);
 			name = IntuneLogWatch;
 			packageProductDependencies = (
+				1B2718B92E4EAE4E00C85ABB /* Sparkle */,
 			);
 			productName = IntuneLogWatch;
 			productReference = 1B02C1442E4A9FDD0085B8CB /* IntuneLogWatch.app */;
@@ -107,6 +114,9 @@
 			);
 			mainGroup = 1B02C13B2E4A9FDD0085B8CB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1B2718B82E4EAE4E00C85ABB /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1B02C1452E4A9FDD0085B8CB /* Products */;
 			projectDirPath = "";
@@ -268,9 +278,12 @@
 				DEVELOPMENT_TEAM = G4MQ57TVLE;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IntuneLogWatch/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_SUFeedURL = "https://gilburns.github.io/IntuneLogWatch/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = TO_BE_REPLACED;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -296,9 +309,12 @@
 				DEVELOPMENT_TEAM = G4MQ57TVLE;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IntuneLogWatch/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_SUFeedURL = "https://gilburns.github.io/IntuneLogWatch/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = TO_BE_REPLACED;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -334,6 +350,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1B2718B82E4EAE4E00C85ABB /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1B2718B92E4EAE4E00C85ABB /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B2718B82E4EAE4E00C85ABB /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1B02C13C2E4A9FDD0085B8CB /* Project object */;
 }

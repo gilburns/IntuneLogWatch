@@ -7,15 +7,29 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import Sparkle
 
 @main
 struct IntuneLogWatchApp: App {
+    private let updaterController: SPUStandardUpdaterController
+    
+    init() {
+        // Set up Sparkle updater
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
         .windowStyle(DefaultWindowStyle())
         .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates...") {
+                    updaterController.checkForUpdates(nil)
+                }
+            }
+            
             CommandGroup(after: .newItem) {
                 Button("Open Log File...") {
                     // Post notification to trigger file picker
