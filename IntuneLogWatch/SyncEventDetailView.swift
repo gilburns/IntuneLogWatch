@@ -42,11 +42,15 @@ struct SyncEventDetailView: View {
         VStack(spacing: 0) {
             syncEventHeader
             
+            let policies = syncEvent.policies
+            let appPoliciesCount = (policies.filter { $0.type == .app }).count
+            let scriptPoliciesCount = (policies.filter { $0.type == .script }).count
+            
             HStack {
-                Picker("Policy Type", selection: $selectedPolicyType) {
+                Picker("Policy Type:", selection: $selectedPolicyType) {
                     Text("All Policies").tag("all")
-                    Text("App Policies").tag("app")
-                    Text("Script Policies").tag("script")
+                    Text("App Policies (\(appPoliciesCount))").tag("app")
+                    Text("Script Policies (\(scriptPoliciesCount))").tag("script")
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .fixedSize()
@@ -69,6 +73,7 @@ struct SyncEventDetailView: View {
     }
     
     private var syncEventHeader: some View {
+        
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 statusIcon
