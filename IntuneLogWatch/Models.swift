@@ -171,6 +171,8 @@ struct LogEntry: Identifiable, Hashable {
             return "Custom Attribute"
         } else if message.contains("recurring script policy") {
             return "Script Policy"
+        } else if message.contains("Not running script policy") {
+            return "Script Policy"
         }
         return nil
     }

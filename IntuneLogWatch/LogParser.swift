@@ -417,9 +417,7 @@ class LogParser: ObservableObject {
         for (policyId, policyEntries) in policyMap {
             let sortedEntries = policyEntries.sorted { $0.timestamp < $1.timestamp }
             
-            let type: PolicyType = sortedEntries.first?.component == "AppPolicyHandler" ? .app :
-                                  sortedEntries.first?.component == "ScriptPolicyRunner" ? .script : .unknown
-            
+            let type = PolicyType.fromComponent(sortedEntries.first?.component)
             let bundleId = sortedEntries.compactMap { $0.bundleId }.first
             let appName = sortedEntries.compactMap { $0.appName }.first
             let appType = sortedEntries.compactMap { $0.appType }.first
@@ -469,6 +467,11 @@ class LogParser: ObservableObject {
             return .failed
         }
         
+        if entries.contains(where: { $0.message.contains("Not running script policy because this policy has already been run.") }) || entries.contains(where: { $0.message.contains("Finished management script.") })
+        {
+            return .completed
+        }
+            
         if entries.contains(where: { $0.level == .warning }) {
             if getEndTime(for: entries, type: type) != nil {
                 return .warning
@@ -479,7 +482,8 @@ class LogParser: ObservableObject {
         
         if getEndTime(for: entries, type: type) != nil {
             if entries.contains(where: { $0.message.contains("Status: Success") }) ||
-               entries.contains(where: { $0.message.contains("Handling app policy finished") }) {
+               entries.contains(where: { $0.message.contains("Handling app policy finished") })
+            {
                 return .completed
             } else {
                 return .warning
@@ -556,5 +560,18 @@ class LogParser: ObservableObject {
         }
         
         return (true, "")
+    }
+}
+
+extension PolicyType {
+    static func fromComponent(_ component: String?) -> PolicyType {
+        switch component {
+        case "AppPolicyHandler":
+            return .app
+        case "ScriptPolicyRunner", "AdHocScriptProcessor":
+            return .script
+        default:
+            return .unknown
+        }
     }
 }

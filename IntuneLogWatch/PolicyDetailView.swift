@@ -52,7 +52,7 @@ struct PolicyDetailView: View {
                 AppIconView(
                     bundleId: policy.bundleId,
                     policyType: policy.type,
-                    size: 32
+                    size: 42
                 )
                 .id("\(policy.policyId)-\(policy.bundleId ?? "nil")")
                 VStack(alignment: .leading, spacing: 2) {
