@@ -129,7 +129,7 @@ build_app() {
         rm -rf "${BUILD_DIR}"
     fi
     
-    # Build for release
+    # Build for release (universal binary) - let Xcode handle signing automatically
     xcodebuild \
         -project "${PROJECT_PATH}" \
         -scheme "${SCHEME}" \
@@ -137,11 +137,11 @@ build_app() {
         -derivedDataPath "${BUILD_DIR}" \
         -archivePath "${BUILD_DIR}/${APP_NAME}.xcarchive" \
         archive \
-        CODE_SIGN_IDENTITY="${APP_SIGN_ID}" \
-        CODE_SIGN_STYLE=Manual \
+        ARCHS="arm64 x86_64" \
+        ONLY_ACTIVE_ARCH=NO \
         DEVELOPMENT_TEAM="G4MQ57TVLE"
     
-    # Export the app
+    # Export the app with proper Developer ID distribution settings
     cat > "${BUILD_DIR}/ExportOptions.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -152,9 +152,17 @@ build_app() {
     <key>teamID</key>
     <string>G4MQ57TVLE</string>
     <key>signingStyle</key>
-    <string>manual</string>
+    <string>automatic</string>
+    <key>signingCertificate</key>
+    <string>Developer ID Application</string>
     <key>stripSwiftSymbols</key>
     <true/>
+    <key>uploadBitcode</key>
+    <false/>
+    <key>uploadSymbols</key>
+    <true/>
+    <key>compileBitcode</key>
+    <false/>
 </dict>
 </plist>
 EOF
@@ -170,31 +178,94 @@ EOF
         exit 1
     fi
     
+    # Verify the app was built as universal
+    MAIN_BINARY="${APP_PATH}/Contents/MacOS/${APP_NAME}"
+    if [[ -f "${MAIN_BINARY}" ]]; then
+        print_status "Verifying universal binary..."
+        if lipo -info "${MAIN_BINARY}" | grep -q "arm64.*x86_64\|x86_64.*arm64"; then
+            print_success "Successfully built universal binary"
+            lipo -info "${MAIN_BINARY}"
+        else
+            print_warning "App may not be universal - check architectures:"
+            lipo -info "${MAIN_BINARY}"
+        fi
+    fi
+    
     print_success "Build completed successfully"
 }
 
-# Sign the app
-sign_app() {
-    print_status "Signing ${APP_NAME}..."
+# Verify app signatures (Xcode should have handled signing during export)
+verify_signatures() {
+    print_status "Verifying ${APP_NAME} signatures..."
     
-    # Sign the app bundle with hardened runtime (required for notarization)
-    codesign --force --deep \
-        --sign "${APP_SIGN_ID}" \
-        --options runtime \
-        --timestamp \
-        "${APP_PATH}"
+    # Check main app architectures
+    MAIN_BINARY="${APP_PATH}/Contents/MacOS/${APP_NAME}"
+    if [[ -f "${MAIN_BINARY}" ]]; then
+        print_status "Main app binary architectures:"
+        lipo -info "${MAIN_BINARY}" || true
+    fi
     
-    # Verify the signature
-    codesign --verify --verbose "${APP_PATH}"
+    # Verify the main app signature
+    print_status "Verifying main application signature..."
+    if codesign --verify --verbose "${APP_PATH}"; then
+        print_success "Main app signature valid"
+    else
+        print_error "Main app signature invalid"
+        return 1
+    fi
+    
+    # Check frameworks
+    FRAMEWORKS_PATH="${APP_PATH}/Contents/Frameworks"
+    if [[ -d "${FRAMEWORKS_PATH}" ]]; then
+        print_status "Verifying embedded frameworks..."
+        for framework in "${FRAMEWORKS_PATH}"/*.framework; do
+            if [[ -d "${framework}" ]]; then
+                FRAMEWORK_NAME=$(basename "${framework}")
+                print_status "Verifying framework: ${FRAMEWORK_NAME}"
+                
+                # Show framework structure for debugging
+                print_status "Framework contents:"
+                find "${framework}" -type f | head -10
+                
+                # Check framework signature
+                if codesign --verify --verbose "${framework}"; then
+                    print_success "Framework ${FRAMEWORK_NAME} signature valid"
+                else
+                    print_error "Framework ${FRAMEWORK_NAME} signature invalid"
+                    return 1
+                fi
+                
+                # Show framework architectures
+                FRAMEWORK_BINARY="${framework}/Versions/A/$(basename "${framework}" .framework)"
+                if [[ ! -f "${FRAMEWORK_BINARY}" ]]; then
+                    FRAMEWORK_BINARY="${framework}/$(basename "${framework}" .framework)"
+                fi
+                
+                if [[ -f "${FRAMEWORK_BINARY}" ]]; then
+                    print_status "Framework ${FRAMEWORK_NAME} architectures:"
+                    lipo -info "${FRAMEWORK_BINARY}" || true
+                fi
+            fi
+        done
+    fi
+    
+    # Verify all signatures in the bundle (deep verification)
+    print_status "Performing deep signature verification..."
+    if codesign --verify --deep --verbose "${APP_PATH}"; then
+        print_success "All signatures valid"
+    else
+        print_error "Deep signature verification failed"
+        return 1
+    fi
     
     # Check that hardened runtime is enabled
     if codesign --display --verbose "${APP_PATH}" 2>&1 | grep -q "runtime"; then
-        print_success "App signed with hardened runtime enabled"
+        print_success "App has hardened runtime enabled"
     else
         print_warning "Hardened runtime may not be properly enabled"
     fi
     
-    print_success "App signed successfully"
+    print_success "All signatures verified successfully"
 }
 
 # Notarize the app
@@ -322,7 +393,7 @@ main() {
     build_app
     echo
     
-    sign_app
+    verify_signatures
     echo
     
     notarize_app
