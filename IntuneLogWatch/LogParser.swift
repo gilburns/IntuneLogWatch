@@ -135,7 +135,17 @@ class LogParser: ObservableObject {
                         syncEvents: analysis.syncEvents,
                         totalEntries: analysis.totalEntries,
                         parseErrors: analysis.parseErrors + ["WARNING: Intune Agent not found at \(intuneAgentPath). Device may have been unenrolled from Intune."],
-                        sourceTitle: analysis.sourceTitle
+                        sourceTitle: analysis.sourceTitle,
+                        environment: analysis.environment,
+                        region: analysis.region,
+                        asu: analysis.asu,
+                        accountID: analysis.accountID,
+                        aadTenantID: analysis.aadTenantID,
+                        deviceID: analysis.deviceID,
+                        macOSVers: analysis.macOSVers,
+                        agentVers: analysis.agentVers,
+                        platform: analysis.platform,
+                        networkSummary: analysis.networkSummary
                     )
                 }
                 
@@ -257,7 +267,9 @@ class LogParser: ObservableObject {
                 // Process the previous entry if it exists
                 if let current = currentEntry {
                     if let entry = buildLogEntry(from: current.components, additionalLines: current.additionalLines, rawLines: [current.components.joined(separator: " | ")] + current.additionalLines) {
-                        entries.append(entry)
+                        if entry.component != "AppPolicyResultsReporter" {
+                            entries.append(entry)
+                        }
                     } else {
                         parseErrors.append("Line \(index): Failed to parse multi-line log entry")
                     }
@@ -292,11 +304,27 @@ class LogParser: ObservableObject {
         
         let syncEvents = await extractSyncEvents(from: entries)
         
+        // Extract enrollment information
+        let enrollmentInfo = extractEnrollmentInfo(from: content)
+        
+        // Extract network connectivity summary
+        let networkSummary = extractNetworkSummary(from: content)
+        
         return LogAnalysis(
             syncEvents: syncEvents,
             totalEntries: entries.count,
             parseErrors: parseErrors,
-            sourceTitle: sourceTitle
+            sourceTitle: sourceTitle,
+            environment: enrollmentInfo.environment,
+            region: enrollmentInfo.region,
+            asu: enrollmentInfo.asu,
+            accountID: enrollmentInfo.accountID,
+            aadTenantID: enrollmentInfo.aadTenantID,
+            deviceID: enrollmentInfo.deviceID,
+            macOSVers: enrollmentInfo.macOSVers,
+            agentVers: enrollmentInfo.agentVers,
+            platform: enrollmentInfo.platform,
+            networkSummary: networkSummary
         )
     }
     
@@ -444,7 +472,7 @@ class LogParser: ObservableObject {
                 endTime: endTime,
                 entries: sortedEntries
             )
-            
+
             policies.append(policy)
         }
         
@@ -460,6 +488,139 @@ class LogParser: ObservableObject {
         case .unknown:
             return entries.last?.timestamp
         }
+    }
+    
+    private func extractEnrollmentInfo(from content: String) -> (environment: String?, region: String?, asu: String?, accountID: String?, aadTenantID: String?, deviceID: String?, macOSVers: String?, agentVers: String?, platform: String?) {
+        let lines = content.components(separatedBy: .newlines)
+        
+        var environment: String?
+        var region: String?
+        var asu: String?
+        var accountID: String?
+        var aadTenantID: String?
+        var deviceID: String?
+        var macOSVers: String?
+        var agentVers: String?
+        var platform: String?
+
+        for line in lines {
+            // Look for VerifyEnrollmentStatus lines with enrollment information
+
+            if line.contains("VerifyEnrollmentStatus") && line.contains("Successfully verified enrollment status") {
+                                                
+                // Extract Environment
+                if let envRange = line.range(of: "Environment: ([^,]+)", options: .regularExpression) {
+                    let envMatch = String(line[envRange])
+                    environment = envMatch.replacingOccurrences(of: "Environment: ", with: "")
+                }
+                
+                // Extract Region
+                if let regionRange = line.range(of: "Region: ([^,]+)", options: .regularExpression) {
+                    let regionMatch = String(line[regionRange])
+                    region = regionMatch.replacingOccurrences(of: "Region: ", with: "")
+                }
+                
+                // Extract ASU
+                if let asuRange = line.range(of: "ASU: ([^,]+)", options: .regularExpression) {
+                    let asuMatch = String(line[asuRange])
+                    asu = asuMatch.replacingOccurrences(of: "ASU: ", with: "")
+                }
+
+                // Extract AccountID
+                if let accountRange = line.range(of: "AccountID: ([a-fA-F0-9-]+)", options: .regularExpression) {
+                    let accountMatch = String(line[accountRange])
+                    accountID = accountMatch.replacingOccurrences(of: "AccountID: ", with: "")
+                }
+
+                // Extract AADTenantID (Entra Tenant ID)
+                if let tenantRange = line.range(of: "AADTenantID: ([a-fA-F0-9-]+)", options: .regularExpression) {
+                    let tenantMatch = String(line[tenantRange])
+                    aadTenantID = tenantMatch.replacingOccurrences(of: "AADTenantID: ", with: "")
+                }
+            }
+            
+            if line.contains("VerifyEnrollmentStatus") && line.contains("Successfully verified device status") {
+                                
+                // Extract Device ID
+                if let deviceRange = line.range(of: "DeviceId: ([^,]+)", options: .regularExpression) {
+                    let deviceMatch = String(line[deviceRange])
+                    deviceID = deviceMatch.replacingOccurrences(of: "DeviceId: ", with: "")
+                }
+                
+                // macOS Version
+                if let macOSRange = line.range(of: "OSVersionActual: ([^,]+)", options: .regularExpression) {
+                    let macOSMatch = String(line[macOSRange])
+                    macOSVers = macOSMatch.replacingOccurrences(of: "OSVersionActual: ", with: "")
+                }
+
+                // Agent Version
+                if let agentRange = line.range(of: "VersionInstalled: ([^,]+)", options: .regularExpression) {
+                    let agentMatch = String(line[agentRange])
+                    agentVers = agentMatch.replacingOccurrences(of: "VersionInstalled: ", with: "")
+                }
+            }
+            
+            if line.contains("VerifyEnrollmentStatus") && line.contains("Successfully verified MDM server info") {
+                
+                // MDM Server Platform
+                if let platformRange = line.range(of: "Platform=([^,]+)", options: .regularExpression) {
+                    let platformMatch = String(line[platformRange])
+                    platform = platformMatch.replacingOccurrences(of: "Platform=", with: "")
+                }
+            }
+            
+            // Return match when we have all values
+            if (environment != nil || region != nil || asu != nil || accountID != nil || aadTenantID != nil) && (deviceID != nil || macOSVers != nil || agentVers != nil) {
+                return (environment, region, asu, accountID, aadTenantID, deviceID, macOSVers, agentVers, platform)
+            }
+
+        }
+        
+        return (nil, nil, nil, nil, nil, nil, nil, nil, nil)
+    }
+    
+    private func extractNetworkSummary(from content: String) -> NetworkSummary? {
+        let lines = content.components(separatedBy: .newlines)
+        var interfaceStats: [String: Int] = [:]
+        var noConnectionCount = 0
+        var totalChecks = 0
+        
+        for line in lines {
+            if line.contains("ObserveNetworkInterface") {
+                totalChecks += 1
+                
+                if line.contains("No internet connection") {
+                    noConnectionCount += 1
+                } else if line.contains("Internet connection available. Context:") {
+                    // Extract the interface(s) from the Context array
+                    if let contextRange = line.range(of: "Context: \\[\"([^\\]]+)\"\\]", options: .regularExpression) {
+                        let contextMatch = String(line[contextRange])
+                        // Extract content between ["..."]
+                        if let interfaceRange = contextMatch.range(of: "\\[\"(.+)\"\\]", options: .regularExpression) {
+                            let interfaceString = String(contextMatch[interfaceRange])
+                            let cleanInterface = interfaceString
+                                .replacingOccurrences(of: "[\"", with: "")
+                                .replacingOccurrences(of: "\"]", with: "")
+                            
+                            // Handle multiple interfaces separated by commas
+                            let interfaces = cleanInterface.components(separatedBy: "\", \"")
+                            for interface in interfaces {
+                                let cleanedInterface = interface.trimmingCharacters(in: .whitespacesAndNewlines)
+                                interfaceStats[cleanedInterface, default: 0] += 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        guard totalChecks > 0 else { return nil }
+        
+        return NetworkSummary(
+            totalNetworkChecks: totalChecks,
+            interfaceStats: interfaceStats,
+            noConnectionCount: noConnectionCount
+        )
     }
     
     private func determineStatus(for entries: [LogEntry], type: PolicyType) -> PolicyStatus {

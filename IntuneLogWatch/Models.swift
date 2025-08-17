@@ -310,12 +310,46 @@ struct SyncEvent: Identifiable, Hashable {
     }
 }
 
+struct NetworkSummary {
+    let totalNetworkChecks: Int
+    let interfaceStats: [String: Int] // Interface name -> count
+    let noConnectionCount: Int
+    
+    var hasData: Bool {
+        totalNetworkChecks > 0
+    }
+    
+    var interfacePercentages: [String: Double] {
+        guard totalNetworkChecks > 0 else { return [:] }
+        return interfaceStats.mapValues { Double($0) / Double(totalNetworkChecks) * 100 }
+    }
+    
+    var noConnectionPercentage: Double {
+        guard totalNetworkChecks > 0 else { return 0 }
+        return Double(noConnectionCount) / Double(totalNetworkChecks) * 100
+    }
+}
+
 struct LogAnalysis {
     let syncEvents: [SyncEvent]
     let totalEntries: Int
     let parseErrors: [String]
     let sourceTitle: String // Title for tab display
     
+    // Enrollment information extracted from VerifyEnrollmentStatus logs
+    let environment: String?
+    let region: String?
+    let asu: String? 
+    let accountID: String?
+    let aadTenantID: String? // Entra Tenant ID
+    let deviceID: String? // Intune Device ID
+    let macOSVers:String?
+    let agentVers: String? // Intune Agent Version
+    let platform: String?
+    
+    // Network connectivity summary from ObserveNetworkInterface logs
+    let networkSummary: NetworkSummary?
+
     var totalSyncEvents: Int {
         syncEvents.count
     }

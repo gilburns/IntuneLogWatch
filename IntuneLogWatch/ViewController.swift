@@ -16,7 +16,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            sidebar
+            sidebar.frame(minWidth: 300)
         } content: {
             syncEventDetail
         } detail: {
@@ -83,8 +83,12 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             if parser.isLoading {
                 ProgressView("Parsing log file...")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let analysis = parser.analysis {
+                
+                appInfoHeader()
+                enrollmentHeader(analysis)
+                networkHeader(analysis)
                 analysisHeader(analysis)
                 
                 sortControls
@@ -93,6 +97,7 @@ struct ContentView: View {
                     SyncEventRow(syncEvent: syncEvent)
                         .tag(syncEvent)
                 }
+
             } else if let error = parser.error {
                 VStack {
                     Image(systemName: "exclamationmark.triangle")
@@ -121,8 +126,14 @@ struct ContentView: View {
         }
     }
     
-    private func analysisHeader(_ analysis: LogAnalysis) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    
+    @State var enrollmentExpanded: Bool = false
+    @State var networkExpanded: Bool = false
+    @State var analysisExpanded: Bool = true
+    
+    private func appInfoHeader() -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+                        
             VStack {
                 AppVersionInformationView(
                     versionString: AppVersionProvider.appVersion(),
@@ -133,41 +144,276 @@ struct ContentView: View {
             HStack {
                 Spacer()
             }
-            HStack {
-                Text("Analysis Summary")
-                    .font(.headline)
-                Spacer()
+        }
+//        .padding()
+        .background(Color(NSColor.controlBackgroundColor))
+    }
+
+    private func enrollmentHeader(_ analysis: LogAnalysis) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+                        
+            if hasEnrollmentInfo(analysis) {
+                
+                DisclosureGroup("Enrollment Status", isExpanded: $enrollmentExpanded) {
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        if let aadTenantID = analysis.aadTenantID {
+                            HStack {
+                                Text("Entra Tenant ID:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            HStack {
+                                Text(" \(aadTenantID)")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .textSelection(.enabled)
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                        
+                        if let deviceID = analysis.deviceID {
+                            HStack {
+                                Text("Intune Device ID:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            HStack {
+                                Text(" \(deviceID)")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .textSelection(.enabled)
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                        
+                        Grid(alignment: .leading, horizontalSpacing: 40, verticalSpacing: 4) {
+                            if let environment = analysis.environment {
+                                GridRow {
+                                    Text("Environment:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(" \(environment)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                            }
+                            
+                            if let region = analysis.region {
+                                GridRow {
+                                    Text("Region:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(" \(region)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                            }
+                            
+                            if let asu = analysis.asu {
+                                GridRow {
+                                    Text("ASU:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(" \(asu)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                            }
+                            
+                            if let macOSVers = analysis.macOSVers {
+                                GridRow {
+                                    Text("macOS Version:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(" \(macOSVers)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                            }
+
+                            if let agentVers = analysis.agentVers {
+                                GridRow {
+                                    Text("Agent Version:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(" \(agentVers)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                            }
+
+                            if let platform = analysis.platform {
+                                GridRow {
+                                    Text("Platform:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(" \(platform)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                    .padding(.bottom, 8)
+                    .padding(.leading, 30)
+
+                    Divider()
+                    
+                }
+                .font(.headline)
+                .padding(.leading, 10)
+                .padding(.trailing, 20)
+
+            }
+        }
+        .background(Color(NSColor.controlBackgroundColor))
+    }
+
+    private func networkHeader(_ analysis: LogAnalysis) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+                        
+            // Network Summary Section
+            if let networkSummary = analysis.networkSummary, networkSummary.hasData {
+                
+                DisclosureGroup("Network Connectivity", isExpanded: $networkExpanded) {
+                    
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        
+                        Grid(alignment: .trailing, horizontalSpacing: 5, verticalSpacing: 4) {
+                            
+                            GridRow {
+                                Text("Connection")
+                                Text("Checks")
+                                Text("Percent")
+                            }
+                            .font(.subheadline)
+                            
+                            Divider()
+                                .background(Color.blue)
+                                .opacity(0.7)
+                                .frame(height: 1)
+
+                            GridRow {
+                                Text("Total:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text(String(format: "%d", networkSummary.totalNetworkChecks))
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                Text("100%")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                            
+                            if networkSummary.noConnectionCount > 0 {
+                                GridRow {
+                                    Text("Disconnected:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(String(format: "%d", networkSummary.noConnectionCount))
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.red)
+                                    Text(String(format: "%.1f%%", networkSummary.noConnectionPercentage))
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.red)
+                                }
+                            }
+
+                            // Interface percentages
+                            ForEach(networkSummary.interfaceStats.sorted(by: { $0.value > $1.value }), id: \.key) { interface, count in
+                                GridRow {
+                                    Text("\(interface):")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(String(format: "%d", count))
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(interfaceColor(interface))
+                                    let percentage = networkSummary.interfacePercentages[interface] ?? 0
+                                    Text(String(format: "%.1f%%", percentage))
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(interfaceColor(interface))
+                                }
+                            }
+
+                        }
+                        .padding(.leading)
+                        .padding(.trailing)
+                        
+                    }
+                    .padding(.bottom, 8)
+                    .padding(.leading, 10)
+                    Divider()
+                    
+                }
+                .font(.headline)
+                .padding(.leading, 10)
+                .padding(.trailing, 20)
+
+
             }
             
-            HStack {
-                Label("\(analysis.totalSyncEvents)", systemImage: "clock")
-                    .font(.caption)
-                    .foregroundColor(.blue)
-                Label("\(analysis.completedSyncs)", systemImage: "checkmark.circle.fill")
-                    .font(.caption)
-                    .foregroundColor(.green)
-                Label("\(analysis.failedSyncs)", systemImage: "xmark.circle.fill")
-                    .font(.caption)
-                    .foregroundColor(.red)
+        }
+        .background(Color(NSColor.controlBackgroundColor))
+    }
+
+    private func analysisHeader(_ analysis: LogAnalysis) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+                        
+            DisclosureGroup("Analysis Summary", isExpanded: $analysisExpanded) {
                 Spacer()
-            }
-            
-            // Show Intune installation warnings
-            ForEach(analysis.parseErrors.filter { $0.hasPrefix("WARNING:") }, id: \.self) { warning in
+
                 HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
+                    Label("\(analysis.totalSyncEvents)", systemImage: "clock")
                         .font(.caption)
-                    Text(warning.replacingOccurrences(of: "WARNING: ", with: ""))
+                        .foregroundColor(.blue)
+                    Label("\(analysis.completedSyncs)", systemImage: "checkmark.circle.fill")
                         .font(.caption)
-                        .foregroundColor(.orange)
+                        .foregroundColor(.green)
+                    Label("\(analysis.failedSyncs)", systemImage: "xmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.red)
                     Spacer()
                 }
-                .padding(.top, 2)
+                .padding(.leading, 20)
+                .padding(.trailing, 10)
+
+                // Show Intune installation warnings
+                ForEach(analysis.parseErrors.filter { $0.hasPrefix("WARNING:") }, id: \.self) { warning in
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        Text(warning.replacingOccurrences(of: "WARNING: ", with: ""))
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        Spacer()
+                    }
+                    .padding(.top, 2)
+                }
+                .padding(.leading, 30)
+                .padding(.trailing, 10)
+
             }
+            .font(.headline)
+            .padding(.leading, 10)
+
             Divider()
         }
-        .padding()
         .background(Color(NSColor.controlBackgroundColor))
     }
     
@@ -251,6 +497,28 @@ struct ContentView: View {
             return syncEvents.sorted { $0.startTime > $1.startTime }
         } else {
             return syncEvents.sorted { $0.startTime < $1.startTime }
+        }
+    }
+    
+    private func hasEnrollmentInfo(_ analysis: LogAnalysis) -> Bool {
+        return analysis.environment != nil || 
+               analysis.region != nil || 
+               analysis.accountID != nil || 
+               analysis.aadTenantID != nil
+    }
+    
+    private func interfaceColor(_ interface: String) -> Color {
+        switch interface.lowercased() {
+        case let str where str.contains("wifi") || str.contains("wi-fi"):
+            return .blue
+        case let str where str.contains("ethernet") || str.contains("en0"):
+            return .green
+        case let str where str.contains("cellular") || str.contains("pdp"):
+            return .orange
+        case let str where str.contains("bluetooth"):
+            return .purple
+        default:
+            return .secondary
         }
     }
 }
