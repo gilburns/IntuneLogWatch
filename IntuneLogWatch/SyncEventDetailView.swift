@@ -5,6 +5,7 @@
 //  Created by Gil Burns on 8/11/25.
 //
 
+import Foundation
 import SwiftUI
 
 struct SyncEventDetailView: View {
