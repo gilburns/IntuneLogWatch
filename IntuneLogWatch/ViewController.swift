@@ -5,6 +5,7 @@
 //  Created by Gil Burns on 8/11/25.
 //
 
+import Foundation
 import SwiftUI
 
 struct ContentView: View {
@@ -12,7 +13,12 @@ struct ContentView: View {
     @State private var selectedSyncEvent: SyncEvent?
     @State private var selectedPolicy: PolicyExecution?
     @State private var showingFilePicker = false
+    @Binding var showingCertificateInspector: Bool
     @State private var sortNewestFirst = false
+    
+    init(showingCertificateInspector: Binding<Bool>) {
+        self._showingCertificateInspector = showingCertificateInspector
+    }
     
     var body: some View {
         NavigationSplitView {
@@ -55,6 +61,10 @@ struct ContentView: View {
                     parser.loadLocalIntuneLogs()
                 }
                 .disabled(parser.isLoading)
+                
+                Button("Inspect MDM Certificate") {
+                    showingCertificateInspector = true
+                }
             }
         }
         .onAppear {
@@ -76,6 +86,9 @@ struct ContentView: View {
             selectedSyncEvent = nil
             selectedPolicy = nil
             parser.loadLocalIntuneLogs()
+        }
+        .sheet(isPresented: $showingCertificateInspector) {
+            CertificateInspectionView()
         }
     }
     

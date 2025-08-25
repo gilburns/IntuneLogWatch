@@ -149,8 +149,9 @@ class LogParser: ObservableObject {
                     )
                 }
                 
+                let finalAnalysis = analysis
                 await MainActor.run {
-                    self.analysis = analysis
+                    self.analysis = finalAnalysis
                     self.isLoading = false
                 }
                 

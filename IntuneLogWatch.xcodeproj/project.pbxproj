@@ -8,10 +8,45 @@
 
 /* Begin PBXBuildFile section */
 		1B2718BA2E4EAE4E00C85ABB /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 1B2718B92E4EAE4E00C85ABB /* Sparkle */; };
+		1B271BBB2E58A86900C85ABB /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 1B271BBA2E58A86900C85ABB /* ArgumentParser */; };
+		1B271BC02E59167400C85ABB /* intunelogwatch-cli in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B271BAC2E58A78500C85ABB /* intunelogwatch-cli */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1B271BBD2E58EB0A00C85ABB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1B02C13C2E4A9FDD0085B8CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1B271BAB2E58A78500C85ABB;
+			remoteInfo = "intunelogwatch-cli";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1B271BAA2E58A78500C85ABB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		1B271BBF2E59165300C85ABB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				1B271BC02E59167400C85ABB /* intunelogwatch-cli in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1B02C1442E4A9FDD0085B8CB /* IntuneLogWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IntuneLogWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B271BAC2E58A78500C85ABB /* intunelogwatch-cli */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "intunelogwatch-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -19,9 +54,34 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppDelegate.swift,
+				Icon/IntuneLogWatch_16.png,
+				Icon/IntuneLogWatch_16x2.png,
+				Icon/IntuneLogWatch_32.png,
+				Icon/IntuneLogWatch_32x2.png,
+				Icon/IntuneLogWatch_128.png,
+				Icon/IntuneLogWatch_128x2.png,
+				Icon/IntuneLogWatch_256.png,
+				Icon/IntuneLogWatch_256x2.png,
+				Icon/IntuneLogWatch_512.png,
+				Icon/IntuneLogWatch_512x2.png,
 				Info.plist,
 			);
 			target = 1B02C1432E4A9FDD0085B8CB /* IntuneLogWatch */;
+		};
+		1B271BB52E58A79800C85ABB /* Exceptions for "CLI" folder in "intunelogwatch-cli" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				main.swift,
+			);
+			target = 1B271BAB2E58A78500C85ABB /* intunelogwatch-cli */;
+		};
+		1B271BB72E58A79F00C85ABB /* Exceptions for "IntuneLogWatch" folder in "intunelogwatch-cli" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CertificateInspector.swift,
+				Models.swift,
+			);
+			target = 1B271BAB2E58A78500C85ABB /* intunelogwatch-cli */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -30,8 +90,17 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				1B02C1602E4AAF410085B8CB /* Exceptions for "IntuneLogWatch" folder in "IntuneLogWatch" target */,
+				1B271BB72E58A79F00C85ABB /* Exceptions for "IntuneLogWatch" folder in "intunelogwatch-cli" target */,
 			);
 			path = IntuneLogWatch;
+			sourceTree = "<group>";
+		};
+		1B271BA72E58A74900C85ABB /* CLI */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1B271BB52E58A79800C85ABB /* Exceptions for "CLI" folder in "intunelogwatch-cli" target */,
+			);
+			path = CLI;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,6 +114,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1B271BA92E58A78500C85ABB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B271BBB2E58A86900C85ABB /* ArgumentParser in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -52,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				1B02C1462E4A9FDD0085B8CB /* IntuneLogWatch */,
+				1B271BA72E58A74900C85ABB /* CLI */,
 				1B02C1452E4A9FDD0085B8CB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,6 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				1B02C1442E4A9FDD0085B8CB /* IntuneLogWatch.app */,
+				1B271BAC2E58A78500C85ABB /* intunelogwatch-cli */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,10 +153,12 @@
 				1B02C1402E4A9FDD0085B8CB /* Sources */,
 				1B02C1412E4A9FDD0085B8CB /* Frameworks */,
 				1B02C1422E4A9FDD0085B8CB /* Resources */,
+				1B271BBF2E59165300C85ABB /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1B271BBE2E58EB0A00C85ABB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1B02C1462E4A9FDD0085B8CB /* IntuneLogWatch */,
@@ -90,6 +171,26 @@
 			productReference = 1B02C1442E4A9FDD0085B8CB /* IntuneLogWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		1B271BAB2E58A78500C85ABB /* intunelogwatch-cli */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B271BB02E58A78500C85ABB /* Build configuration list for PBXNativeTarget "intunelogwatch-cli" */;
+			buildPhases = (
+				1B271BA82E58A78500C85ABB /* Sources */,
+				1B271BA92E58A78500C85ABB /* Frameworks */,
+				1B271BAA2E58A78500C85ABB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "intunelogwatch-cli";
+			packageProductDependencies = (
+				1B271BBA2E58A86900C85ABB /* ArgumentParser */,
+			);
+			productName = "intunelogwatch-cli";
+			productReference = 1B271BAC2E58A78500C85ABB /* intunelogwatch-cli */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -101,6 +202,9 @@
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					1B02C1432E4A9FDD0085B8CB = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					1B271BAB2E58A78500C85ABB = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -116,6 +220,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				1B2718B82E4EAE4E00C85ABB /* XCRemoteSwiftPackageReference "Sparkle" */,
+				1B271BB92E58A86900C85ABB /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1B02C1452E4A9FDD0085B8CB /* Products */;
@@ -123,6 +228,7 @@
 			projectRoot = "";
 			targets = (
 				1B02C1432E4A9FDD0085B8CB /* IntuneLogWatch */,
+				1B271BAB2E58A78500C85ABB /* intunelogwatch-cli */,
 			);
 		};
 /* End PBXProject section */
@@ -145,7 +251,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1B271BA82E58A78500C85ABB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1B271BBE2E58EB0A00C85ABB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1B271BAB2E58A78500C85ABB /* intunelogwatch-cli */;
+			targetProxy = 1B271BBD2E58EB0A00C85ABB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1B02C1512E4A9FDF0085B8CB /* Debug */ = {
@@ -328,6 +449,36 @@
 			};
 			name = Release;
 		};
+		1B271BB12E58A78500C85ABB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = G4MQ57TVLE;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.gilburns.IntuneLogWatch-cli";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1B271BB22E58A78500C85ABB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = G4MQ57TVLE;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.gilburns.IntuneLogWatch-cli";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -349,6 +500,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		1B271BB02E58A78500C85ABB /* Build configuration list for PBXNativeTarget "intunelogwatch-cli" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1B271BB12E58A78500C85ABB /* Debug */,
+				1B271BB22E58A78500C85ABB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -360,6 +520,14 @@
 				minimumVersion = 2.7.1;
 			};
 		};
+		1B271BB92E58A86900C85ABB /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -367,6 +535,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1B2718B82E4EAE4E00C85ABB /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		1B271BBA2E58A86900C85ABB /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B271BB92E58A86900C85ABB /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

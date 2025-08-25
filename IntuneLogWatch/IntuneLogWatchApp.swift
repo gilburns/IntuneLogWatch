@@ -12,6 +12,7 @@ import Sparkle
 @main
 struct IntuneLogWatchApp: App {
     private let updaterController: SPUStandardUpdaterController
+    @State private var showingCertificateInspector = false
     
     init() {
         // Set up Sparkle updater
@@ -239,7 +240,7 @@ struct IntuneLogWatchApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(showingCertificateInspector: $showingCertificateInspector)
         }
         .windowStyle(DefaultWindowStyle())
         .commands {
@@ -281,6 +282,10 @@ struct IntuneLogWatchApp: App {
                 
                 Button("Collect Logs…") {
                     collectAndExportLogs()
+                }
+                
+                Button("Inspect MDM Certificate…") {
+                    showingCertificateInspector = true
                 }
                 
                 Divider()
