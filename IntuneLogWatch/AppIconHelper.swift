@@ -94,7 +94,7 @@ struct AppIconView: View {
     
     var body: some View {
         Group {
-            if let bundleId = bundleId, let icon = appIcon {
+            if let icon = appIcon {
                 Image(nsImage: icon)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
