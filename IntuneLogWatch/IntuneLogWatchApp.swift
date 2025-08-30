@@ -225,6 +225,9 @@ struct IntuneLogWatchApp: App {
                     self.showAlert(title: "Error Saving File", 
                                  message: "Could not save the log file: \(error.localizedDescription)")
                 }
+            } else {
+                // Clean up temporary file when user cancels
+                try? FileManager.default.removeItem(at: zipFile)
             }
         }
     }
