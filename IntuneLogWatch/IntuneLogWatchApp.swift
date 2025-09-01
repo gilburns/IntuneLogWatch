@@ -31,6 +31,55 @@ struct IntuneLogWatchApp: App {
         }
     }
     
+    
+    private func openCLITool(withArgs arguments: [String] = []) {
+        guard let cliPath = Bundle.main.path(forAuxiliaryExecutable: "intunelogwatch-cli") else {
+            showAlert(title: "CLI Tool Not Found", message: "The CLI tool could not be located in the app bundle.")
+            return
+        }
+        
+        // Create a temporary script that runs the CLI tool and keeps the shell open
+        let tempDir = FileManager.default.temporaryDirectory
+        let scriptPath = tempDir.appendingPathComponent("run_intune_cli.sh")
+        
+        let scriptContent = """
+        #!/bin/bash
+        echo "Running IntuneLogWatch CLI Tool..."
+        echo "=================================="
+        "\(cliPath)" \(arguments.joined(separator: " ")) "$@"
+        echo ""
+        echo "Type 'exit' to close this terminal session."
+        exec "$SHELL"
+        """
+        
+        do {
+            try scriptContent.write(to: scriptPath, atomically: true, encoding: .utf8)
+            
+            // Make the script executable
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/chmod")
+            process.arguments = ["+x", scriptPath.path]
+            try process.run()
+            process.waitUntilExit()
+            
+            // Open Terminal with the script
+            openTerminal(at: scriptPath)
+            
+        } catch {
+            showAlert(title: "Error", message: "Could not create temporary script: \(error.localizedDescription)")
+        }
+    }
+    
+    
+   private func openTerminal(at url: URL?){
+        guard let url = url,
+              let appUrl = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal")
+        else { return }
+        
+        NSWorkspace.shared.open([url], withApplicationAt: appUrl, configuration: NSWorkspace.OpenConfiguration() )
+    }
+
+    
     @MainActor
     private func performLogCollection() async {
         let intuneLogsPath = "/Library/Logs/Microsoft/Intune/"
@@ -290,7 +339,21 @@ struct IntuneLogWatchApp: App {
                 Button("Inspect MDM Certificate…") {
                     showingCertificateInspector = true
                 }
-                
+
+                if #available(macOS 15.0, *) {
+                    Button("Inspect MDM Certificate with CLI…") {
+                        openCLITool(withArgs: [])
+                    }.modifierKeyAlternate(.option) {
+                        Button("Open MDM CLI…") {
+                            openCLITool(withArgs: ["--help"])
+                        }
+                    }
+                } else {
+                    Button("Inspect MDM Certificate with CLI…") {
+                        openCLITool(withArgs: [])
+                    }
+                }
+
                 Divider()
                 
                 Button("Microsoft Graph Explorer…") {
