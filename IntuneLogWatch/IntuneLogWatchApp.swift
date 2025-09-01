@@ -48,7 +48,7 @@ struct IntuneLogWatchApp: App {
         echo "=================================="
         "\(cliPath)" \(arguments.joined(separator: " ")) "$@"
         echo ""
-        echo "Run the CLI tool from here:" 
+        echo "You can run the CLI tool from here:" 
         echo "\(cliPath)"
         echo ""
         echo "Type 'exit' to close this terminal session."
