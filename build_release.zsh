@@ -274,7 +274,8 @@ notarize_app() {
     
     # Create zip for notarization
     NOTARY_ZIP="${BUILD_DIR}/${APP_NAME}-notarization.zip"
-    (cd "${BUILD_DIR}/Release" && zip -r "../../${NOTARY_ZIP}" "${APP_NAME}.app")
+    # Preserve symlinks & bundle structure
+    /usr/bin/ditto -c -k --keepParent "${APP_PATH}" "${NOTARY_ZIP}"
     
     print_status "Submitting app for notarization..."
     
@@ -342,7 +343,7 @@ create_dmg() {
     mkdir -p "${DMG_TEMP_DIR}"
     
     # Copy app to DMG directory
-    cp -R "${APP_PATH}" "${DMG_TEMP_DIR}/"
+    /usr/bin/ditto "${APP_PATH}" "${DMG_TEMP_DIR}/${APP_NAME}.app"
     
     # Create Applications symlink
     ln -s /Applications "${DMG_TEMP_DIR}/Applications"
@@ -377,7 +378,7 @@ create_zip() {
     # Create ZIP
     ZIP_PATH="${RELEASE_DIR}/${ZIP_NAME}"
     
-    (cd "${BUILD_DIR}/Release" && zip -r "../../${ZIP_PATH}" "${APP_NAME}.app")
+    /usr/bin/ditto -c -k --keepParent "${APP_PATH}" "${ZIP_PATH}"
     
     print_success "ZIP created: ${ZIP_PATH}"
 }
@@ -406,7 +407,22 @@ main() {
         echo "2) ZIP"
         echo "3) Both"
         echo
-        read -p "Enter choice (1-3): " PACKAGE_CHOICE
+        if [[ -t 0 ]]; then
+            # interactive stdin
+            read "PACKAGE_CHOICE?Enter choice (1-3): "
+        else
+            # stdin isn't interactive (e.g., BBEdit, CI). Read from the terminal directly.
+            {
+                set +e
+                read "PACKAGE_CHOICE?Enter choice (1-3): " </dev/tty
+                rc=$?
+                set -e
+            }
+            if (( rc != 0 )); then
+                print_warning "No interactive input available; defaulting to DMG."
+                PACKAGE_CHOICE=1
+            fi
+        fi
     else
         case $PACKAGE_CHOICE in
             1) print_status "Creating DMG (from command line option)" ;;
