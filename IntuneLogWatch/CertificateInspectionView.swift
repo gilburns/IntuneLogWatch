@@ -127,6 +127,8 @@ struct CertificateInspectionView: View {
                 if !info.extensions.isEmpty {
                     extensionsSection(info.extensions)
                 }
+                
+                fingerprintsSection(info.fingerprints)
             }
         }
     }
@@ -179,6 +181,19 @@ struct CertificateInspectionView: View {
                 }
             }
             .padding(.vertical, 4)
+        }
+        .backgroundStyle(.regularMaterial)
+        .foregroundColor(.primary)
+    }
+    
+    private func fingerprintsSection(_ fingerprints: CertificateFingerprints) -> some View {
+        GroupBox("Certificate Fingerprints") {
+            VStack(alignment: .leading, spacing: 12) {
+                InfoRow(label: "SHA-256", value: fingerprints.sha256)
+                InfoRow(label: "SHA-1", value: fingerprints.sha1)
+                InfoRow(label: "MD5", value: fingerprints.md5)
+            }
+            .padding(.vertical, 8)
         }
         .backgroundStyle(.regularMaterial)
         .foregroundColor(.primary)
