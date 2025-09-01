@@ -112,6 +112,13 @@ struct IntuneLogWatchCLI: ParsableCommand {
             json["notValidAfter"] = ISO8601DateFormatter().string(from: validTo)
         }
         
+        // Fingerprints
+        json["fingerprints"] = [
+            "sha1": certInfo.fingerprints.sha1,
+            "sha256": certInfo.fingerprints.sha256,
+            "md5": certInfo.fingerprints.md5
+        ]
+        
         // Extensions
         var extensions: [String: Any] = [:]
         for ext in certInfo.extensions {
@@ -166,6 +173,12 @@ struct IntuneLogWatchCLI: ParsableCommand {
             if let ext = findExtension(certInfo, oid: "1.2.840.113556.5.15") {
                 print(ext.value)
             }
+        case "sha1", "sha1fingerprint":
+            print(certInfo.fingerprints.sha1)
+        case "sha256", "sha256fingerprint":
+            print(certInfo.fingerprints.sha256)
+        case "md5", "md5fingerprint":
+            print(certInfo.fingerprints.md5)
         default:
             // Try to find by extension name or OID
             if let ext = certInfo.extensions.first(where: { 
@@ -231,6 +244,13 @@ struct IntuneLogWatchCLI: ParsableCommand {
                 }
             }
         }
+        
+        // Add fingerprints section
+        print("\nCertificate Fingerprints")
+        print("=======================")
+        print("SHA-256: \(certInfo.fingerprints.sha256)")
+        print("SHA-1: \(certInfo.fingerprints.sha1)")
+        print("MD5: \(certInfo.fingerprints.md5)")
     }
     
     // MARK: - Helper Methods
