@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import CryptoKit
 
 struct CertificateExtension: Identifiable {
     let id = UUID()
@@ -9,12 +10,19 @@ struct CertificateExtension: Identifiable {
     let isCritical: Bool
 }
 
+struct CertificateFingerprints {
+    let sha1: String
+    let sha256: String
+    let md5: String
+}
+
 struct MDMCertificateInfo {
     let commonName: String?
     let issuer: String?
     let serialNumber: String?
     let validFrom: Date?
     let validTo: Date?
+    let fingerprints: CertificateFingerprints
     let extensions: [CertificateExtension]
 }
 
@@ -134,6 +142,28 @@ class CertificateInspector: ObservableObject {
         return regex?.firstMatch(in: commonName, options: [], range: range) != nil
     }
     
+    private func calculateFingerprints(from certificate: SecCertificate) -> CertificateFingerprints {
+        let certData = SecCertificateCopyData(certificate)
+        let data = Data(bytes: CFDataGetBytePtr(certData), count: CFDataGetLength(certData))
+        
+        // Calculate SHA-256 fingerprint
+        let sha256Hash = SHA256.hash(data: data)
+        let sha256String = sha256Hash.compactMap { String(format: "%02X", $0) }.joined(separator: " ")
+        
+        // Calculate SHA-1 fingerprint
+        let sha1Hash = Insecure.SHA1.hash(data: data)
+        let sha1String = sha1Hash.compactMap { String(format: "%02X", $0) }.joined(separator: " ")
+        
+        // Calculate MD5 fingerprint
+        let md5Hash = Insecure.MD5.hash(data: data)
+        let md5String = md5Hash.compactMap { String(format: "%02X", $0) }.joined(separator: " ")
+        
+        return CertificateFingerprints(
+            sha1: sha1String,
+            sha256: sha256String,
+            md5: md5String
+        )
+    }
     
     private func extractCertificateInfo(from certificate: SecCertificate) throws -> MDMCertificateInfo {
         let certData = SecCertificateCopyData(certificate)
@@ -146,6 +176,7 @@ class CertificateInspector: ObservableObject {
         let extensions = extractExtensionsUsingSecurity(from: certificate)
         let serialNumber = extractSerialNumberUsingSecurity(from: certificate)
         let (validFrom, validTo) = extractValidityUsingSecurity(from: certificate)
+        let fingerprints = calculateFingerprints(from: certificate)
         
         return MDMCertificateInfo(
             commonName: commonName as String?,
@@ -153,6 +184,7 @@ class CertificateInspector: ObservableObject {
             serialNumber: serialNumber,
             validFrom: validFrom,
             validTo: validTo,
+            fingerprints: fingerprints,
             extensions: extensions
         )
     }
@@ -544,7 +576,7 @@ class CertificateInspector: ObservableObject {
         
         return nil
     }
-    
+
     private func extractValidityUsingSecurity(from certificate: SecCertificate) -> (Date?, Date?) {
         guard let certDict = SecCertificateCopyValues(certificate, nil, nil) as? [String: Any] else {
             return (nil, nil)
@@ -557,7 +589,6 @@ class CertificateInspector: ObservableObject {
         for (_, value) in certDict {
             if let valueDict = value as? [String: Any],
                let label = valueDict[kSecPropertyKeyLabel as String] as? String {
-                
                 
                 if label.lowercased().contains("not valid before") || label.lowercased().contains("not before") {
                     if let dateValue = valueDict[kSecPropertyKeyValue as String] as? Date {
