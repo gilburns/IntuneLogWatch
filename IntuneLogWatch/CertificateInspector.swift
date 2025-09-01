@@ -162,15 +162,15 @@ class CertificateInspector: ObservableObject {
         
         let targetOIDs = [
             "1.2.840.113556.5.4": "Intune Device ID",
-            "1.2.840.113556.5.6": "AccountID", 
+            "1.2.840.113556.5.6": "Account ID",
             "1.2.840.113556.5.10": "Entra User ID",
-//            "1.2.840.113556.5.11": "Unknown ID",
-            "1.2.840.113556.5.14": "TenantID",
-            "1.2.840.113556.5.15": "MdmEnrollmentID",
-            "1.2.840.113556.5.16": "PolicyID",
-            "1.2.840.113556.5.17": "ResourceID",
-            "1.2.840.113556.5.18": "ProfileID"
-//            "1.2.840.113556.5.19": "OID_1_2_840_113556_5_19"
+            "1.2.840.113556.5.11": "OID_1.2.840.113556.5.11",
+            "1.2.840.113556.5.14": "Tenant ID",
+            "1.2.840.113556.5.15": "MdmEnrollment ID",
+            "1.2.840.113556.5.16": "Policy ID",
+            "1.2.840.113556.5.17": "Resource ID",
+            "1.2.840.113556.5.18": "Profile ID",
+            "1.2.840.113556.5.19": "OID_1.2.840.113556.5.19"
         ]
         
         // Get certificate values using Security framework
