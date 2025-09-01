@@ -56,10 +56,16 @@ struct CertificateInspectionView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("Inspecting certificate with issuer: Microsoft Intune MDM Device CA")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            Grid(alignment: .center) {
+                GridRow {
+                    Text("Inspecting certificate with issuer:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("Microsoft Intune MDM Device CA")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }.multilineTextAlignment(.center)
+            }
         }
     }
     
@@ -152,6 +158,7 @@ struct CertificateInspectionView: View {
             .padding(.vertical, 8)
         }
         .backgroundStyle(.regularMaterial)
+        .foregroundColor(.primary)
     }
     
     private func extensionsSection(_ extensions: [CertificateExtension]) -> some View {
@@ -171,9 +178,10 @@ struct CertificateInspectionView: View {
                     }
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 4)
         }
         .backgroundStyle(.regularMaterial)
+        .foregroundColor(.primary)
     }
     
     private func sortedExtensions(_ extensions: [CertificateExtension]) -> [CertificateExtension] {
@@ -216,9 +224,9 @@ struct InfoRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
         .background(Color(.controlBackgroundColor))
-        .cornerRadius(6)
+        .cornerRadius(8)
     }
 }
 
@@ -226,7 +234,7 @@ struct ExtensionRow: View {
     let ext: CertificateExtension
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 2) {
             HStack {
                 Text(ext.name)
                     .font(.caption)
