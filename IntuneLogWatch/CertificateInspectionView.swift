@@ -1,3 +1,10 @@
+//
+//  CertificateInspectionView.swift
+//  IntuneLogWatch
+//
+//  Created by Gil Burns on 8/25/25.
+//
+
 import SwiftUI
 
 struct CertificateInspectionView: View {
