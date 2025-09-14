@@ -92,6 +92,14 @@ struct LogEntry: Identifiable, Hashable {
     var executionContext: String? {
         extractExecutionContext(from: message)
     }
+
+    var hasAppInstallationError: Bool {
+        extractAppInstallationError(from: message)
+    }
+
+    var appErrorCode: String? {
+        extractAppErrorCode(from: message)
+    }
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -198,7 +206,7 @@ struct LogEntry: Identifiable, Hashable {
             "ExecutionContext: (root|user)",
             "ExecutionContext:(root|user)"
         ]
-        
+
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
                let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
@@ -206,6 +214,80 @@ struct LogEntry: Identifiable, Hashable {
                 return String(message[range])
             }
         }
+        return nil
+    }
+
+    private func extractAppInstallationError(from message: String) -> Bool {
+        // Check if this is an AppResultStateChangeManager entry with ErrorCode
+        guard component == "AppResultStateChangeManager" else { return false }
+
+        // Extract the current PolicyResult section (not CachedPolicyResult)
+        guard let currentPolicyResult = extractCurrentPolicyResult(from: message) else { return false }
+
+        // Look for ErrorCode in the current PolicyResult's ComplianceStateMessage or EnforcementStateMessage
+        let errorCodePatterns = [
+            "\"ErrorCode\"\\s*=\\s*\"[^\"]+\"",
+            "ErrorCode\\s*=\\s*\"[^\"]+\"",
+            "\"ErrorCode\":\\s*\"[^\"]+\"",
+            "ErrorCode:\\s*\"[^\"]+\""
+        ]
+
+        for pattern in errorCodePatterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               regex.firstMatch(in: currentPolicyResult, options: [], range: NSRange(location: 0, length: currentPolicyResult.count)) != nil {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    private func extractAppErrorCode(from message: String) -> String? {
+        // Check if this is an AppResultStateChangeManager entry
+        guard component == "AppResultStateChangeManager" else { return nil }
+
+        // Extract the current PolicyResult section (not CachedPolicyResult)
+        guard let currentPolicyResult = extractCurrentPolicyResult(from: message) else { return nil }
+
+        // Look for ErrorCode value in the current PolicyResult's ComplianceStateMessage or EnforcementStateMessage
+        let errorCodePatterns = [
+            "\"?ErrorCode\"?\\s*[=:]\\s*\"([^\"]+)\"",
+            "\"?ErrorCode\"?\\s*[=:]\\s*([^,\\s;}]+)"
+        ]
+
+        for pattern in errorCodePatterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: currentPolicyResult, options: [], range: NSRange(location: 0, length: currentPolicyResult.count)) {
+                let range = Range(match.range(at: 1), in: currentPolicyResult)!
+                let errorCode = String(currentPolicyResult[range]).trimmingCharacters(in: .whitespacesAndNewlines)
+                // Filter out empty values or placeholder values
+                if !errorCode.isEmpty && errorCode != "0" {
+                    return errorCode
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func extractCurrentPolicyResult(from message: String) -> String? {
+        // Look for PolicyResult pattern and extract everything up to CachedPolicyResult or end of message
+        let policyResultPattern = "PolicyResult:\\s*(\\[.*?)(?:,\\s*CachedPolicyResult:|$)"
+
+        if let regex = try? NSRegularExpression(pattern: policyResultPattern, options: [.dotMatchesLineSeparators]),
+           let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
+            let range = Range(match.range(at: 1), in: message)!
+            return String(message[range])
+        }
+
+        // Fallback: look for PolicyResult without expecting CachedPolicyResult
+        let fallbackPattern = "PolicyResult:\\s*(\\[.*)"
+        if let regex = try? NSRegularExpression(pattern: fallbackPattern, options: [.dotMatchesLineSeparators]),
+           let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
+            let range = Range(match.range(at: 1), in: message)!
+            return String(message[range])
+        }
+
         return nil
     }
 }
@@ -236,6 +318,14 @@ struct PolicyExecution: Identifiable, Hashable {
     
     var hasWarnings: Bool {
         entries.contains { $0.level == .warning }
+    }
+
+    var hasAppInstallationErrors: Bool {
+        entries.contains { $0.hasAppInstallationError }
+    }
+
+    var appErrorCodes: [String] {
+        entries.compactMap { $0.appErrorCode }
     }
     
     var displayName: String {

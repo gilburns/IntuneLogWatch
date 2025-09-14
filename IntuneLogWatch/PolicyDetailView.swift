@@ -104,20 +104,46 @@ struct PolicyDetailView: View {
                 Spacer()
             }
             
-            if policy.hasErrors || policy.hasWarnings {
+            if policy.hasErrors || policy.hasWarnings || policy.hasAppInstallationErrors {
                 HStack(spacing: 12) {
                     if policy.hasErrors {
                         Label("Contains Errors", systemImage: "exclamationmark.circle.fill")
                             .font(.caption)
                             .foregroundColor(.red)
                     }
-                    
+
                     if policy.hasWarnings {
                         Label("Contains Warnings", systemImage: "exclamationmark.triangle.fill")
                             .font(.caption)
                             .foregroundColor(.orange)
                     }
-                    
+
+                    if policy.hasAppInstallationErrors {
+                        let errorCodes = policy.appErrorCodes
+                        HStack(spacing: 8) {
+                            if errorCodes.isEmpty {
+                                Label("App Installation Failed", systemImage: "app.badge.checkmark")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            } else {
+                                Label("App Installation Failed:", systemImage: "app.badge.checkmark")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+
+                                ForEach(errorCodes, id: \.self) { code in
+                                    let hexCode: String? = {
+                                        if let intCode = Int32(code) {
+                                            return String(format: "0x%08X", intCode)
+                                        }
+                                        return nil
+                                    }()
+
+                                    ErrorCodeButton(errorCode: code, hexCode: hexCode)
+                                }
+                            }
+                        }
+                    }
+
                     Spacer()
                 }
             }
@@ -203,6 +229,8 @@ struct PolicyDetailView: View {
                     // Detect if option key is pressed
                     if NSEvent.modifierFlags.contains(.option) {
                         copyGraphApiUrl()
+                    } else if NSEvent.modifierFlags.contains(.control) {
+                        copyIntunePortalUrl()
                     } else {
                         copyPolicyId()
                     }
@@ -212,7 +240,7 @@ struct PolicyDetailView: View {
                         .foregroundColor(policyIdCopied ? .green : .secondary)
                 }
                 .buttonStyle(BorderlessButtonStyle())
-                .help(policyIdCopied ? "Copied \(copiedText)!" : "Copy Policy ID (⌥-click for Graph API URL)")
+                .help(policyIdCopied ? "Copied \(copiedText)!" : "Copy Policy ID\r⌥-click for Graph API URL,\r ⌃-click for Intune Portal URL")
             }
             Text(policy.policyId)
                 .font(.caption)
@@ -229,7 +257,12 @@ struct PolicyDetailView: View {
         let apiUrl = generateGraphApiUrl(for: policy)
         copyToClipboard(text: apiUrl, displayText: "Graph API URL")
     }
-    
+
+    private func copyIntunePortalUrl() {
+        let apiUrl = generateIntunePortalUrl(for: policy)
+        copyToClipboard(text: apiUrl, displayText: "Intune Portal URL")
+    }
+
     private func copyToClipboard(text: String, displayText: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
@@ -266,7 +299,27 @@ struct PolicyDetailView: View {
             return "\(baseUrl)/deviceManagement/deviceShellScripts/\(guid)"
         }
     }
-    
+
+    private func generateIntunePortalUrl(for policy: PolicyExecution) -> String {
+        let baseUrl = "https://intune.microsoft.com"
+        let guid = policy.policyId
+        
+        switch policy.type {
+        case .app:
+            return "\(baseUrl)/#view/Microsoft_Intune_Apps/SettingsMenu/~/0/appId/\(guid)"
+        case .script:
+            // Check if it's a custom attribute or regular script based on scriptType
+            if let scriptType = policy.scriptType, scriptType == "Custom Attribute" {
+                return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/customAttributes"
+            } else {
+                return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/scripts"
+            }
+        case .unknown:
+            // Default to shell script endpoint for unknown types
+            return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/scripts"
+        }
+    }
+
     private var timelineView: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -384,7 +437,7 @@ struct TimelineEntryView: View {
                     Text(formatTime(entry.timestamp))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     Text(entry.component)
                         .font(.caption)
                         .fontWeight(.medium)
@@ -393,9 +446,34 @@ struct TimelineEntryView: View {
                         .background(Color.blue.opacity(0.1))
                         .foregroundColor(.blue)
                         .cornerRadius(3)
-                    
+
+                    if entry.hasAppInstallationError {
+                        if let errorCode = entry.appErrorCode {
+                            let hexCode: String? = {
+                                if let intCode = Int32(errorCode) {
+                                    return String(format: "0x%08X", intCode)
+                                }
+                                return nil
+                            }()
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "app.badge.checkmark")
+                                    .font(.caption2)
+                                    .foregroundColor(.red)
+                                Text("Error:")
+                                    .font(.caption2)
+                                    .foregroundColor(.red)
+                                ErrorCodeButton(errorCode: errorCode, hexCode: hexCode)
+                            }
+                        } else {
+                            Label("App Error", systemImage: "app.badge.checkmark")
+                                .font(.caption2)
+                                .foregroundColor(.red)
+                        }
+                    }
+
                     Spacer()
-                    
+
                     Text("Thread \(entry.threadId)")
                         .font(.caption2)
                         .foregroundColor(.secondary)

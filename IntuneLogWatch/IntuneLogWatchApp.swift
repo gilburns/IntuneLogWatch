@@ -13,6 +13,7 @@ import Sparkle
 struct IntuneLogWatchApp: App {
     private let updaterController: SPUStandardUpdaterController
     @State private var showingCertificateInspector = false
+    @State private var errorCodesWindowController: ErrorCodesReferenceWindowControllerSimple?
     
     init() {
         // Set up Sparkle updater
@@ -292,6 +293,17 @@ struct IntuneLogWatchApp: App {
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }
+
+    private func showErrorCodesReference() {
+        if let windowController = errorCodesWindowController {
+            windowController.showWindow(nil)
+            windowController.window?.makeKeyAndOrderFront(nil)
+        } else {
+            let windowController = ErrorCodesReferenceWindowControllerSimple()
+            windowController.showWindow(nil)
+            self.errorCodesWindowController = windowController
+        }
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -329,16 +341,23 @@ struct IntuneLogWatchApp: App {
                     openURL("https://github.com/gilburns/IntuneLogWatch/wiki")
                 }
 
+                Button("Error Codes Reference…") {
+                    showErrorCodesReference()
+                }
+
+                Divider()
+
                 Button("Intune Logs Folder…") {
                     openURL("file:/Library/Logs/Microsoft/Intune")
                 }
 
-                Divider()
                 
                 Button("Collect Logs…") {
                     collectAndExportLogs()
                 }
                 
+                Divider()
+
                 Button("Inspect MDM Certificate…") {
                     showingCertificateInspector = true
                 }
