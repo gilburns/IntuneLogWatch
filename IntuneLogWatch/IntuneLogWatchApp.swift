@@ -326,7 +326,7 @@ struct IntuneLogWatchApp: App {
                     NotificationCenter.default.post(name: .openLogFile, object: nil)
                 }
                 .keyboardShortcut("o", modifiers: .command)
-                
+
                 Divider()
 
                 Button("Reload Local Logs") {
@@ -334,6 +334,14 @@ struct IntuneLogWatchApp: App {
                     NotificationCenter.default.post(name: .reloadLocalLogs, object: nil)
                 }
                 .keyboardShortcut("r", modifiers: .command)
+            }
+
+            CommandGroup(after: .textEditing) {
+                Button("Search Policies...") {
+                    // Post notification to focus search field
+                    NotificationCenter.default.post(name: .focusSearchField, object: nil)
+                }
+                .keyboardShortcut("f", modifiers: .command)
             }
             
             CommandGroup(replacing: .help) {
@@ -389,6 +397,9 @@ struct IntuneLogWatchApp: App {
 extension Notification.Name {
     static let openLogFile = Notification.Name("openLogFile")
     static let reloadLocalLogs = Notification.Name("reloadLocalLogs")
+    static let focusSearchField = Notification.Name("focusSearchField")
+    static let focusPolicyList = Notification.Name("focusPolicyList")
+    static let focusSearchFieldDirect = Notification.Name("focusSearchFieldDirect")
 }
 
 extension UTType {

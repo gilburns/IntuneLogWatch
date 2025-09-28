@@ -34,7 +34,12 @@ struct PolicyDetailView: View {
                     .foregroundColor(.secondary)
             }
             .padding()
-            
+
+            Text("(Double click on a log entry to view or copy details)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+
             if showingRawLogs {
                 rawLogView
             } else {
@@ -42,8 +47,10 @@ struct PolicyDetailView: View {
             }
         }
         .sheet(item: $detailLogEntry) { entry in
-            LogEntryDetailView(entry: entry)
-                .frame(minWidth: 700, minHeight: 550)
+            if let index = policy.entries.firstIndex(where: { $0.id == entry.id }) {
+                LogEntryDetailView(displayName: policy.displayName, bundleIdentifier: policy.bundleId ?? "", policyType: policy.type, entries: policy.entries, currentIndex: index)
+                    .frame(minWidth: 700, minHeight: 550)
+            }
         }
     }
     
@@ -238,9 +245,10 @@ struct PolicyDetailView: View {
                     Image(systemName: policyIdCopied ? "checkmark" : "doc.on.clipboard")
                         .font(.caption2)
                         .foregroundColor(policyIdCopied ? .green : .secondary)
+                        .frame(width: 24, height: 24)
                 }
                 .buttonStyle(BorderlessButtonStyle())
-                .help(policyIdCopied ? "Copied \(copiedText)!" : "Copy Policy ID\r⌥-click for Graph API URL,\r ⌃-click for Intune Portal URL")
+                .help(policyIdCopied ? "Copied \(copiedText)!" : "Click to copy Policy ID\r⌥ + Click for Graph API URL,\r ⌃ + Click for Intune Portal URL")
             }
             Text(policy.policyId)
                 .font(.caption)
