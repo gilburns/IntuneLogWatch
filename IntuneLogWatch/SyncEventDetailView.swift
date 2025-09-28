@@ -13,6 +13,9 @@ struct SyncEventDetailView: View {
     @Binding var selectedPolicy: PolicyExecution?
     @State private var searchText = ""
     @State private var selectedPolicyType: String = "all"
+    @State private var logDetailPolicy: PolicyExecution?
+    @FocusState private var policyListFocused: Bool
+    @FocusState private var searchFieldFocused: Bool
     
     var filteredPolicies: [PolicyExecution] {
         var policies = syncEvent.policies
@@ -61,14 +64,50 @@ struct SyncEventDetailView: View {
                 TextField("Search policies...", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 200)
+                    .focused($searchFieldFocused)
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
             .fixedSize(horizontal: false, vertical: true)
             
-            List(filteredPolicies, selection: $selectedPolicy) { policy in
-                PolicyRow(policy: policy)
+            if #available(macOS 14.0, *) {
+                List(filteredPolicies, selection: $selectedPolicy) { policy in
+                    PolicyRow(policy: policy) {
+                        if !policy.entries.isEmpty {
+                            logDetailPolicy = policy
+                        }
+                    }
                     .tag(policy)
+                }
+                .focused($policyListFocused)
+                .onKeyPress(.return) {
+                    if let selectedPolicy = selectedPolicy, !selectedPolicy.entries.isEmpty {
+                        logDetailPolicy = selectedPolicy
+                        return .handled
+                    }
+                    return .ignored
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .focusPolicyList)) { _ in
+                    policyListFocused = true
+                    // Auto-select first policy when focus is received
+                    if !filteredPolicies.isEmpty {
+                        selectedPolicy = filteredPolicies.first
+                    }
+                }
+        .onReceive(NotificationCenter.default.publisher(for: .focusSearchField)) { _ in
+            searchFieldFocused = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .focusSearchFieldDirect)) { _ in
+            searchFieldFocused = true
+        }
+            } else {
+                // Fallback on earlier versions
+            }
+        }
+        .sheet(item: $logDetailPolicy) { policy in
+            if !policy.entries.isEmpty {
+                LogEntryDetailView(displayName: policy.displayName, bundleIdentifier: policy.bundleId ?? "", policyType: policy.type, entries: policy.entries, currentIndex: 0)
+                    .frame(minWidth: 700, minHeight: 550)
             }
         }
     }
@@ -198,7 +237,13 @@ struct SyncEventDetailView: View {
 
 struct PolicyRow: View {
     let policy: PolicyExecution
+    let onDoubleClick: (() -> Void)?
     @Environment(\.controlActiveState) private var controlActiveState
+
+    init(policy: PolicyExecution, onDoubleClick: (() -> Void)? = nil) {
+        self.policy = policy
+        self.onDoubleClick = onDoubleClick
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -222,6 +267,10 @@ struct PolicyRow: View {
                         .background(selectionAwareColor(.blue, fallback: .cyan).opacity(0.3))
                         .foregroundColor(selectionAwareColor(.blue, fallback: .cyan))
                         .cornerRadius(4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.white, lineWidth: 0.5)
+                        )
                     
                     // App type indicator (PKG/DMG)
                     if let appType = policy.appType {
@@ -232,6 +281,10 @@ struct PolicyRow: View {
                             .background(appType == "PKG" ? Color.green.opacity(enhancedBackgroundOpacity(0.1)) : Color.purple.opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(appType == "PKG" ? .green : .purple)
                             .cornerRadius(3)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .stroke(Color.white, lineWidth: 0.5)
+                            )
                     }
                     
                     // App intent indicator (RequiredInstall/Available/Uninstall)
@@ -243,6 +296,10 @@ struct PolicyRow: View {
                             .background(intentColor(appIntent).opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(intentColor(appIntent))
                             .cornerRadius(3)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .stroke(Color.white, lineWidth: 0.5)
+                            )
                     }
                     
                     // Script type indicator
@@ -254,6 +311,10 @@ struct PolicyRow: View {
                             .background(scriptType == "Custom Attribute" ? Color.orange.opacity(enhancedBackgroundOpacity(0.1)) : Color.teal.opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(scriptType == "Custom Attribute" ? .orange : .teal)
                             .cornerRadius(3)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .stroke(Color.white, lineWidth: 0.5)
+                            )
                     }
                     
                     // Execution context indicator (for scripts only)
@@ -265,6 +326,10 @@ struct PolicyRow: View {
                             .background(contextColor(executionContext).opacity(enhancedBackgroundOpacity(0.1)))
                             .foregroundColor(contextColor(executionContext))
                             .cornerRadius(3)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .stroke(Color.white, lineWidth: 0.5)
+                            )
                     }
                 }
             }
@@ -304,6 +369,27 @@ struct PolicyRow: View {
                         .foregroundColor(.orange)
                         .font(.caption)
                 }
+
+                if !policy.entries.isEmpty {
+                    Button(action: {
+                        onDoubleClick?()
+                    }) {
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                            .padding(4)
+                            .background(
+                                Circle()
+                                    .fill(Color.blue)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white, lineWidth: 1.5)
+                                    )
+                            )
+                    }
+                    .buttonStyle(PressedButtonStyle())
+                    .help("View log entries")
+                }
             }
         }
         .padding(.vertical, 2)
@@ -333,6 +419,10 @@ struct PolicyRow: View {
             .background(statusColor.opacity(enhancedBackgroundOpacity(0.2)))
             .foregroundColor(statusColor)
             .cornerRadius(4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.white, lineWidth: 0.5)
+            )
     }
     
     private var statusColor: Color {
@@ -415,5 +505,14 @@ struct PolicyRow: View {
     private func enhancedBackgroundOpacity(_ baseOpacity: Double) -> Double {
         // Increase opacity slightly for better visibility on selection
         return min(baseOpacity + 0.1, 0.4)
+    }
+}
+
+struct PressedButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
+            .opacity(configuration.isPressed ? 0.8 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }

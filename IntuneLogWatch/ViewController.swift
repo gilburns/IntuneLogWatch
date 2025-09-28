@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var showingFilePicker = false
     @Binding var showingCertificateInspector: Bool
     @State private var sortNewestFirst = false
+    @FocusState private var syncEventListFocused: Bool
+    @FocusState private var syncEventDetailFocused: Bool
     
     init(showingCertificateInspector: Binding<Bool>) {
         self._showingCertificateInspector = showingCertificateInspector
@@ -87,6 +89,25 @@ struct ContentView: View {
             selectedPolicy = nil
             parser.loadLocalIntuneLogs()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .focusSearchField)) { _ in
+            // Handle search focus at the top level
+            if selectedSyncEvent != nil {
+                // If we have a sync event, ensure detail view is focused first
+                syncEventDetailFocused = true
+                // Then post the search field focus notification
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    NotificationCenter.default.post(name: .focusSearchFieldDirect, object: nil)
+                }
+            }
+        }
+        .onChange(of: parser.isLoading) { isLoading in
+            // Auto-select first sync event when parsing completes
+            if !isLoading, let analysis = parser.analysis, selectedSyncEvent == nil {
+                let sortedEvents = sortedSyncEvents(analysis.syncEvents)
+                selectedSyncEvent = sortedEvents.first
+                syncEventListFocused = true
+            }
+        }
         .sheet(isPresented: $showingCertificateInspector) {
             CertificateInspectionView()
         }
@@ -106,9 +127,29 @@ struct ContentView: View {
                 
                 sortControls
                 
-                List(sortedSyncEvents(analysis.syncEvents), selection: $selectedSyncEvent) { syncEvent in
-                    SyncEventRow(syncEvent: syncEvent)
-                        .tag(syncEvent)
+                if #available(macOS 14.0, *) {
+                    List(sortedSyncEvents(analysis.syncEvents), selection: $selectedSyncEvent) { syncEvent in
+                        SyncEventRow(syncEvent: syncEvent)
+                            .tag(syncEvent)
+                    }
+                    .focused($syncEventListFocused)
+                    .onKeyPress(.rightArrow) {
+                        if selectedSyncEvent != nil {
+                            syncEventDetailFocused = true
+                            return .handled
+                        }
+                        return .ignored
+                    }
+                    .onAppear {
+                        // Auto-select the first sync event when the list appears
+                        if selectedSyncEvent == nil {
+                            let sortedEvents = sortedSyncEvents(analysis.syncEvents)
+                            selectedSyncEvent = sortedEvents.first
+                            syncEventListFocused = true
+                        }
+                    }
+                } else {
+                    // Fallback on earlier versions
                 }
 
             } else if let error = parser.error {
@@ -211,6 +252,7 @@ struct ContentView: View {
                                     Text(" \(environment)")
                                         .font(.caption)
                                         .fontWeight(.medium)
+                                        .textSelection(.enabled)
                                     Spacer()
                                 }
                             }
@@ -223,6 +265,7 @@ struct ContentView: View {
                                     Text(" \(region)")
                                         .font(.caption)
                                         .fontWeight(.medium)
+                                        .textSelection(.enabled)
                                     Spacer()
                                 }
                             }
@@ -235,6 +278,7 @@ struct ContentView: View {
                                     Text(" \(asu)")
                                         .font(.caption)
                                         .fontWeight(.medium)
+                                        .textSelection(.enabled)
                                     Spacer()
                                 }
                             }
@@ -247,6 +291,7 @@ struct ContentView: View {
                                     Text(" \(macOSVers)")
                                         .font(.caption)
                                         .fontWeight(.medium)
+                                        .textSelection(.enabled)
                                     Spacer()
                                 }
                             }
@@ -259,6 +304,7 @@ struct ContentView: View {
                                     Text(" \(agentVers)")
                                         .font(.caption)
                                         .fontWeight(.medium)
+                                        .textSelection(.enabled)
                                     Spacer()
                                 }
                             }
@@ -271,6 +317,7 @@ struct ContentView: View {
                                     Text(" \(platform)")
                                         .font(.caption)
                                         .fontWeight(.medium)
+                                        .textSelection(.enabled)
                                     Spacer()
                                 }
                             }
@@ -433,7 +480,21 @@ struct ContentView: View {
     private var syncEventDetail: some View {
         Group {
             if let syncEvent = selectedSyncEvent {
-                SyncEventDetailView(syncEvent: syncEvent, selectedPolicy: $selectedPolicy)
+                if #available(macOS 14.0, *) {
+                    SyncEventDetailView(syncEvent: syncEvent, selectedPolicy: $selectedPolicy)
+                        .focused($syncEventDetailFocused)
+                        .onKeyPress(.leftArrow) {
+                            syncEventListFocused = true
+                            return .handled
+                        }
+                        .onChange(of: syncEventDetailFocused) { focused in
+                            if focused {
+                                NotificationCenter.default.post(name: .focusPolicyList, object: nil)
+                            }
+                        }
+                } else {
+                    // Fallback on earlier versions
+                }
             } else {
                 VStack {
                     Image(systemName: "sidebar.left")
