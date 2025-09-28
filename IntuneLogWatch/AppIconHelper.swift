@@ -107,11 +107,11 @@ struct AppIconView: View {
         .onAppear {
             loadIcon()
         }
-        .onChange(of: bundleId) { newBundleId in
+        .onChange(of: bundleId) { oldValue, newValue in
             appIcon = nil // Clear the current icon immediately
             loadIcon()
         }
-        .onChange(of: policyType) { _ in
+        .onChange(of: policyType) { oldValue, newValue in
             appIcon = nil // Clear when policy type changes
             loadIcon()
         }
