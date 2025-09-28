@@ -359,7 +359,7 @@ struct PolicyDetailView: View {
             .onAppear {
                 proxy.scrollTo("timelineTop", anchor: .top)
             }
-            .onChange(of: policy.policyId) { _ in
+            .onChange(of: policy.policyId) { oldValue, newValue in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     proxy.scrollTo("timelineTop", anchor: .top)
                 }
@@ -398,7 +398,7 @@ struct PolicyDetailView: View {
             .onAppear {
                 proxy.scrollTo("rawLogTop", anchor: .top)
             }
-            .onChange(of: policy.policyId) { _ in
+            .onChange(of: policy.policyId) { oldValue, newValue in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     proxy.scrollTo("rawLogTop", anchor: .top)
                 }
