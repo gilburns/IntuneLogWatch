@@ -100,9 +100,9 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: parser.isLoading) { isLoading in
+        .onChange(of: parser.isLoading) { oldValue, newValue in
             // Auto-select first sync event when parsing completes
-            if !isLoading, let analysis = parser.analysis, selectedSyncEvent == nil {
+            if !newValue, let analysis = parser.analysis, selectedSyncEvent == nil {
                 let sortedEvents = sortedSyncEvents(analysis.syncEvents)
                 selectedSyncEvent = sortedEvents.first
                 syncEventListFocused = true
@@ -487,8 +487,8 @@ struct ContentView: View {
                             syncEventListFocused = true
                             return .handled
                         }
-                        .onChange(of: syncEventDetailFocused) { focused in
-                            if focused {
+                        .onChange(of: syncEventDetailFocused) { oldValue, newValue in
+                            if newValue {
                                 NotificationCenter.default.post(name: .focusPolicyList, object: nil)
                             }
                         }
