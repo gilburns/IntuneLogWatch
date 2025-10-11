@@ -39,10 +39,9 @@ class LogParser: ObservableObject {
                 }
                 
                 let content = try String(contentsOf: url, encoding: .utf8)
-                let sourceTitle = url.lastPathComponent
                 
                 // Validate that this appears to be an Intune log file
-                let validationResult = validateIntuneLogFile(content: content, filename: sourceTitle)
+                let validationResult = validateIntuneLogFile(content: content)
                 if !validationResult.isValid {
                     await MainActor.run {
                         self.error = validationResult.errorMessage
@@ -51,9 +50,16 @@ class LogParser: ObservableObject {
                     return
                 }
                 
-                let analysis = await parseLogContent(content, sourceTitle: sourceTitle)
+                var analysis = await parseLogContent(content)
                 
-                await MainActor.run {
+                let sourceTitle = url.lastPathComponent
+                if analysis.totalEntries > 0 {
+                    analysis.sourceTitle = ("\(sourceTitle) (\(analysis.totalEntries) entries)")
+                } else {
+                    analysis.sourceTitle = sourceTitle
+                }
+                
+                await MainActor.run { [analysis] in
                     self.analysis = analysis
                     self.isLoading = false
                 }
@@ -124,10 +130,13 @@ class LogParser: ObservableObject {
                     return
                 }
                 
+
                 // Read and combine all log files
                 let combinedContent = try await readAndCombineLogFiles(logFiles)
+                var analysis = await parseLogContent(combinedContent)
+                
                 let sourceTitle = "Local Intune Logs (\(logFiles.count) files)"
-                var analysis = await parseLogContent(combinedContent, sourceTitle: sourceTitle)
+                analysis.sourceTitle = sourceTitle
                 
                 // Add warning if agent is missing
                 if !intuneStatus.hasAgent {
@@ -253,7 +262,7 @@ class LogParser: ObservableObject {
         return nil
     }
     
-    private func parseLogContent(_ content: String, sourceTitle: String = "Unknown") async -> LogAnalysis {
+    private func parseLogContent(_ content: String) async -> LogAnalysis {
         let lines = content.components(separatedBy: .newlines)
         var entries: [LogEntry] = []
         var parseErrors: [String] = []
@@ -315,7 +324,7 @@ class LogParser: ObservableObject {
             syncEvents: syncEvents,
             totalEntries: entries.count,
             parseErrors: parseErrors,
-            sourceTitle: sourceTitle,
+            sourceTitle: "",
             environment: enrollmentInfo.environment,
             region: enrollmentInfo.region,
             asu: enrollmentInfo.asu,
@@ -485,7 +494,12 @@ class LogParser: ObservableObject {
         case .app:
             return entries.last { $0.message.contains("Handling app policy finished") }?.timestamp
         case .script:
-            return entries.last { $0.message.contains("policy ran") }?.timestamp
+            // Look for "policy ran" or last entry is not found
+            if let entry = entries.last(where: { $0.message.contains("policy ran") }) {
+                return entry.timestamp
+            } else {
+                return entries.last?.timestamp
+            }
         case .unknown:
             return entries.last?.timestamp
         }
@@ -655,7 +669,7 @@ class LogParser: ObservableObject {
         return .running
     }
     
-    private func validateIntuneLogFile(content: String, filename: String) -> (isValid: Bool, errorMessage: String) {
+    private func validateIntuneLogFile(content: String) -> (isValid: Bool, errorMessage: String) {
         let lines = content.components(separatedBy: .newlines).prefix(50) // Check first 50 lines
         
         var hasTimestampFormat = false
