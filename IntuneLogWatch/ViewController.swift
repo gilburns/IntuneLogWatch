@@ -29,6 +29,7 @@ struct ContentView: View {
             syncEventDetail
         } detail: {
             policyDetail
+                .frame(minWidth: 400)
         }
         .navigationTitle(parser.analysis?.sourceTitle ?? "Intune Log Watch")
         .fileImporter(
@@ -371,7 +372,7 @@ struct ContentView: View {
                                 Text(String(format: "%d", networkSummary.totalNetworkChecks))
                                     .font(.caption)
                                     .fontWeight(.medium)
-                                Text("100%")
+                                Text("")
                                     .font(.caption)
                                     .fontWeight(.medium)
                             }
@@ -438,15 +439,49 @@ struct ContentView: View {
                 Spacer()
 
                 HStack {
-                    Label("\(analysis.totalSyncEvents)", systemImage: "clock")
+                    Spacer()
+                    Label("Parsed \(analysis.totalEntries) log entries", systemImage: "magnifyingglass")
                         .font(.caption)
-                        .foregroundColor(.blue)
-                    Label("\(analysis.completedSyncs)", systemImage: "checkmark.circle.fill")
-                        .font(.caption)
-                        .foregroundColor(.green)
-                    Label("\(analysis.failedSyncs)", systemImage: "xmark.circle.fill")
-                        .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Spacer()
+                }
+                .padding(.leading, 15)
+                .padding(.trailing, 10)
+
+                Spacer()
+                Spacer()
+
+                
+                HStack {
+                    VStack(alignment: .center, spacing: 2) {
+                        Label("\(analysis.totalSyncEvents)", systemImage: "clock")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        Text("sync events")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    Spacer()
+
+                    VStack(alignment: .center, spacing: 2) {
+                        Label("\(analysis.completedSyncs)", systemImage: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                        Text("completed")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+                    Spacer()
+
+                    VStack(alignment: .center, spacing: 2) {
+                        Label("\(analysis.failedSyncs)", systemImage: "xmark.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                        Text("failed events")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
                     Spacer()
                 }
                 .padding(.leading, 20)
@@ -603,7 +638,8 @@ struct SyncEventRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                statusIcon
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .foregroundColor(.blue)
                 Text(syncEvent.isComplete ? "Sync Event" : "Sync Event (In Progress)")
                     .font(.headline)
                 Spacer()

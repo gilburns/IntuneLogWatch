@@ -63,19 +63,31 @@ struct PolicyDetailView: View {
                     size: 42
                 )
                 .id("\(policy.policyId)-\(policy.bundleId ?? "nil")")
+                
                 VStack(alignment: .leading, spacing: 2) {
+                                        
                     Text(policy.displayName)
-                        .font(.title2)
+                        .font(policy.displayName.count > 27 ? .title3 : .title2)
                         .fontWeight(.semibold)
                     
                     if let bundleId = policy.bundleId, bundleId != policy.displayName {
                         Text(bundleId)
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    } else if let scriptType = policy.scriptType {
+                        Text(scriptType == "Custom Attribute" ? "Custom Attribute" : "Script")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
+
                 }
                 Spacer()
-                statusBadge
+                VStack(alignment: .leading, spacing: 2) {
+                    statusBadge
+                    Text("")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             
             HStack(spacing: 16) {
@@ -105,7 +117,11 @@ struct PolicyDetailView: View {
                         color: .orange
                     )
                 }
-                
+                Spacer()
+            }
+
+            HStack(spacing: 16) {
+
                 copyablePolicyId
                 
                 Spacer()
@@ -153,6 +169,10 @@ struct PolicyDetailView: View {
 
                     Spacer()
                 }
+            } else {
+                Label("No Issues Detected", systemImage: "app.badge.checkmark")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
         .padding()
@@ -198,7 +218,7 @@ struct PolicyDetailView: View {
         Text(policy.status.displayName.uppercased())
             .font(.caption)
             .fontWeight(.semibold)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background(statusColor.opacity(0.2))
             .foregroundColor(statusColor)
@@ -221,7 +241,7 @@ struct PolicyDetailView: View {
     }
     
     private var copyablePolicyId: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
                 Image(systemName: "number")
                     .foregroundColor(.secondary)
@@ -231,7 +251,18 @@ struct PolicyDetailView: View {
                     .foregroundColor(.secondary)
                 
                 Spacer()
+                Text("Copy ID")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+            }
+            HStack(spacing: 4) {
+                Text(policy.policyId)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .textSelection(.enabled)
                 
+                Spacer()
                 Button(action: {
                     // Detect if option key is pressed
                     if NSEvent.modifierFlags.contains(.option) {
@@ -245,15 +276,12 @@ struct PolicyDetailView: View {
                     Image(systemName: policyIdCopied ? "checkmark" : "doc.on.clipboard")
                         .font(.caption2)
                         .foregroundColor(policyIdCopied ? .green : .secondary)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 40, height: 24)
                 }
                 .buttonStyle(BorderlessButtonStyle())
                 .help(policyIdCopied ? "Copied \(copiedText)!" : "Click to copy Policy ID\r⌥ + Click for Graph API URL,\r ⌃ + Click for Intune Portal URL")
+
             }
-            Text(policy.policyId)
-                .font(.caption)
-                .fontWeight(.medium)
-                .textSelection(.enabled)
         }
     }
     

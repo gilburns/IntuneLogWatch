@@ -116,10 +116,12 @@ struct SyncEventDetailView: View {
         
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                statusIcon
-                Text("Sync Event")
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .foregroundColor(.blue)
+                Text("Sync Event (FullSyncWorkflow)")
                     .font(.title2)
                     .fontWeight(.semibold)
+                statusIcon
                 Spacer()
                 Text(formatDateTime(syncEvent.startTime))
                     .font(.caption)

@@ -424,7 +424,7 @@ struct LogAnalysis {
     let syncEvents: [SyncEvent]
     let totalEntries: Int
     let parseErrors: [String]
-    let sourceTitle: String // Title for tab display
+    var sourceTitle: String // Title for tab display
     
     // Enrollment information extracted from VerifyEnrollmentStatus logs
     let environment: String?
