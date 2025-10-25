@@ -145,11 +145,11 @@ struct PolicyDetailView: View {
                         let errorCodes = policy.appErrorCodes
                         HStack(spacing: 8) {
                             if errorCodes.isEmpty {
-                                Label("App Installation Failed", systemImage: "app.badge.checkmark")
+                                Label("App Installation Error", systemImage: "app.badge.checkmark")
                                     .font(.caption)
                                     .foregroundColor(.red)
                             } else {
-                                Label("App Installation Failed:", systemImage: "app.badge.checkmark")
+                                Label("App Installation Error:", systemImage: "app.badge.checkmark")
                                     .font(.caption)
                                     .foregroundColor(.red)
 
