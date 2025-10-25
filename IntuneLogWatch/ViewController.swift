@@ -638,7 +638,7 @@ struct SyncEventRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Image(systemName: "arrow.triangle.2.circlepath")
+                Image(systemName: "gearshape.arrow.triangle.2.circlepath")
                     .foregroundColor(.blue)
                 Text(syncEvent.isComplete ? "Sync Event" : "Sync Event (In Progress)")
                     .font(.headline)
@@ -646,6 +646,7 @@ struct SyncEventRow: View {
                 Text(formatTime(syncEvent.startTime))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .tooltip(formatTimeFull(syncEvent.startTime))
             }
             
             HStack {
@@ -705,11 +706,17 @@ struct SyncEventRow: View {
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
-    
+
+    private func formatTimeFull(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        formatter.timeStyle = .full
+        return formatter.string(from: date)
+    }
+
     private func formatDuration(_ duration: TimeInterval) -> String {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
 }
-
