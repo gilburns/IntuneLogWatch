@@ -65,11 +65,35 @@ struct SyncEventDetailView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 200)
                     .focused($searchFieldFocused)
+                    .overlay(alignment: .trailing) {
+                        if !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.trailing, 6)
+                        }
+                    }
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
             .fixedSize(horizontal: false, vertical: true)
-            
+                        
+            HStack {
+                let policyCount = policies.count
+                let filteredPolicyCount = filteredPolicies.count
+                Spacer()
+                Text("Viewing \(filteredPolicyCount) of \(policyCount) Policies")
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 2)
+            .fixedSize(horizontal: false, vertical: true)
+            .font(.caption)
+            .foregroundColor(.secondary)
+
             if #available(macOS 14.0, *) {
                 List(filteredPolicies, selection: $selectedPolicy) { policy in
                     PolicyRow(policy: policy) {
@@ -116,7 +140,7 @@ struct SyncEventDetailView: View {
         
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: "arrow.triangle.2.circlepath")
+                Image(systemName: "gearshape.arrow.triangle.2.circlepath")
                     .foregroundColor(.blue)
                 Text("Sync Event (FullSyncWorkflow)")
                     .font(.title2)
@@ -126,6 +150,7 @@ struct SyncEventDetailView: View {
                 Text(formatDateTime(syncEvent.startTime))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .tooltip(formatDateTimeFull(syncEvent.startTime))
             }
             
             HStack(spacing: 16) {
@@ -171,7 +196,9 @@ struct SyncEventDetailView: View {
                 }
                 
                 Spacer()
+                
             }
+            
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
@@ -225,7 +252,14 @@ struct SyncEventDetailView: View {
         formatter.timeStyle = .medium
         return formatter.string(from: date)
     }
-    
+
+    private func formatDateTimeFull(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        formatter.timeStyle = .full
+        return formatter.string(from: date)
+    }
+
     private func formatDuration(_ duration: TimeInterval) -> String {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
@@ -258,6 +292,7 @@ struct PolicyRow: View {
                 Text(policy.displayName)
                     .font(.headline)
                     .lineLimit(1)
+
                 Spacer()
                 
                 HStack(spacing: 4) {
@@ -338,6 +373,11 @@ struct PolicyRow: View {
             
             if let bundleId = policy.bundleId {
                 Text(bundleId)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            } else if let policyId = policy.policyId as NSString? {
+                Text("\(policyId)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
