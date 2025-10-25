@@ -84,6 +84,18 @@ class IntuneErrorCodeLookup {
                 recommendation: "Remove the unmanaged app from the device and then re-deploy the managed app."
             ),
             IntuneErrorCode(
+                hex: "0x87D30146",
+                title: "App Found on Device but assignment is 'Available'",
+                description: "Available App is present on the Device but the version needs to be updated.",
+                recommendation: "Set the install assignment to 'Required' if you want to force an update."
+            ),
+            IntuneErrorCode(
+                hex: "0x87D30143",
+                title: "Unsupported application",
+                description: "The file provided is not supported. Check the requirements for deploying the selected app type.",
+                recommendation: "Check to see if the app is compatible with the macOS version or if it possibly requires that Rosetta be installed prior to deployment."
+            ),
+            IntuneErrorCode(
                 hex: "0x87D3014D",
                 title: "App Not Found on Device",
                 description: "Available App is no longer present on the Device. The detection did not find the app with the given BundleID value.",
