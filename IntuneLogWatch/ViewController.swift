@@ -15,11 +15,51 @@ struct ContentView: View {
     @State private var showingFilePicker = false
     @Binding var showingCertificateInspector: Bool
     @State private var sortNewestFirst = false
+    @State private var eventFilter: EventFilter = .all
     @FocusState private var syncEventListFocused: Bool
     @FocusState private var syncEventDetailFocused: Bool
-    
+
+    enum EventFilter: String, CaseIterable {
+        case all = "all"
+        case syncOnly = "sync"
+        case recurringOnly = "recurring"
+
+        var displayName: String {
+            switch self {
+            case .all: return "All Events"
+            case .syncOnly: return "Sync Events"
+            case .recurringOnly: return "Recurring Events"
+            }
+        }
+
+        func displayNameWithCount(syncCount: Int, recurringCount: Int) -> String {
+            switch self {
+            case .all:
+                return "All\nEvents"
+            case .syncOnly:
+                return "Sync\nEvents (\(syncCount))"
+            case .recurringOnly:
+                return "Recurring\nEvents (\(recurringCount))"
+            }
+        }
+
+        var keyboardShortcut: KeyEquivalent {
+            switch self {
+            case .all: return "1"
+            case .syncOnly: return "2"
+            case .recurringOnly: return "3"
+            }
+        }
+    }
+
     init(showingCertificateInspector: Binding<Bool>) {
         self._showingCertificateInspector = showingCertificateInspector
+
+        // Load saved filter preference
+        if let savedFilter = UserDefaults.standard.string(forKey: "EventFilterPreference"),
+           let filter = EventFilter(rawValue: savedFilter) {
+            _eventFilter = State(initialValue: filter)
+        }
     }
     
     var body: some View {
@@ -125,7 +165,8 @@ struct ContentView: View {
                 enrollmentHeader(analysis)
                 networkHeader(analysis)
                 analysisHeader(analysis)
-                
+
+                filterControls(analysis: analysis)
                 sortControls
                 
                 if #available(macOS 14.0, *) {
@@ -458,7 +499,7 @@ struct ContentView: View {
                         Label("\(analysis.totalSyncEvents)", systemImage: "clock")
                             .font(.caption)
                             .foregroundColor(.blue)
-                        Text("sync events")
+                        Text("events")
                             .font(.caption)
                             .foregroundColor(.blue)
                     }
@@ -564,12 +605,70 @@ struct ContentView: View {
         }
     }
     
+    private func filterControls(analysis: LogAnalysis) -> some View {
+        let syncCount = analysis.syncEvents.filter { $0.eventType == .fullSync }.count
+        let recurringCount = analysis.syncEvents.filter { $0.eventType == .recurringPolicy }.count
+
+        return VStack(spacing: 0) {
+
+            HStack {
+                Text("Event Filter:")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 2)
+
+            HStack(spacing: 4) {
+                ForEach(EventFilter.allCases, id: \.self) { filter in
+                    Button(action: {
+                        eventFilter = filter
+                    }) {
+                        Text(filter.displayNameWithCount(syncCount: syncCount, recurringCount: recurringCount))
+                            .multilineTextAlignment(.center)
+                            .font(.caption)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 4)
+                            .frame(maxWidth: .infinity)
+                            .background(eventFilter == filter ? Color.accentColor : Color.gray.opacity(0.2))
+                            .foregroundColor(eventFilter == filter ? .white : .primary)
+                            .cornerRadius(4)
+                    }
+                    .buttonStyle(.plain)
+                    .keyboardShortcut(filter.keyboardShortcut)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 2)
+            .onChange(of: eventFilter) { oldValue, newValue in
+                // Save filter preference to UserDefaults
+                UserDefaults.standard.set(newValue.rawValue, forKey: "EventFilterPreference")
+
+                // Clear selection first
+                selectedSyncEvent = nil
+                selectedPolicy = nil
+
+                // Delay the selection to allow the List to update its content first
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    let filteredEvents = sortedSyncEvents(analysis.syncEvents)
+                    if !filteredEvents.isEmpty {
+                        selectedSyncEvent = filteredEvents.first
+                    }
+                }
+            }
+
+        }
+        .background(Color(NSColor.controlBackgroundColor))
+    }
+
     private var sortControls: some View {
         HStack {
-            Text("Sort:")
+            Text("Event Sort:")
                 .font(.caption)
                 .foregroundColor(.secondary)
-            
+
             Button(action: { sortNewestFirst = false }) {
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.up")
@@ -581,7 +680,7 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .foregroundColor(sortNewestFirst ? .secondary : .blue)
             .fontWeight(sortNewestFirst ? .regular : .medium)
-            
+
             Button(action: { sortNewestFirst = true }) {
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.down")
@@ -593,19 +692,31 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .foregroundColor(sortNewestFirst ? .blue : .secondary)
             .fontWeight(sortNewestFirst ? .medium : .regular)
-            
+
             Spacer()
         }
         .padding(.horizontal)
-        .padding(.vertical, 8)
+        .padding(.vertical, 6)
         .background(Color(NSColor.controlBackgroundColor))
     }
     
     private func sortedSyncEvents(_ syncEvents: [SyncEvent]) -> [SyncEvent] {
+        // First, apply the filter
+        var filteredEvents = syncEvents
+        switch eventFilter {
+        case .all:
+            break // No filtering
+        case .syncOnly:
+            filteredEvents = syncEvents.filter { $0.eventType == .fullSync }
+        case .recurringOnly:
+            filteredEvents = syncEvents.filter { $0.eventType == .recurringPolicy }
+        }
+
+        // Then, apply the sort
         if sortNewestFirst {
-            return syncEvents.sorted { $0.startTime > $1.startTime }
+            return filteredEvents.sorted { $0.startTime > $1.startTime }
         } else {
-            return syncEvents.sorted { $0.startTime < $1.startTime }
+            return filteredEvents.sorted { $0.startTime < $1.startTime }
         }
     }
     
@@ -634,13 +745,22 @@ struct ContentView: View {
 
 struct SyncEventRow: View {
     let syncEvent: SyncEvent
-    
+
+    private var eventLabel: String {
+        switch syncEvent.eventType {
+        case .fullSync:
+            return syncEvent.isComplete ? "Sync Event" : "Sync Event (In Progress)"
+        case .recurringPolicy:
+            return syncEvent.isComplete ? "Recurring Event" : "Recurring Event (In Progress)"
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Image(systemName: "gearshape.arrow.triangle.2.circlepath")
+                Image(systemName: syncEvent.eventType == .fullSync ? "gearshape.arrow.triangle.2.circlepath" : "clock.arrow.circlepath")
                     .foregroundColor(.blue)
-                Text(syncEvent.isComplete ? "Sync Event" : "Sync Event (In Progress)")
+                Text(eventLabel)
                     .font(.headline)
                 Spacer()
                 Text(formatTime(syncEvent.startTime))

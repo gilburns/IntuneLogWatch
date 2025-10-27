@@ -137,12 +137,12 @@ struct SyncEventDetailView: View {
     }
     
     private var syncEventHeader: some View {
-        
+
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: "gearshape.arrow.triangle.2.circlepath")
+                Image(systemName: syncEvent.eventType == .fullSync ? "gearshape.arrow.triangle.2.circlepath" : "clock.arrow.circlepath")
                     .foregroundColor(.blue)
-                Text("Sync Event (FullSyncWorkflow)")
+                Text(syncEvent.eventType.displayName)
                     .font(.title2)
                     .fontWeight(.semibold)
                 statusIcon
@@ -194,9 +194,18 @@ struct SyncEventDetailView: View {
                         color: .secondary
                     )
                 }
-                
+
+                if let frequency = syncEvent.executionFrequencyFormatted {
+                    syncMetric(
+                        value: frequency,
+                        label: "Frequency",
+                        icon: "arrow.clockwise",
+                        color: .purple
+                    )
+                }
+
                 Spacer()
-                
+
             }
             
         }

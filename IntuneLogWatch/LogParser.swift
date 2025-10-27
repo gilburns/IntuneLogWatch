@@ -384,57 +384,132 @@ class LogParser: ObservableObject {
         var syncEvents: [SyncEvent] = []
         var currentSyncEntries: [LogEntry] = []
         var syncStartTime: Date?
-        
+        var currentEventType: SyncEventType?
+
+        // Track recurring policy events separately
+        var recurringPolicyGroups: [String: [LogEntry]] = [:] // PolicyID -> entries
+        var recurringPolicyStartTimes: [String: Date] = [:] // PolicyID -> start time
+
         for entry in entries {
+            // Handle FullSyncWorkflow events
             if entry.component == "FullSyncWorkflow" && entry.message.contains("Starting sidecar gateway service checkin") {
-                if !currentSyncEntries.isEmpty, let startTime = syncStartTime {
+                if !currentSyncEntries.isEmpty, let startTime = syncStartTime, let eventType = currentEventType {
                     let syncEvent = await buildSyncEvent(
+                        eventType: eventType,
                         startTime: startTime,
                         endTime: nil,
                         entries: currentSyncEntries
                     )
                     syncEvents.append(syncEvent)
                 }
-                
+
                 currentSyncEntries = [entry]
                 syncStartTime = entry.timestamp
-                
+                currentEventType = .fullSync
+
             } else if entry.component == "FullSyncWorkflow" && entry.message.contains("Finished sidecar gateway service checkin") {
                 currentSyncEntries.append(entry)
-                
-                if let startTime = syncStartTime {
+
+                if let startTime = syncStartTime, let eventType = currentEventType {
                     let syncEvent = await buildSyncEvent(
+                        eventType: eventType,
                         startTime: startTime,
                         endTime: entry.timestamp,
                         entries: currentSyncEntries
                     )
                     syncEvents.append(syncEvent)
                 }
-                
+
                 currentSyncEntries = []
                 syncStartTime = nil
-                
-            } else if syncStartTime != nil {
+                currentEventType = nil
+
+            } else if syncStartTime != nil && currentEventType == .fullSync {
                 currentSyncEntries.append(entry)
             }
+
+            // Handle recurring script policy events
+            if entry.component == "ScriptPolicyRunner" && entry.message.contains("Running recurring script policy") {
+                guard let policyId = entry.policyId else { continue }
+
+                // Check if there's an existing recurring policy event for this policyId that needs to be finalized
+                if let existingEntries = recurringPolicyGroups[policyId],
+                   !existingEntries.isEmpty,
+                   let existingStartTime = recurringPolicyStartTimes[policyId] {
+                    // Finalize the previous occurrence of this policy
+                    let recurringEvent = await buildSyncEvent(
+                        eventType: .recurringPolicy,
+                        startTime: existingStartTime,
+                        endTime: existingEntries.last?.timestamp,
+                        entries: existingEntries
+                    )
+                    syncEvents.append(recurringEvent)
+                }
+
+                // Start a new recurring policy event
+                recurringPolicyGroups[policyId] = [entry]
+                recurringPolicyStartTimes[policyId] = entry.timestamp
+
+            } else if entry.component == "ScriptPolicyRunner" && entry.message.contains("Recurring script policy ran") {
+                guard let policyId = entry.policyId else { continue }
+
+                if var existingEntries = recurringPolicyGroups[policyId] {
+                    existingEntries.append(entry)
+
+                    if let startTime = recurringPolicyStartTimes[policyId] {
+                        let recurringEvent = await buildSyncEvent(
+                            eventType: .recurringPolicy,
+                            startTime: startTime,
+                            endTime: entry.timestamp,
+                            entries: existingEntries
+                        )
+                        syncEvents.append(recurringEvent)
+                    }
+
+                    // Clear this policy from tracking
+                    recurringPolicyGroups.removeValue(forKey: policyId)
+                    recurringPolicyStartTimes.removeValue(forKey: policyId)
+                }
+
+            } else if let policyId = entry.policyId, recurringPolicyGroups[policyId] != nil {
+                // Add entry to the recurring policy event
+                recurringPolicyGroups[policyId]?.append(entry)
+            }
         }
-        
-        if !currentSyncEntries.isEmpty, let startTime = syncStartTime {
+
+        // Finalize any remaining full sync event
+        if !currentSyncEntries.isEmpty, let startTime = syncStartTime, let eventType = currentEventType {
             let syncEvent = await buildSyncEvent(
+                eventType: eventType,
                 startTime: startTime,
                 endTime: nil, // nil indicates sync is still in progress
                 entries: currentSyncEntries
             )
             syncEvents.append(syncEvent)
         }
-        
-        return syncEvents
+
+        // Finalize any remaining recurring policy events
+        for (policyId, entries) in recurringPolicyGroups {
+            if !entries.isEmpty, let startTime = recurringPolicyStartTimes[policyId] {
+                let recurringEvent = await buildSyncEvent(
+                    eventType: .recurringPolicy,
+                    startTime: startTime,
+                    endTime: entries.last?.timestamp,
+                    entries: entries
+                )
+                syncEvents.append(recurringEvent)
+            }
+        }
+
+        // Sort all events by start time
+        return syncEvents.sorted { $0.startTime < $1.startTime }
     }
     
-    private func buildSyncEvent(startTime: Date, endTime: Date?, entries: [LogEntry]) async -> SyncEvent {
+    private func buildSyncEvent(eventType: SyncEventType, startTime: Date, endTime: Date?, entries: [LogEntry]) async -> SyncEvent {
         let policies = await extractPolicies(from: entries)
-        
+
         return SyncEvent(
+            eventType: eventType,
             startTime: startTime,
             endTime: endTime,
             policies: policies,
