@@ -93,6 +93,10 @@ struct LogEntry: Identifiable, Hashable {
         extractExecutionContext(from: message)
     }
 
+    var executionFrequency: Int? {
+        extractExecutionFrequency(from: message)
+    }
+
     var hasAppInstallationError: Bool {
         extractAppInstallationError(from: message)
     }
@@ -212,6 +216,24 @@ struct LogEntry: Identifiable, Hashable {
                let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
                 let range = Range(match.range(at: 1), in: message)!
                 return String(message[range])
+            }
+        }
+        return nil
+    }
+
+    private func extractExecutionFrequency(from message: String) -> Int? {
+        let patterns = [
+            "ExecutionFrequency: (\\d+)",
+            "ExecutionFrequency:(\\d+)"
+        ]
+
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
+                let range = Range(match.range(at: 1), in: message)!
+                if let frequency = Int(String(message[range])) {
+                    return frequency
+                }
             }
         }
         return nil
@@ -347,38 +369,51 @@ struct PolicyExecution: Identifiable, Hashable {
     }
 }
 
+enum SyncEventType: String {
+    case fullSync = "FullSyncWorkflow"
+    case recurringPolicy = "RecurringPolicy"
+
+    var displayName: String {
+        switch self {
+        case .fullSync: return "Sync Event (FullSyncWorkflow)"
+        case .recurringPolicy: return "Recurring Event"
+        }
+    }
+}
+
 struct SyncEvent: Identifiable, Hashable {
     let id = UUID()
+    let eventType: SyncEventType
     let startTime: Date
     let endTime: Date?
     let policies: [PolicyExecution]
     let allEntries: [LogEntry]
-    
+
     var duration: TimeInterval? {
         guard let end = endTime else { return nil }
         return end.timeIntervalSince(startTime)
     }
-    
+
     var totalPolicies: Int {
         policies.count
     }
-    
+
     var completedPolicies: Int {
         policies.filter { $0.status == .completed }.count
     }
-    
+
     var failedPolicies: Int {
         policies.filter { $0.status == .failed }.count
     }
-    
+
     var warningPolicies: Int {
         policies.filter { $0.hasWarnings }.count
     }
-    
+
     var isComplete: Bool {
         endTime != nil
     }
-    
+
     var overallStatus: PolicyStatus {
         if failedPolicies > 0 {
             return .failed
@@ -388,6 +423,37 @@ struct SyncEvent: Identifiable, Hashable {
             return .completed
         } else {
             return .running
+        }
+    }
+
+    var executionFrequency: Int? {
+        // For recurring policy events, extract the execution frequency from the first entry
+        guard eventType == .recurringPolicy else { return nil }
+        return allEntries.compactMap { $0.executionFrequency }.first
+    }
+
+    var executionFrequencyFormatted: String? {
+        guard let frequency = executionFrequency else { return nil }
+
+        // Convert seconds to human-readable format
+        let hours = frequency / 3600
+        let minutes = (frequency % 3600) / 60
+        let seconds = frequency % 60
+
+        if hours > 0 {
+            if minutes > 0 {
+                return "\(hours)h \(minutes)m"
+            } else {
+                return "\(hours)h"
+            }
+        } else if minutes > 0 {
+            if seconds > 0 {
+                return "\(minutes)m \(seconds)s"
+            } else {
+                return "\(minutes)m"
+            }
+        } else {
+            return "\(seconds)s"
         }
     }
     
