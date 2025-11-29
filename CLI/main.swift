@@ -5,7 +5,7 @@ struct IntuneLogWatchCLI: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "intunelogwatch-cli",
         abstract: "Inspect MDM certificates from the command line",
-        version: "1.5.0"
+        version: "2.0.0"
     )
     
     @Flag(name: .shortAndLong, help: "Output in JSON format")
