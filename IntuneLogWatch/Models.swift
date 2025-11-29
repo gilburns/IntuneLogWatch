@@ -26,12 +26,14 @@ enum LogLevel: String, CaseIterable {
 enum PolicyType: String, CaseIterable {
     case app = "AppPolicyHandler"
     case script = "ScriptPolicyRunner"
+    case health = "HealthCheckWorkflow"
     case unknown = "Unknown"
     
     var displayName: String {
         switch self {
         case .app: return "App Policy"
         case .script: return "Script Policy"
+        case .health: return "Health Check"
         case .unknown: return "Other"
         }
     }
@@ -97,6 +99,18 @@ struct LogEntry: Identifiable, Hashable {
         extractExecutionFrequency(from: message)
     }
 
+    var healthDomain: String? {
+        extractHealthDomain(from: message)
+    }
+
+    var healthCheckContext: String? {
+        extractHealthCheckContext(from: message)
+    }
+
+    var healthCheckStatus: String? {
+        extractHealthCheckStatus(from: message)
+    }
+
     var hasAppInstallationError: Bool {
         extractAppInstallationError(from: message)
     }
@@ -114,12 +128,23 @@ struct LogEntry: Identifiable, Hashable {
     }
     
     private func extractPolicyId(from message: String) -> String? {
+        // Health check entries don't have a real PolicyID, so use a fake one
+        if component == "HealthCheckWorkflow" {
+            return "00000000-0000-0000-0000-000000000000"
+        }
+
+        // ExecutionClock entries with "Context: health check" also use the fake GUID
+        // Must check for "Context: health check" specifically, not just "health check"
+        if component == "ExecutionClock" && message.range(of: "Context:\\s*health check", options: .regularExpression) != nil {
+            return "00000000-0000-0000-0000-000000000000"
+        }
+
         let patterns = [
             "PolicyID: ([a-f0-9-]{36})",
             "PolicyID:([a-f0-9-]{36})",
             "Policy measurement. ID: ([a-f0-9-]{36})"
         ]
-        
+
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
                let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
@@ -239,6 +264,68 @@ struct LogEntry: Identifiable, Hashable {
         return nil
     }
 
+    private func extractHealthDomain(from message: String) -> String? {
+        // Extract domain from health check messages ONLY
+        // Example: "Starting health check Domain: pulse"
+        guard component == "HealthCheckWorkflow" else { return nil }
+
+        let patterns = [
+            "Domain: ([^,\\s]+)",
+            "Domain:([^,\\s]+)"
+        ]
+
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
+                let range = Range(match.range(at: 1), in: message)!
+                return String(message[range]).trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return nil
+    }
+
+    private func extractHealthCheckContext(from message: String) -> String? {
+        // Extract context from ExecutionClock health check messages
+        // Example: "Context: health check - pulse"
+        guard component == "ExecutionClock" else { return nil }
+
+        let patterns = [
+            "Context: health check - ([^,]+)",
+            "Context: health check -([^,]+)",
+            "Context:health check - ([^,]+)",
+            "Context:health check -([^,]+)"
+        ]
+
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
+                let range = Range(match.range(at: 1), in: message)!
+                return String(message[range]).trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return nil
+    }
+
+    private func extractHealthCheckStatus(from message: String) -> String? {
+        // Extract status from ExecutionClock health check messages
+        // Example: "Status: success" or "Status: failure"
+        guard component == "ExecutionClock" else { return nil }
+
+        let patterns = [
+            "Status: ([^,\\s]+)",
+            "Status:([^,\\s]+)"
+        ]
+
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.count)) {
+                let range = Range(match.range(at: 1), in: message)!
+                return String(message[range]).trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return nil
+    }
+
     private func extractAppInstallationError(from message: String) -> Bool {
         // Check if this is an AppResultStateChangeManager entry with ErrorCode
         guard component == "AppResultStateChangeManager" else { return false }
@@ -324,6 +411,7 @@ struct PolicyExecution: Identifiable, Hashable {
     let appIntent: String? // RequiredInstall, Available, Uninstall
     let scriptType: String? // Custom Attribute or Script Policy
     let executionContext: String? // root or user
+    let healthDomain: String? // Domain name for health checks
     let status: PolicyStatus
     let startTime: Date?
     let endTime: Date?
@@ -355,6 +443,8 @@ struct PolicyExecution: Identifiable, Hashable {
             return appName
         } else if let bundleId = bundleId {
             return bundleId
+        } else if let healthDomain = healthDomain {
+            return "Health Check - \(healthDomain)"
         } else {
             return "Policy \(policyId.prefix(8))..."
         }
@@ -372,11 +462,13 @@ struct PolicyExecution: Identifiable, Hashable {
 enum SyncEventType: String {
     case fullSync = "FullSyncWorkflow"
     case recurringPolicy = "RecurringPolicy"
+    case healthPolicy = "HealthPolicy"
 
     var displayName: String {
         switch self {
         case .fullSync: return "Sync Event (FullSyncWorkflow)"
         case .recurringPolicy: return "Recurring Event"
+        case .healthPolicy: return "Health Event"
         }
     }
 }
@@ -491,18 +583,19 @@ struct LogAnalysis {
     let totalEntries: Int
     let parseErrors: [String]
     var sourceTitle: String // Title for tab display
-    
+    let allEntries: [LogEntry] // All parsed log entries for full log view
+
     // Enrollment information extracted from VerifyEnrollmentStatus logs
     let environment: String?
     let region: String?
-    let asu: String? 
+    let asu: String?
     let accountID: String?
     let aadTenantID: String? // Entra Tenant ID
     let deviceID: String? // Intune Device ID
     let macOSVers:String?
     let agentVers: String? // Intune Agent Version
     let platform: String?
-    
+
     // Network connectivity summary from ObserveNetworkInterface logs
     let networkSummary: NetworkSummary?
 
