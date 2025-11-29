@@ -38,13 +38,7 @@ struct CertificateInspectionView: View {
                     Button("Close") {
                         dismiss()
                     }
-                }
-                
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Inspect Certificate") {
-                        inspector.inspectMDMCertificate()
-                    }
-                    .disabled(inspector.isLoading)
+                    .keyboardShortcut(.defaultAction)
                 }
             }
         }
@@ -55,7 +49,7 @@ struct CertificateInspectionView: View {
     
     private var headerSection: some View {
         VStack(spacing: 8) {
-            Image(systemName: "doc.text.magnifyingglass")
+            Image(systemName: "text.viewfinder")
                 .font(.system(size: 48))
                 .foregroundColor(.blue)
             
