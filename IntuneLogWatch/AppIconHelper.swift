@@ -130,8 +130,13 @@ struct AppIconView: View {
                     .foregroundColor(.green)
                     .font(.system(size: size * 0.8))
                     .frame(width: size, height: size)
+            case .health:
+                Image(systemName: "stethoscope")
+                    .foregroundColor(.purple)
+                    .font(.system(size: size * 0.8))
+                    .frame(width: size, height: size)
             case .unknown:
-                Image(systemName: "questionmark.circle")
+                Image(systemName: "doc.plaintext")
                     .foregroundColor(.secondary)
                     .font(.system(size: size * 0.8))
                     .frame(width: size, height: size)
