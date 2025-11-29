@@ -230,17 +230,17 @@ struct LogEntryDetailView: View {
                         Image(systemName: "chevron.left")
                     }
                     .disabled(currentIndex <= 0)
-                    .keyboardShortcut(.leftArrow, modifiers: .command)
-                    
+                    .keyboardShortcut("[", modifiers: .command)
+
                     Text("\(currentIndex + 1) of \(entries.count)")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     Button(action: nextEntry) {
                         Image(systemName: "chevron.right")
                     }
                     .disabled(currentIndex >= entries.count - 1)
-                    .keyboardShortcut(.rightArrow, modifiers: .command)
+                    .keyboardShortcut("]", modifiers: .command)
                 }
                 
                 Spacer()
@@ -254,6 +254,7 @@ struct LogEntryDetailView: View {
         }
         .padding()
         .frame(minWidth: 650, idealWidth: 650, maxWidth: 800, minHeight: 550, idealHeight: 550, maxHeight: 700)
+        .presentationBackground(Color.gray.opacity(0.07))
     }
     
     private var levelIcon: some View {
