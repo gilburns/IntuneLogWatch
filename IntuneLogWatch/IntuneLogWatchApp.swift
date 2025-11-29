@@ -9,23 +9,66 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Sparkle
 
+enum AppearancePreference: String, CaseIterable {
+    case system = "system"
+    case light = "light"
+    case dark = "dark"
+
+    var displayName: String {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
 @main
 struct IntuneLogWatchApp: App {
     private let updaterController: SPUStandardUpdaterController
     @State private var showingCertificateInspector = false
     @State private var errorCodesWindowController: ErrorCodesReferenceWindowControllerSimple?
-    
+    @State private var sidebarVisibility = NavigationSplitViewVisibility.automatic
+    @State private var enrollmentExpanded: Bool = false
+    @State private var networkExpanded: Bool = false
+    @State private var analysisExpanded: Bool = true
+    @AppStorage("appearancePreference") private var appearancePreference: AppearancePreference = .system
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     init() {
         // Set up Sparkle updater
         updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
     }
     
+    class AppDelegate: NSObject, NSApplicationDelegate {
+        func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+            return true
+        }
+        
+        func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+            return true
+        }
+    }
+
     private func openURL(_ urlString: String) {
         if let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
         }
     }
-    
+
+    private func openClipLibraryWindow() {
+        // Post notification to open clip library
+        NotificationCenter.default.post(name: .openClipLibrary, object: nil)
+    }
+
     private func collectAndExportLogs() {
         Task {
             await performLogCollection()
@@ -307,87 +350,275 @@ struct IntuneLogWatchApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView(showingCertificateInspector: $showingCertificateInspector)
+            ContentView(
+                showingCertificateInspector: $showingCertificateInspector,
+                sidebarVisibility: $sidebarVisibility,
+                enrollmentExpanded: $enrollmentExpanded,
+                networkExpanded: $networkExpanded,
+                analysisExpanded: $analysisExpanded
+            )
+            .preferredColorScheme(appearancePreference.colorScheme)
+            .onReceive(NotificationCenter.default.publisher(for: .showErrorCodesReference)) { _ in
+                showErrorCodesReference()
+            }
         }
         .windowStyle(DefaultWindowStyle())
+
+        WindowGroup("Clip Library", id: "clip-library") {
+            ClipLibraryWindowWrapper()
+                .preferredColorScheme(appearancePreference.colorScheme)
+        }
+        .defaultPosition(.center)
+        .defaultSize(width: 900, height: 600)
+
         .commands {
             CommandGroup(after: .appInfo) {
                 
                 Divider()
                 
-                Button("Check for Updates...") {
+                Button(action: {
                     updaterController.checkForUpdates(nil)
+                }) {
+                    Label("Check for Updates…", systemImage: "arrow.down.circle")
                 }
             }
-            
-            CommandGroup(after: .newItem) {
-                Button("Open Log File...") {
+
+            CommandGroup(replacing: .newItem) {
+                Button(action: {
+                    NSApp.sendAction(
+                        #selector(NSWindowController().newWindowForTab(_:)),
+                        to: nil,
+                        from: nil
+                    )
+                }) {
+                    Label("New Window", systemImage: "macwindow.badge.plus")
+                }
+                .keyboardShortcut("n", modifiers: .command)
+
+                Button(action: {
+                    if let currentWindow = NSApp.keyWindow,
+                      let windowController = currentWindow.windowController {
+                      windowController.newWindowForTab(nil)
+                      if let newWindow = NSApp.keyWindow,
+                        currentWindow != newWindow {
+                          currentWindow.addTabbedWindow(newWindow, ordered: .above)
+                        }
+                    }
+                }) {
+                    Label("New Tab", systemImage: "macwindow.stack")
+                }
+                .keyboardShortcut("t", modifiers: .command)
+
+                Divider()
+
+                Button(action: {
                     // Post notification to trigger file picker
                     NotificationCenter.default.post(name: .openLogFile, object: nil)
+                }) {
+                    Label("Open Log File…", systemImage: "arrow.up.right")
                 }
                 .keyboardShortcut("o", modifiers: .command)
 
                 Divider()
 
-                Button("Reload Local Logs") {
+                Button(action: {
                     // Post notification to trigger local logs reload
                     NotificationCenter.default.post(name: .reloadLocalLogs, object: nil)
+                }) {
+                    Label("Reload Local Logs", systemImage: "arrow.clockwise")
                 }
                 .keyboardShortcut("r", modifiers: .command)
             }
 
             CommandGroup(after: .textEditing) {
-                Button("Search Policies...") {
+                Button(action: {
                     // Post notification to focus search field
                     NotificationCenter.default.post(name: .focusSearchField, object: nil)
+                }) {
+                    Label("Search Policies…", systemImage: "magnifyingglass")
                 }
                 .keyboardShortcut("f", modifiers: .command)
+
             }
             
+            CommandGroup(after: .toolbar) {
+                Divider()
+                
+                Button(action: {
+                    NSApp.sendAction(
+                        #selector(NSSplitViewController.toggleSidebar(_:)),
+                        to: nil,
+                        from: nil
+                    )
+                }) {
+                    Label(sidebarVisibility == .doubleColumn ? "Show Sidebar" : "Hide Sidebar", systemImage: "sidebar.left")
+                }
+                .keyboardShortcut("s", modifiers: [.command, .option])
+                
+                Divider()
+            }
+            
+            CommandGroup(after: CommandGroupPlacement.toolbar) {
+
+                Divider()
+
+                Button(action: {
+                    enrollmentExpanded.toggle()
+                }) {
+                    Label(enrollmentExpanded ? "Collapse Enrollment Status" : "Expand Enrollment Status",
+                          systemImage: "person.text.rectangle")
+                }
+                .keyboardShortcut("e", modifiers: [.command, .option])
+                .disabled(sidebarVisibility == .doubleColumn)
+
+                Button(action: {
+                    networkExpanded.toggle()
+                }) {
+                    Label(networkExpanded ? "Collapse Network Connectivity" : "Expand Network Connectivity",
+                          systemImage: "network")
+                }
+                .keyboardShortcut("n", modifiers: [.command, .option])
+                .disabled(sidebarVisibility == .doubleColumn)
+
+                Button(action: {
+                    analysisExpanded.toggle()
+                }) {
+                    Label(analysisExpanded ? "Collapse Analysis Summary" : "Expand Analysis Summary",
+                          systemImage: "chart.bar.doc.horizontal")
+                }
+                .keyboardShortcut("a", modifiers: [.command, .option])
+                .disabled(sidebarVisibility == .doubleColumn)
+
+                Divider()
+                
+                Button(action: {
+                    // Post notification to show all log entries
+                    NotificationCenter.default.post(name: .showAllLogEntries, object: nil)
+                }) {
+                    Label("View All Log Entries…", systemImage: "text.page.badge.magnifyingglass")
+                }
+                .keyboardShortcut("l", modifiers: [.command, .shift])
+
+                Divider()
+
+                Button(action: {
+                    openClipLibraryWindow()
+                }) {
+                    Label("Clip Library", systemImage: "scissors")
+                }
+                .keyboardShortcut("c", modifiers: [.command, .shift])
+
+                Divider()
+
+                Menu {
+                    ForEach(AppearancePreference.allCases, id: \.self) { preference in
+                        Button(action: {
+                            if preference == .system {
+                                // Workaround: First switch to matching light/dark mode, then to system
+                                let currentSystemAppearance = NSApp.effectiveAppearance.name
+                                let isDark = currentSystemAppearance == .darkAqua || currentSystemAppearance == .vibrantDark
+
+                                // First set to the matching mode
+                                appearancePreference = isDark ? .dark : .light
+
+                                // Then immediately switch to system
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    appearancePreference = .system
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.50) {
+                                    appearancePreference = .system
+                                }
+                            } else {
+                                appearancePreference = preference
+                            }
+                        } ) {
+                            HStack {
+                                Text(preference.displayName)
+                                if appearancePreference == preference {
+                                    Image(systemName: "checkmark")
+                                }
+                            } 
+                        }
+                    }
+                } label: {
+                    Label("Appearance", systemImage: "circle.lefthalf.filled")
+                }
+
+                Divider()
+
+            }
+
             CommandGroup(replacing: .help) {
-                Button("IntuneLogWatch Wiki…") {
+                Button(action: {
                     openURL("https://github.com/gilburns/IntuneLogWatch/wiki")
+                }) {
+                    Label("IntuneLogWatch Wiki…", systemImage: "document")
                 }
 
-                Button("Error Codes Reference…") {
+                Button(action: {
+                    openURL("https://github.com/gilburns/IntuneLogWatch/releases")
+                }) {
+                    Label("IntuneLogWatch Release Notes…", systemImage: "document")
+                }
+
+                Divider()
+
+                Button(action: {
                     showErrorCodesReference()
+                }) {
+                    Label("Intune Error Codes Reference…", systemImage: "exclamationmark.triangle")
                 }
 
                 Divider()
 
-                Button("Intune Logs Folder…") {
+                Button(action: {
                     openURL("file:/Library/Logs/Microsoft/Intune")
+                }) {
+                    Label("Intune Logs Folder…", systemImage: "arrow.up.folder")
                 }
 
-                
-                Button("Collect Logs…") {
+                Button(action: {
                     collectAndExportLogs()
+                }) {
+                    Label("Collect Logs…", systemImage: "text.badge.plus")
                 }
-                
+
                 Divider()
 
-                Button("Inspect MDM Certificate…") {
+                Button(action: {
                     showingCertificateInspector = true
+                }) {
+                    Label("Inspect MDM Certificate…", systemImage: "text.page.badge.magnifyingglass")
                 }
+
 
                 if #available(macOS 15.0, *) {
-                    Button("Inspect MDM Certificate with CLI…") {
+                    Button(action: {
                         openCLITool(withArgs: [])
-                    }.modifierKeyAlternate(.option) {
-                        Button("Open MDM CLI…") {
+                    }) {
+                        Label("Inspect MDM Certificate with CLI…", systemImage: "apple.terminal")
+                    }
+                    .modifierKeyAlternate(.option) {
+                        Button(action: {
                             openCLITool(withArgs: ["--help"])
+                        }) {
+                            Label("Open MDM CLI…", systemImage: "apple.terminal")
                         }
                     }
                 } else {
-                    Button("Inspect MDM Certificate with CLI…") {
+                    Button(action: {
                         openCLITool(withArgs: [])
+                    }) {
+                        Label("Inspect MDM Certificate with CLI…", systemImage: "apple.terminal")
                     }
                 }
 
                 Divider()
                 
-                Button("Microsoft Graph Explorer…") {
+                Button(action: {
                     openURL("https://developer.microsoft.com/en-us/graph/graph-explorer")
+                }) {
+                    Label("Microsoft Graph Explorer…", systemImage: "curlybraces.square")
                 }
             }
         }
@@ -400,6 +631,9 @@ extension Notification.Name {
     static let focusSearchField = Notification.Name("focusSearchField")
     static let focusPolicyList = Notification.Name("focusPolicyList")
     static let focusSearchFieldDirect = Notification.Name("focusSearchFieldDirect")
+    static let showAllLogEntries = Notification.Name("showAllLogEntries")
+    static let showErrorCodesReference = Notification.Name("showErrorCodesReference")
+    static let openClipLibrary = Notification.Name("openClipLibrary")
 }
 
 extension UTType {
