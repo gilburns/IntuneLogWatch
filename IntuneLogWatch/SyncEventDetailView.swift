@@ -8,14 +8,19 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Sync Event Details
+
 struct SyncEventDetailView: View {
     let syncEvent: SyncEvent
     @Binding var selectedPolicy: PolicyExecution?
     @State private var searchText = ""
     @State private var selectedPolicyType: String = "all"
     @State private var logDetailPolicy: PolicyExecution?
+    @State private var showingClipDialog = false
+
     @FocusState private var policyListFocused: Bool
     @FocusState private var searchFieldFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
     
     var filteredPolicies: [PolicyExecution] {
         var policies = syncEvent.policies
@@ -26,6 +31,8 @@ struct SyncEventDetailView: View {
             policies = policies.filter { $0.type == .app }
         case "script":
             policies = policies.filter { $0.type == .script }
+        case "health":
+            policies = policies.filter { $0.type == .health }
         default:
             break // "all" - no filtering
         }
@@ -49,7 +56,7 @@ struct SyncEventDetailView: View {
             let policies = syncEvent.policies
             let appPoliciesCount = (policies.filter { $0.type == .app }).count
             let scriptPoliciesCount = (policies.filter { $0.type == .script }).count
-            
+
             HStack {
                 Picker("Policy Type:", selection: $selectedPolicyType) {
                     Text("All Policies").tag("all")
@@ -96,12 +103,19 @@ struct SyncEventDetailView: View {
 
             if #available(macOS 14.0, *) {
                 List(filteredPolicies, selection: $selectedPolicy) { policy in
-                    PolicyRow(policy: policy) {
-                        if !policy.entries.isEmpty {
-                            logDetailPolicy = policy
+                    PolicyRow(
+                        policy: policy,
+                        syncEvent: syncEvent,
+                        isSelected: selectedPolicy?.id == policy.id,
+                        onDoubleClick: {
+                            if !policy.entries.isEmpty {
+                                logDetailPolicy = policy
+                            }
                         }
-                    }
+                    )
+                    .listRowBackground(Color.gray.opacity(0.07))
                     .tag(policy)
+
                 }
                 .focused($policyListFocused)
                 .onKeyPress(.return) {
@@ -118,6 +132,7 @@ struct SyncEventDetailView: View {
                         selectedPolicy = filteredPolicies.first
                     }
                 }
+
         .onReceive(NotificationCenter.default.publisher(for: .focusSearchField)) { _ in
             searchFieldFocused = true
         }
@@ -132,16 +147,41 @@ struct SyncEventDetailView: View {
             if !policy.entries.isEmpty {
                 LogEntryDetailView(displayName: policy.displayName, bundleIdentifier: policy.bundleId ?? "", policyType: policy.type, entries: policy.entries, currentIndex: 0)
                     .frame(minWidth: 700, minHeight: 550)
+                    .presentationBackground(Color.gray.opacity(0.07))
             }
         }
+
     }
     
+    
+    private var eventHeaderIcon: String {
+        switch syncEvent.eventType {
+        case .fullSync:
+            return "gearshape.arrow.triangle.2.circlepath"
+        case .recurringPolicy:
+            return "clock.arrow.circlepath"
+        case .healthPolicy:
+            return "stethoscope.circle"
+        }
+    }
+
+    private var eventHeaderIconColor: Color {
+        switch syncEvent.eventType {
+        case .fullSync:
+            return .blue
+        case .recurringPolicy:
+            return .blue
+        case .healthPolicy:
+            return .blue
+        }
+    }
+
     private var syncEventHeader: some View {
 
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: syncEvent.eventType == .fullSync ? "gearshape.arrow.triangle.2.circlepath" : "clock.arrow.circlepath")
-                    .foregroundColor(.blue)
+                Image(systemName: eventHeaderIcon)
+                    .foregroundColor(eventHeaderIconColor)
                 Text(syncEvent.eventType.displayName)
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -212,8 +252,9 @@ struct SyncEventDetailView: View {
         .padding(.horizontal)
         .padding(.vertical, 8)
         .background(Color(NSColor.controlBackgroundColor))
+        .id(colorScheme)
     }
-    
+
     private func syncMetric(value: String, label: String, icon: String, color: Color) -> some View {
         VStack(spacing: 2) {
             HStack(spacing: 4) {
@@ -282,11 +323,18 @@ struct SyncEventDetailView: View {
 
 struct PolicyRow: View {
     let policy: PolicyExecution
+    let syncEvent: SyncEvent
+    let isSelected: Bool
     let onDoubleClick: (() -> Void)?
     @Environment(\.controlActiveState) private var controlActiveState
+    @State private var packageReceiptInfo: PackageReceiptInfo?
+    @State private var showingClipDialog = false
+    @State private var isHovered: Bool = false
 
-    init(policy: PolicyExecution, onDoubleClick: (() -> Void)? = nil) {
+    init(policy: PolicyExecution, syncEvent: SyncEvent, isSelected: Bool = false, onDoubleClick: (() -> Void)? = nil) {
         self.policy = policy
+        self.syncEvent = syncEvent
+        self.isSelected = isSelected
         self.onDoubleClick = onDoubleClick
     }
     
@@ -296,156 +344,105 @@ struct PolicyRow: View {
                 AppIconView(
                     bundleId: policy.bundleId,
                     policyType: policy.type,
-                    size: 20
+                    size: 36
                 )
-                Text(policy.displayName)
-                    .font(.headline)
-                    .lineLimit(1)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(policy.displayName)
+                        .font(.headline)
+                        .lineLimit(1)
 
-                Spacer()
-                
-                HStack(spacing: 4) {
-                    // Main policy type
-                    Text(policy.type.displayName)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(selectionAwareColor(.blue, fallback: .cyan).opacity(0.3))
-                        .foregroundColor(selectionAwareColor(.blue, fallback: .cyan))
-                        .cornerRadius(4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.white, lineWidth: 0.5)
-                        )
-                    
-                    // App type indicator (PKG/DMG)
-                    if let appType = policy.appType {
-                        Text(appType)
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(appType == "PKG" ? Color.green.opacity(enhancedBackgroundOpacity(0.1)) : Color.purple.opacity(enhancedBackgroundOpacity(0.1)))
-                            .foregroundColor(appType == "PKG" ? .green : .purple)
-                            .cornerRadius(3)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 3)
-                                    .stroke(Color.white, lineWidth: 0.5)
-                            )
-                    }
-                    
-                    // App intent indicator (RequiredInstall/Available/Uninstall)
-                    if let appIntent = policy.appIntent {
-                        Text(intentDisplayName(appIntent))
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(intentColor(appIntent).opacity(enhancedBackgroundOpacity(0.1)))
-                            .foregroundColor(intentColor(appIntent))
-                            .cornerRadius(3)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 3)
-                                    .stroke(Color.white, lineWidth: 0.5)
-                            )
-                    }
-                    
-                    // Script type indicator
-                    if let scriptType = policy.scriptType {
-                        Text(scriptType == "Custom Attribute" ? "ATTR" : "SCRIPT")
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(scriptType == "Custom Attribute" ? Color.orange.opacity(enhancedBackgroundOpacity(0.1)) : Color.teal.opacity(enhancedBackgroundOpacity(0.1)))
-                            .foregroundColor(scriptType == "Custom Attribute" ? .orange : .teal)
-                            .cornerRadius(3)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 3)
-                                    .stroke(Color.white, lineWidth: 0.5)
-                            )
-                    }
-                    
-                    // Execution context indicator (for scripts only)
-                    if policy.type == .script, let executionContext = policy.executionContext {
-                        Text(executionContext.uppercased())
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(contextColor(executionContext).opacity(enhancedBackgroundOpacity(0.1)))
-                            .foregroundColor(contextColor(executionContext))
-                            .cornerRadius(3)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 3)
-                                    .stroke(Color.white, lineWidth: 0.5)
-                            )
-                    }
-                }
-            }
-            
-            if let bundleId = policy.bundleId {
-                Text(bundleId)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            } else if let policyId = policy.policyId as NSString? {
-                Text("\(policyId)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-            
-            HStack {
-                statusBadge
-                
-                if let startTime = policy.startTime {
-                    Text(formatTime(startTime))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                if let duration = policy.duration {
-                    Text("• \(formatDuration(duration))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                if policy.hasErrors {
-                    Image(systemName: "exclamationmark.circle.fill")
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-                
-                if policy.hasWarnings {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                        .font(.caption)
-                }
-
-                if !policy.entries.isEmpty {
-                    Button(action: {
-                        onDoubleClick?()
-                    }) {
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .foregroundColor(.white)
+                    if let bundleId = policy.bundleId {
+                        Text(bundleId)
                             .font(.caption)
-                            .padding(4)
-                            .background(
-                                Circle()
-                                    .fill(Color.blue)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(Color.white, lineWidth: 1.5)
-                                    )
-                            )
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    } else if let policyId = policy.policyId as NSString? {
+                        Text("\(policyId)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
-                    .buttonStyle(PressedButtonStyle())
-                    .help("View log entries")
+
+                }
+
+                Spacer()
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack (alignment: .center) {
+                        if let startTime = policy.startTime {
+                            Text(formatTime(startTime))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        if let duration = policy.duration {
+                            Text("• \(formatDuration(duration))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                                            
+                        if policy.hasErrors {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
+                        
+                        if policy.hasWarnings {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                        }
+                        
+                        statusBadge
+
+                    }
+                    Text("")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+
+                }
+            }
+            .padding(.bottom, 12)
+
+            HStack {
+                policyTypeTiles
+                    .padding(.bottom, 7)
+
+                Spacer()
+
+                if isHovered {
+                    actionButtons
+                        .transition(.opacity)
                 }
             }
         }
         .padding(.vertical, 2)
+        .background(
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.accentColor.opacity(isHovered && !isSelected ? 0.2 : 0))
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
+        .sheet(item: $packageReceiptInfo) { info in
+            PackageReceiptView(packageInfo: info)
+                .frame(minWidth: 700, minHeight: 600)
+        }
+        .sheet(isPresented: $showingClipDialog) {
+            ClipEventDialog(policy: policy) { customName, notes in
+                let clippedEvent = ClippedPolicyEvent(customName: customName, notes: notes, policyExecution: policy)
+                ClipLibraryManager.shared.saveEvent(clippedEvent)
+            }
+        }
+        .alignmentGuide(.listRowSeparatorLeading) { d in
+            0
+        }
+
     }
-    
+
     private var policyIcon: some View {
         Group {
             switch policy.type {
@@ -455,13 +452,322 @@ struct PolicyRow: View {
             case .script:
                 Image(systemName: "terminal")
                     .foregroundColor(.mint)
+            case .health:
+                Image(systemName: "stethoscope")
+                    .foregroundColor(.purple)
             case .unknown:
                 Image(systemName: "questionmark.circle")
                     .foregroundColor(.secondary)
             }
         }
     }
-    
+        
+    private var actionButtons: some View {
+        HStack(spacing: 6) {
+
+            // Reveal in Finder button for apps
+            if policy.type == .app, let bundleId = policy.bundleId {
+                if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
+                    // App bundle found - show Finder button
+                    Button(action: {
+                        NSWorkspace.shared.selectFile(appURL.path, inFileViewerRootedAtPath: "")
+                    }) {
+                        Image(systemName: "arrow.forward.folder")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                            .padding(4)
+                            .padding(.bottom, 1)
+                            .padding(.leading, 1)
+                            .background(
+                                Circle()
+                                    .fill(Color.indigo)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white, lineWidth: 1.5)
+                                    )
+                            )
+                    }
+                    .buttonStyle(PressedButtonStyle())
+                    .help("Reveal \(policy.displayName) in Finder")
+                } else {
+                    // Show disabled button
+                    Button(action: {
+
+                    }) {
+                        Image(systemName: "arrow.forward.folder")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                            .padding(4)
+                            .padding(.bottom, 1)
+                            .padding(.leading, 1)
+                            .background(
+                                Circle()
+                                    .fill(Color(NSColor.lightGray).opacity(0.5))
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white.opacity(0.5), lineWidth: 1.5)
+                                    )
+                            )
+                    }
+                    .buttonStyle(PressedButtonStyle())
+                    .help("\(policy.displayName) not found in Finder")
+                }
+                
+                // PKG Inspector
+                if PackageInspectorHelper.hasPackageReceipt(bundleId: bundleId) {
+                    // Package receipt found - show package info button
+                    Button(action: {
+                        if let info = PackageInspectorHelper.getPackageInfo(bundleId: bundleId) {
+                            packageReceiptInfo = info
+                        }
+                    }) {
+                        Image(systemName: "shippingbox")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                            .padding(4)
+                            .padding(.bottom, 1)
+                            .padding(.leading, 1)
+                            .background(
+                                Circle()
+                                    .fill(Color.yellow.opacity(0.8))
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white, lineWidth: 1.5)
+                                    )
+                            )
+                    }
+                    .buttonStyle(PressedButtonStyle())
+                    .help("View \(policy.displayName) package receipt")
+                } else {
+                    // Show disabled button
+                    Button(action: {
+
+                    }) {
+                        Image(systemName: "shippingbox")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                            .padding(4)
+                            .padding(.bottom, 1)
+                            .padding(.leading, 1)
+                            .background(
+                                Circle()
+                                    .fill(Color(NSColor.lightGray).opacity(0.5))
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white.opacity(0.5), lineWidth: 1.5)
+                                    )
+                            )
+                    }
+                    .buttonStyle(PressedButtonStyle())
+                    .help("\(policy.displayName) package receipt not found")
+                }
+            } else {
+                // Show disabled button
+                Button(action: {
+
+                }) {
+                    Image(systemName: "arrow.forward.folder")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(4)
+                        .padding(.bottom, 1)
+                        .padding(.leading, 1)
+                        .background(
+                            Circle()
+                                .fill(Color(NSColor.lightGray).opacity(0.5))
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.5), lineWidth: 1.5)
+                                )
+                        )
+                }
+                .buttonStyle(PressedButtonStyle())
+                .help("Script objects not available in the Finder")
+
+                // Show disabled button
+                Button(action: {
+
+                }) {
+                    Image(systemName: "shippingbox")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(4)
+                        .padding(.bottom, 1)
+                        .padding(.leading, 1)
+                        .background(
+                            Circle()
+                                .fill(Color(NSColor.lightGray).opacity(0.5))
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.5), lineWidth: 1.5)
+                                )
+                        )
+                }
+                .buttonStyle(PressedButtonStyle())
+                .help("Script objects do not have a package receipt")
+                
+            }
+
+            if !policy.entries.isEmpty {
+                Button(action: {
+                    PolicyExportHelper.exportPolicyToPDF(policy: policy)
+                }) {
+                    Image(systemName: "doc.richtext")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Color.purple)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white, lineWidth: 1.5)
+                                )
+                        )
+                }
+                .buttonStyle(PressedButtonStyle())
+                .help("Export \(policy.displayName) logs to PDF")
+
+                Button(action: {
+                    PolicyExportHelper.exportPolicyLogs(policy: policy, syncEvent: nil)
+                }) {
+                    Image(systemName: "square.and.arrow.up")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(4)
+                        .padding(.bottom, 3)
+                        .background(
+                            Circle()
+                                .fill(Color.green)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white, lineWidth: 1.5)
+                                )
+                        )
+                }
+                .buttonStyle(PressedButtonStyle())
+                .help("Export \(policy.displayName) log entries to file")
+
+                Button(action: {
+                    onDoubleClick?()
+                }) {
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(4)
+                        .padding(.bottom, 1)
+                        .background(
+                            Circle()
+                                .fill(Color.blue)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white, lineWidth: 1.5)
+                                )
+                        )
+                }
+                .buttonStyle(PressedButtonStyle())
+                .help("View \(policy.displayName) log entries")
+                
+                Button(action: {
+                    showingClipDialog = true
+                }) {
+                    Image(systemName: "scissors")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Color.orange)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white, lineWidth: 1.5)
+                                )
+                        )
+                }
+                .buttonStyle(PressedButtonStyle())
+                .help("Save \(policy.displayName) to Clip Library")
+
+            }
+        }
+    }
+
+    private var policyTypeTiles: some View {
+        HStack(spacing: 4) {
+            // Main policy type
+            Text(policy.type.displayName)
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(selectionAwareColor(.blue, fallback: .cyan).opacity(0.3))
+                .foregroundColor(selectionAwareColor(.blue, fallback: .cyan))
+                .cornerRadius(4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.white, lineWidth: 0.5)
+                )
+            
+            // App type indicator (PKG/DMG)
+            if let appType = policy.appType {
+                Text(appType)
+                    .font(.caption2)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(appType == "PKG" ? Color.green.opacity(enhancedBackgroundOpacity(0.1)) : Color.purple.opacity(enhancedBackgroundOpacity(0.1)))
+                    .foregroundColor(appType == "PKG" ? .green : .purple)
+                    .cornerRadius(3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 3)
+                            .stroke(Color.white, lineWidth: 0.5)
+                    )
+            }
+            
+            // App intent indicator (RequiredInstall/Available/Uninstall)
+            if let appIntent = policy.appIntent {
+                Text(intentDisplayName(appIntent))
+                    .font(.caption2)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(intentColor(appIntent).opacity(enhancedBackgroundOpacity(0.1)))
+                    .foregroundColor(intentColor(appIntent))
+                    .cornerRadius(3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 3)
+                            .stroke(Color.white, lineWidth: 0.5)
+                    )
+            }
+            
+            // Script type indicator
+            if let scriptType = policy.scriptType {
+                Text(scriptType == "Custom Attribute" ? "ATTR" : "SCRIPT")
+                    .font(.caption2)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(scriptType == "Custom Attribute" ? Color.orange.opacity(enhancedBackgroundOpacity(0.1)) : Color.teal.opacity(enhancedBackgroundOpacity(0.1)))
+                    .foregroundColor(scriptType == "Custom Attribute" ? .orange : .teal)
+                    .cornerRadius(3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 3)
+                            .stroke(Color.white, lineWidth: 0.5)
+                    )
+            }
+            
+            // Execution context indicator (for scripts only)
+            if policy.type == .script, let executionContext = policy.executionContext {
+                Text(executionContext.uppercased())
+                    .font(.caption2)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(contextColor(executionContext).opacity(enhancedBackgroundOpacity(0.1)))
+                    .foregroundColor(contextColor(executionContext))
+                    .cornerRadius(3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 3)
+                            .stroke(Color.white, lineWidth: 0.5)
+                    )
+            }
+        }
+    }
+
     private var statusBadge: some View {
         Text(policy.status.displayName)
             .font(.caption2)

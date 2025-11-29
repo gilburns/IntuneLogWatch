@@ -14,46 +14,77 @@ struct ContentView: View {
     @State private var selectedPolicy: PolicyExecution?
     @State private var showingFilePicker = false
     @Binding var showingCertificateInspector: Bool
+    @Binding var sidebarVisibility: NavigationSplitViewVisibility
+    @Binding var enrollmentExpanded: Bool
+    @Binding var networkExpanded: Bool
+    @Binding var analysisExpanded: Bool
+    @State private var showingAllLogEntries = false
     @State private var sortNewestFirst = false
-    @State private var eventFilter: EventFilter = .all
+    @State private var eventFilter: EventFilter = .syncOnly
     @FocusState private var syncEventListFocused: Bool
     @FocusState private var syncEventDetailFocused: Bool
+    @State private var infoViewVisible = true
+    @State private var windowHeight: CGFloat = 0
+    @State private var bottomThreshold: CGFloat = 50
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openWindow) private var openWindow
 
     enum EventFilter: String, CaseIterable {
-        case all = "all"
         case syncOnly = "sync"
         case recurringOnly = "recurring"
+        case healthOnly = "health"
 
         var displayName: String {
             switch self {
-            case .all: return "All Events"
             case .syncOnly: return "Sync Events"
             case .recurringOnly: return "Recurring Events"
+            case .healthOnly: return "Health Events"
             }
         }
 
-        func displayNameWithCount(syncCount: Int, recurringCount: Int) -> String {
+        func displayNameWithCount(syncCount: Int, recurringCount: Int, healthCount: Int) -> String {
             switch self {
-            case .all:
-                return "All\nEvents"
             case .syncOnly:
-                return "Sync\nEvents (\(syncCount))"
+                return "Sync\nEvents\n(\(syncCount))"
             case .recurringOnly:
-                return "Recurring\nEvents (\(recurringCount))"
+                return "Recurring\nEvents\n(\(recurringCount))"
+            case .healthOnly:
+                return "Health\nEvents\n(\(healthCount))"
+            }
+        }
+
+        func toolTipForFilter() -> String {
+            switch self {
+            case .syncOnly:
+                return "Sync Events"
+            case .recurringOnly:
+                return "Recurring Events"
+            case .healthOnly:
+                return "Health Events"
             }
         }
 
         var keyboardShortcut: KeyEquivalent {
             switch self {
-            case .all: return "1"
-            case .syncOnly: return "2"
-            case .recurringOnly: return "3"
+            case .syncOnly: return "1"
+            case .recurringOnly: return "2"
+            case .healthOnly: return "3"
             }
         }
     }
 
-    init(showingCertificateInspector: Binding<Bool>) {
+    init(
+        showingCertificateInspector: Binding<Bool>,
+        sidebarVisibility: Binding<NavigationSplitViewVisibility>,
+        enrollmentExpanded: Binding<Bool>,
+        networkExpanded: Binding<Bool>,
+        analysisExpanded: Binding<Bool>
+    ) {
         self._showingCertificateInspector = showingCertificateInspector
+        self._sidebarVisibility = sidebarVisibility
+        self._enrollmentExpanded = enrollmentExpanded
+        self._networkExpanded = networkExpanded
+        self._analysisExpanded = analysisExpanded
 
         // Load saved filter preference
         if let savedFilter = UserDefaults.standard.string(forKey: "EventFilterPreference"),
@@ -62,34 +93,114 @@ struct ContentView: View {
         }
     }
     
+    
     var body: some View {
-        NavigationSplitView {
-            sidebar.frame(minWidth: 300)
-        } content: {
-            syncEventDetail
-        } detail: {
-            policyDetail
-                .frame(minWidth: 400)
-        }
-        .navigationTitle(parser.analysis?.sourceTitle ?? "Intune Log Watch")
-        .fileImporter(
-            isPresented: $showingFilePicker,
-            allowedContentTypes: [.log, .plainText],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    parser.parseLogFile(at: url)
-                }
-            case .failure(let error):
-                parser.error = error.localizedDescription
+        
+        GeometryReader { geometry in
+            
+            NavigationSplitView(columnVisibility: $sidebarVisibility) {
+                sidebar.frame(minWidth: 300)
+            } content: {
+                syncEventDetail
+            } detail: {
+                policyDetail
+                    .frame(minWidth: 400)
             }
+            .navigationTitle(parser.analysis?.sourceTitle ?? "Intune Log Watch")
+            .fileImporter(
+                isPresented: $showingFilePicker,
+                allowedContentTypes: [.log, .plainText],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    if let url = urls.first {
+                        parser.parseLogFile(at: url)
+                    }
+                case .failure(let error):
+                    parser.error = error.localizedDescription
+                }
+            }
+            .onAppear {
+                // Automatically load local Intune logs when the app launches
+                if parser.analysis == nil && parser.error == nil {
+                    parser.loadLocalIntuneLogs()
+                }
+                
+                // Capture the window height on appearance
+                windowHeight = geometry.size.height
+                
+                // Add local event monitor for mouse movement
+                NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) { event in
+                    self.handleMouseMoved(event, windowHeight: geometry.size.height)
+                    return event
+                }
+
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openLogFile)) { _ in
+                // Trigger the same action as the toolbar button
+                selectedSyncEvent = nil
+                selectedPolicy = nil
+                parser.analysis = nil
+                parser.error = nil
+                showingFilePicker = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .showAllLogEntries)) { _ in
+                // Show all log entries window
+                if parser.analysis != nil {
+                    showingAllLogEntries = true
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openClipLibrary)) { _ in
+                // Open clip library window
+                openWindow(id: "clip-library")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .reloadLocalLogs)) { _ in
+                // Trigger the same action as the reload button
+                selectedSyncEvent = nil
+                selectedPolicy = nil
+                parser.loadLocalIntuneLogs()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .focusSearchField)) { _ in
+                // Handle search focus at the top level
+                if selectedSyncEvent != nil {
+                    // If we have a sync event, ensure detail view is focused first
+                    syncEventDetailFocused = true
+                    // Then post the search field focus notification
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        NotificationCenter.default.post(name: .focusSearchFieldDirect, object: nil)
+                    }
+                }
+            }
+            .onChange(of: parser.isLoading) { oldValue, newValue in
+                // Auto-select first sync event when parsing completes
+                if !newValue, let analysis = parser.analysis, selectedSyncEvent == nil {
+                    let sortedEvents = sortedSyncEvents(analysis.syncEvents)
+                    selectedSyncEvent = sortedEvents.first
+                    syncEventListFocused = true
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $showingCertificateInspector) {
+                CertificateInspectionView()
+                    .frame(minWidth: 600, minHeight: 500)
+            }
+            .sheet(isPresented: $showingAllLogEntries) {
+                if let analysis = parser.analysis {
+                    AllLogEntriesView(entries: analysis.allEntries, sourceTitle: analysis.sourceTitle)
+                        .frame(minWidth: 900, minHeight: 600)
+                }
+            }
+
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                
-                Button("Open Log File...") {
+                Button("Open Log File…", systemImage: "arrow.up.right") {
                     selectedSyncEvent = nil
                     selectedPolicy = nil
                     parser.analysis = nil
@@ -97,60 +208,64 @@ struct ContentView: View {
                     showingFilePicker = true
                 }
                 .disabled(parser.isLoading)
-                
-                Button("Reload Local Logs") {
+                .help("Open Log File…")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? 0 : nil)
+                .opacity(sidebarVisibility != .doubleColumn ? 0 : 1)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 0.5 : 1)
+                .allowsHitTesting(sidebarVisibility == .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Button("Reload Local Logs…", systemImage: "arrow.clockwise") {
                     selectedSyncEvent = nil
                     selectedPolicy = nil
                     parser.loadLocalIntuneLogs()
                 }
                 .disabled(parser.isLoading)
-                
-                Button("Inspect MDM Certificate") {
+                .help("Reload Local Logs…")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? 0 : nil)
+                .opacity(sidebarVisibility != .doubleColumn ? 0 : 1)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 0.5 : 1)
+                .allowsHitTesting(sidebarVisibility == .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Button("View All Log Entries", systemImage: "text.page.badge.magnifyingglass") {
+                    showingAllLogEntries = true
+                }
+                .disabled(parser.analysis == nil)
+                .help("View All Log Entries")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? 0 : nil)
+                .opacity(sidebarVisibility != .doubleColumn ? 0 : 1)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 0.5 : 1)
+                .allowsHitTesting(sidebarVisibility == .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Button("Inspect MDM Certificate", systemImage: "text.viewfinder") {
                     showingCertificateInspector = true
                 }
+                .help("Inspect MDM Certificate")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? 0 : nil)
+                .opacity(sidebarVisibility != .doubleColumn ? 0 : 1)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 0.5 : 1)
+                .allowsHitTesting(sidebarVisibility == .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
             }
         }
-        .onAppear {
-            // Automatically load local Intune logs when the app launches
-            if parser.analysis == nil && parser.error == nil {
-                parser.loadLocalIntuneLogs()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .openLogFile)) { _ in
-            // Trigger the same action as the toolbar button
-            selectedSyncEvent = nil
-            selectedPolicy = nil
-            parser.analysis = nil
-            parser.error = nil
-            showingFilePicker = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .reloadLocalLogs)) { _ in
-            // Trigger the same action as the reload button
-            selectedSyncEvent = nil
-            selectedPolicy = nil
-            parser.loadLocalIntuneLogs()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .focusSearchField)) { _ in
-            // Handle search focus at the top level
-            if selectedSyncEvent != nil {
-                // If we have a sync event, ensure detail view is focused first
-                syncEventDetailFocused = true
-                // Then post the search field focus notification
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    NotificationCenter.default.post(name: .focusSearchFieldDirect, object: nil)
-                }
-            }
-        }
-        .onChange(of: parser.isLoading) { oldValue, newValue in
-            // Auto-select first sync event when parsing completes
-            if !newValue, let analysis = parser.analysis, selectedSyncEvent == nil {
-                let sortedEvents = sortedSyncEvents(analysis.syncEvents)
-                selectedSyncEvent = sortedEvents.first
-                syncEventListFocused = true
-            }
-        }
-        .sheet(isPresented: $showingCertificateInspector) {
-            CertificateInspectionView()
+        
+        if infoViewVisible {
+            bottomBarExpanded
+                .animation(.easeInOut(duration: 0.25), value: infoViewVisible)
+
+        } else {
+            bottomBarExpander
+                .animation(.easeInOut(duration: 0.25), value: infoViewVisible)
         }
     }
     
@@ -161,18 +276,26 @@ struct ContentView: View {
 //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let analysis = parser.analysis {
                 
-                appInfoHeader()
-                enrollmentHeader(analysis)
-                networkHeader(analysis)
-                analysisHeader(analysis)
+                Group {
+                    appInfoHeader()
+                    enrollmentHeader(analysis)
+                    networkHeader(analysis)
+                    analysisHeader(analysis)
 
-                filterControls(analysis: analysis)
-                sortControls
+                    filterControls(analysis: analysis)
+                    sortControls
+
+                }
+                .background(Color(NSColor.controlBackgroundColor))
+
                 
                 if #available(macOS 14.0, *) {
                     List(sortedSyncEvents(analysis.syncEvents), selection: $selectedSyncEvent) { syncEvent in
-                        SyncEventRow(syncEvent: syncEvent)
-                            .tag(syncEvent)
+                        SyncEventRow(
+                            syncEvent: syncEvent,
+                            isSelected: selectedSyncEvent?.id == syncEvent.id
+                        )
+                        .tag(syncEvent)
                     }
                     .focused($syncEventListFocused)
                     .onKeyPress(.rightArrow) {
@@ -220,13 +343,285 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Spacer()
+                Button("Open Log File…", systemImage: "arrow.up.right") {
+                    selectedSyncEvent = nil
+                    selectedPolicy = nil
+                    parser.analysis = nil
+                    parser.error = nil
+                    showingFilePicker = true
+                }
+                .disabled(parser.isLoading)
+                .help("Open Log File…")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? nil : 0)
+                .opacity(sidebarVisibility != .doubleColumn ? 1 : 0)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 1 : 0.5)
+                .allowsHitTesting(sidebarVisibility != .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Button("Reload Local Logs…", systemImage: "arrow.clockwise") {
+                    selectedSyncEvent = nil
+                    selectedPolicy = nil
+                    parser.loadLocalIntuneLogs()
+                }
+                .disabled(parser.isLoading)
+                .help("Reload Local Logs…")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? nil : 0)
+                .opacity(sidebarVisibility != .doubleColumn ? 1 : 0)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 1 : 0.5)
+                .allowsHitTesting(sidebarVisibility != .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Button("View All Log Entries", systemImage: "text.page.badge.magnifyingglass") {
+                    showingAllLogEntries = true
+                }
+                .disabled(parser.analysis == nil)
+                .help("View All Log Entries")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? nil : 0)
+                .opacity(sidebarVisibility != .doubleColumn ? 1 : 0)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 1 : 0.5)
+                .allowsHitTesting(sidebarVisibility != .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Button("Inspect MDM Certificate", systemImage: "text.viewfinder") {
+                    showingCertificateInspector = true
+                }
+                .help("Inspect MDM Certificate")
+                .fixedSize()
+                .clipped()
+                .frame(width: sidebarVisibility != .doubleColumn ? nil : 0)
+                .opacity(sidebarVisibility != .doubleColumn ? 1 : 0)
+                .scaleEffect(sidebarVisibility != .doubleColumn ? 1 : 0.5)
+                .allowsHitTesting(sidebarVisibility != .doubleColumn)
+                .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+            }
+        }
+        .id(colorScheme)
+    }
+
+    private var bottomBarExpanded: some View {
+        VStack() {
+            HStack (alignment: .bottom) {
+                Label("Show Bottom Bar", systemImage: "line.3.horizontal")
+                    .foregroundColor(.blue)
+                    .labelStyle(.iconOnly)
+                    .controlSize(.small)
+                    .alignmentGuide(.bottom) { $0[HorizontalAlignment.center] }
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .help("Show Bottom Bar")
+
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+
+                if let icon = AppIconProvider.appIcon() {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .offset(x: 0, y: 6)
+                        .onTapGesture {
+                            NSApplication.shared.orderFrontStandardAboutPanel(self)
+                            
+                            withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                                infoViewVisible = false
+                            }
+                        }
+                }
+
+                Text("IntuneLogWatch")
+                    .font(.system(size: 16, weight: .bold))
+                    .padding(.trailing, 4)
+
+                let version = AppVersionProvider.fullVersionString()
+
+                Text("v\(version)")
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    Button(action: {
+                        let logsPath = "/Library/Logs/Microsoft/Intune"
+                        NSWorkspace.shared.open (URL(fileURLWithPath: logsPath))
+                        
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }) {
+                        Label("Intune Logs", systemImage: "arrow.up.folder")
+                            .frame(minWidth: 110)
+                    }
+                    .buttonStyle(.link)
+                    .controlSize(.small)
+                    .padding(2)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .border(.black)
+                    .cornerRadius(8)
+                    .tooltip("/Library/Logs/Microsoft/Intune")
+
+                    Button(action: {
+                        // Post notification to open clip library
+                        NotificationCenter.default.post(name: .openClipLibrary, object: nil)
+
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }) {
+                        Label("Clip Library", systemImage: "scissors")
+                            .frame(minWidth: 110)
+                    }
+                    .buttonStyle(.link)
+                    .controlSize(.small)
+                    .padding(2)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .border(.black)
+                    .cornerRadius(8)
+                    .tooltip("IntuneLogWatch Clip Library")
+
+                    Button(action: {
+                        NotificationCenter.default.post(name: .showErrorCodesReference, object: nil)
+                        
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }) {
+                        Label("Error Codes", systemImage: "exclamationmark.triangle")
+                            .frame(minWidth: 110)
+                    }
+                    .buttonStyle(.link)
+                    .controlSize(.small)
+                    .padding(2)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .border(.black)
+                    .cornerRadius(8)
+                    .tooltip("Intune Error Codes Reference")
+
+                    Button(action: {
+                        let urlString = "https://github.com/gilburns/IntuneLogWatch/wiki"
+                        NSWorkspace.shared.open (URL(string: urlString)!)
+                        
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }) {
+                        Label("Wiki", systemImage: "document")
+                            .frame(minWidth: 110)
+                    }
+                    .buttonStyle(.link)
+                    .controlSize(.small)
+                    .padding(2)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .border(.black)
+                    .cornerRadius(8)
+                    .tooltip("https://github.com/gilburns/IntuneLogWatch/wiki")
+
+                    Button(action: {
+                        let urlString = "https://github.com/gilburns/IntuneLogWatch/releases/tag/\(version)/"
+                        NSWorkspace.shared.open (URL(string: urlString)!)
+                        
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }) {
+                        Label("Release Notes", systemImage: "music.note")
+                            .frame(minWidth: 110)
+                    }
+                    .buttonStyle(.link)
+                    .controlSize(.small)
+                    .padding(2)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .border(.black)
+                    .cornerRadius(8)
+                    .tooltip("https://github.com/gilburns/IntuneLogWatch/releases/tag/\(version)/")
+
+                    Button(action: {
+                        let urlString = "https://developer.microsoft.com/en-us/graph/graph-explorer"
+                        NSWorkspace.shared.open (URL(string: urlString)!)
+                        
+                        withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                            infoViewVisible = false
+                        }
+                    }) {
+                        Label("Graph Explorer", systemImage: "curlybraces.square")
+                            .frame(minWidth: 110)
+                    }
+                    .buttonStyle(.link)
+                    .controlSize(.small)
+                    .padding(2)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .border(.black)
+                    .cornerRadius(8)
+                    .tooltip("https://developer.microsoft.com/en-us/graph/graph-explorer")
+                    
+                }
+
+            }
+            .padding(.top, 0)
+            .padding(.bottom, 12)
+            .padding(.leading, 20)
+            .padding(.trailing, 20)
+            .cornerRadius(10)
+
+        }
+        .background(Color(NSColor.windowBackgroundColor))
+        .overlay(Divider(), alignment: .top)
     }
     
-    
-    @State var enrollmentExpanded: Bool = false
-    @State var networkExpanded: Bool = false
-    @State var analysisExpanded: Bool = true
-    
+    private var bottomBarExpander: some View {
+        HStack (alignment: .top) {
+            Label("Show Bottom Bar", systemImage: "line.3.horizontal.decrease")
+                .foregroundColor(.blue)
+                .imageScale(.medium)
+                .padding(.bottom, 6)
+                .offset(x: 0, y: 3)
+                .labelStyle(.iconOnly)
+                .controlSize(.small)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                infoViewVisible = true
+            }
+        }
+        .help("Show IntuneLogWatcher action bar")
+        .padding(.leading, 30)
+        .padding(.trailing, 30)
+    }
+
+    private func handleMouseMoved(_ event: NSEvent, windowHeight: CGFloat) {
+        // In macOS window coordinates, (0,0) is bottom-left.
+        let mouseYLocation = event.locationInWindow.y
+        
+        // Check if the mouse is within the bottom threshold
+        if mouseYLocation >= bottomThreshold {
+            if infoViewVisible {
+                withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
+                    infoViewVisible = false
+                }
+            }
+        } else {
+//            if !infoViewVisible {
+//                infoViewVisible = true
+//            }
+        }
+    }
+
     private func appInfoHeader() -> some View {
         VStack(alignment: .leading, spacing: 2) {
                         
@@ -236,6 +631,9 @@ struct ContentView: View {
                     appIcon: AppIconProvider.appIcon()
                 )
             }
+            .padding(.bottom, 8)
+            .padding(.leading, 10)
+
             Divider()
             HStack {
                 Spacer()
@@ -243,6 +641,7 @@ struct ContentView: View {
         }
 //        .padding()
         .background(Color(NSColor.controlBackgroundColor))
+        
     }
 
     private func enrollmentHeader(_ analysis: LogAnalysis) -> some View {
@@ -369,6 +768,7 @@ struct ContentView: View {
                     .padding(.leading, 30)
 
                     Divider()
+                    .padding(.bottom, 6)
                     
                 }
                 .font(.headline)
@@ -400,12 +800,15 @@ struct ContentView: View {
                                 Text("Percent")
                             }
                             .font(.subheadline)
-                            
-                            Divider()
-                                .background(Color.blue)
-                                .opacity(0.7)
-                                .frame(height: 1)
 
+                            GridRow {
+                                Divider()
+                                    .background(Color.blue)
+                                    .opacity(0.3)
+                                    .frame(height: 1)
+                                    .padding(.leading, 25)
+                                    .gridCellColumns(3)
+                            }
                             GridRow {
                                 Text("Total:")
                                     .font(.caption)
@@ -460,12 +863,12 @@ struct ContentView: View {
                     .padding(.bottom, 8)
                     .padding(.leading, 10)
                     Divider()
-                    
+                    .padding(.bottom, 6)
+
                 }
                 .font(.headline)
                 .padding(.leading, 10)
                 .padding(.trailing, 20)
-
 
             }
             
@@ -475,80 +878,87 @@ struct ContentView: View {
 
     private func analysisHeader(_ analysis: LogAnalysis) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-                        
+
             DisclosureGroup("Analysis Summary", isExpanded: $analysisExpanded) {
-                Spacer()
 
-                HStack {
-                    Spacer()
-                    Label("Parsed \(analysis.totalEntries) log entries", systemImage: "magnifyingglass")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Spacer()
-                    Spacer()
-                }
-                .padding(.leading, 15)
-                .padding(.trailing, 10)
-
-                Spacer()
-                Spacer()
-
-                
-                HStack {
-                    VStack(alignment: .center, spacing: 2) {
-                        Label("\(analysis.totalSyncEvents)", systemImage: "clock")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                        Text("events")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                    }
-                    Spacer()
-
-                    VStack(alignment: .center, spacing: 2) {
-                        Label("\(analysis.completedSyncs)", systemImage: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                        Text("completed")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
-                    Spacer()
-
-                    VStack(alignment: .center, spacing: 2) {
-                        Label("\(analysis.failedSyncs)", systemImage: "xmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                        Text("failed events")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                    }
-                    Spacer()
-                }
-                .padding(.leading, 20)
-                .padding(.trailing, 10)
-
-                // Show Intune installation warnings
-                ForEach(analysis.parseErrors.filter { $0.hasPrefix("WARNING:") }, id: \.self) { warning in
+                VStack {
                     HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
+                        Label("Parsed log entries: \(analysis.totalEntries)", systemImage: "doc.text.magnifyingglass")
                             .font(.caption)
-                        Text(warning.replacingOccurrences(of: "WARNING: ", with: ""))
-                            .font(.caption)
-                            .foregroundColor(.orange)
+                            .foregroundColor(.gray)
                         Spacer()
                     }
-                    .padding(.top, 2)
-                }
-                .padding(.leading, 30)
-                .padding(.trailing, 10)
+                    .padding(.leading, 20)
+                    .padding(.trailing, 10)
+                    .padding(.top, 6)
+                    .padding(.bottom, 0)
+                    
+                    Divider()
+                    .padding(.leading, 18)
+                    .padding(.trailing, 40)
+                    .padding(.bottom, 6)
 
-            }
+                    
+                    HStack {
+                        VStack(alignment: .center, spacing: 2) {
+                            Label("\(analysis.totalSyncEvents)", systemImage: "clock")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text("events")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                        Spacer()
+
+                        VStack(alignment: .center, spacing: 2) {
+                            Label("\(analysis.completedSyncs)", systemImage: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                            Text("completed")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        }
+                        Spacer()
+
+                        VStack(alignment: .center, spacing: 2) {
+                            Label("\(analysis.failedSyncs)", systemImage: "xmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                            Text("failed events")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                        Spacer()
+                    }
+                    .padding(.leading, 20)
+                    .padding(.trailing, 10)
+                    .padding(.bottom, 6)
+
+                    // Show Intune installation warnings
+                    ForEach(analysis.parseErrors.filter { $0.hasPrefix("WARNING:") }, id: \.self) { warning in
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                            Text(warning.replacingOccurrences(of: "WARNING: ", with: ""))
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                            Spacer()
+                        }
+                        .padding(.top, 2)
+                    }
+                    .padding(.leading, 30)
+                    .padding(.trailing, 10)
+                    .padding(.bottom, 6)
+
+                }
+             }
             .font(.headline)
             .padding(.leading, 10)
 
             Divider()
+            .padding(.bottom, 6)
+            
         }
         .background(Color(NSColor.controlBackgroundColor))
     }
@@ -608,11 +1018,12 @@ struct ContentView: View {
     private func filterControls(analysis: LogAnalysis) -> some View {
         let syncCount = analysis.syncEvents.filter { $0.eventType == .fullSync }.count
         let recurringCount = analysis.syncEvents.filter { $0.eventType == .recurringPolicy }.count
+        let healthCount = analysis.syncEvents.filter { $0.eventType == .healthPolicy }.count
 
         return VStack(spacing: 0) {
 
             HStack {
-                Text("Event Filter:")
+                Text("Event Type:")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -620,23 +1031,27 @@ struct ContentView: View {
             }
             .padding(.horizontal)
             .padding(.vertical, 2)
-
+            
             HStack(spacing: 4) {
                 ForEach(EventFilter.allCases, id: \.self) { filter in
                     Button(action: {
                         eventFilter = filter
                     }) {
-                        Text(filter.displayNameWithCount(syncCount: syncCount, recurringCount: recurringCount))
+                        
+                        Text(filter.displayNameWithCount(syncCount: syncCount, recurringCount: recurringCount, healthCount: healthCount))
                             .multilineTextAlignment(.center)
                             .font(.caption)
                             .padding(.horizontal, 4)
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 8)
                             .frame(maxWidth: .infinity)
                             .background(eventFilter == filter ? Color.accentColor : Color.gray.opacity(0.2))
                             .foregroundColor(eventFilter == filter ? .white : .primary)
                             .cornerRadius(4)
+                            .tooltip(filter.toolTipForFilter())
+
                     }
                     .buttonStyle(.plain)
+                    .buttonBorderShape(.roundedRectangle)
                     .keyboardShortcut(filter.keyboardShortcut)
                 }
             }
@@ -658,58 +1073,125 @@ struct ContentView: View {
                     }
                 }
             }
+            HStack(spacing: 4) {
+                Button(action: {}) {
+                    Text("⌘1")
+                        .font(.caption)
+                        .foregroundColor(eventFilter == .syncOnly ? .blue : .secondary)
+                        .padding(.horizontal, 4)
+                        .frame(maxWidth: .infinity)
+
+                }
+                .background(Color(NSColor.controlBackgroundColor))
+                .buttonStyle(.borderless)
+
+                Button(action: {}) {
+                    Text("⌘2")
+                        .font(.caption)
+                        .foregroundColor(eventFilter == .recurringOnly ? .blue : .secondary)
+                        .padding(.horizontal, 4)
+                        .frame(maxWidth: .infinity)
+
+                }
+                .background(Color(NSColor.controlBackgroundColor))
+                .buttonStyle(.borderless)
+
+                Button(action: {}) {
+                    Text("⌘3")
+                        .font(.caption)
+                        .foregroundColor(eventFilter == .healthOnly ? .blue : .secondary)
+                        .padding(.horizontal, 4)
+                        .frame(maxWidth: .infinity)
+
+                }
+                .background(Color(NSColor.controlBackgroundColor))
+                .buttonStyle(.borderless)
+
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 2)
 
         }
         .background(Color(NSColor.controlBackgroundColor))
+        .padding(.bottom, 6)
     }
 
     private var sortControls: some View {
-        HStack {
-            Text("Event Sort:")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            Button(action: { sortNewestFirst = false }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.up")
-                        .font(.caption)
-                    Text("Oldest First")
-                        .font(.caption)
-                }
+        VStack {
+            HStack {
+                Text("Event Sort:")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
             }
-            .buttonStyle(.plain)
-            .foregroundColor(sortNewestFirst ? .secondary : .blue)
-            .fontWeight(sortNewestFirst ? .regular : .medium)
+            .padding(.horizontal)
+            .background(Color(NSColor.controlBackgroundColor))
 
-            Button(action: { sortNewestFirst = true }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.down")
-                        .font(.caption)
-                    Text("Newest First")
-                        .font(.caption)
+            HStack {
+                Spacer()
+                Button(action: { sortNewestFirst = false }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.up")
+                            .font(.caption)
+                        Text("Oldest First")
+                            .font(.caption)
+                    }
                 }
-            }
-            .buttonStyle(.plain)
-            .foregroundColor(sortNewestFirst ? .blue : .secondary)
-            .fontWeight(sortNewestFirst ? .medium : .regular)
+                .buttonStyle(.plain)
+                .foregroundColor(sortNewestFirst ? .secondary : .blue)
+                .fontWeight(sortNewestFirst ? .regular : .medium)
+                .keyboardShortcut(.upArrow)
+                
+                Text("⌘↑")
+                    .font(.caption)
+                    .foregroundColor(sortNewestFirst ? .secondary : .blue)
+                    .fontWeight(sortNewestFirst ? .regular : .medium)
 
-            Spacer()
+                Spacer()
+
+                Button(action: { sortNewestFirst = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.down")
+                            .font(.caption)
+                        Text("Newest First")
+                            .font(.caption)
+                    }
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(sortNewestFirst ? .blue : .secondary)
+                .fontWeight(sortNewestFirst ? .medium : .regular)
+                .keyboardShortcut(.downArrow)
+                
+                Text("⌘↓")
+                    .font(.caption)
+                    .foregroundColor(sortNewestFirst ? .blue : .secondary)
+                    .fontWeight(sortNewestFirst ? .medium : .regular)
+
+                Spacer()
+                
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 6)
+            .background(Color(NSColor.controlBackgroundColor))
+
         }
-        .padding(.horizontal)
-        .padding(.vertical, 6)
         .background(Color(NSColor.controlBackgroundColor))
     }
-    
+        
     private func sortedSyncEvents(_ syncEvents: [SyncEvent]) -> [SyncEvent] {
         // First, apply the filter
         var filteredEvents = syncEvents
         switch eventFilter {
-        case .all:
-            break // No filtering
+//        case .all:
+//            // Show only Sync and Recurring events (exclude health events as they're too frequent)
+//            filteredEvents = syncEvents.filter { $0.eventType == .fullSync || $0.eventType == .recurringPolicy }
         case .syncOnly:
             filteredEvents = syncEvents.filter { $0.eventType == .fullSync }
         case .recurringOnly:
             filteredEvents = syncEvents.filter { $0.eventType == .recurringPolicy }
+        case .healthOnly:
+            filteredEvents = syncEvents.filter { $0.eventType == .healthPolicy }
         }
 
         // Then, apply the sort
@@ -721,9 +1203,9 @@ struct ContentView: View {
     }
     
     private func hasEnrollmentInfo(_ analysis: LogAnalysis) -> Bool {
-        return analysis.environment != nil || 
-               analysis.region != nil || 
-               analysis.accountID != nil || 
+        return analysis.environment != nil ||
+               analysis.region != nil ||
+               analysis.accountID != nil ||
                analysis.aadTenantID != nil
     }
     
@@ -745,6 +1227,13 @@ struct ContentView: View {
 
 struct SyncEventRow: View {
     let syncEvent: SyncEvent
+    let isSelected: Bool
+    @State private var isHovered: Bool = false
+
+    init(syncEvent: SyncEvent, isSelected: Bool = false) {
+        self.syncEvent = syncEvent
+        self.isSelected = isSelected
+    }
 
     private var eventLabel: String {
         switch syncEvent.eventType {
@@ -752,14 +1241,41 @@ struct SyncEventRow: View {
             return syncEvent.isComplete ? "Sync Event" : "Sync Event (In Progress)"
         case .recurringPolicy:
             return syncEvent.isComplete ? "Recurring Event" : "Recurring Event (In Progress)"
+        case .healthPolicy:
+            let healthPolicyName: String = syncEvent.policies.first?.displayName ?? "Unknown"
+            let healthPolicyDomain = healthPolicyName.split(separator: " - ").last ?? ""
+            return syncEvent.isComplete ? "Health Event - \(healthPolicyDomain)" : "Health Event - \(healthPolicyDomain) (In Progress)"
+        }
+    }
+
+    private var eventIcon: String {
+        switch syncEvent.eventType {
+        case .fullSync:
+            return "gearshape.arrow.triangle.2.circlepath"
+        case .recurringPolicy:
+            return "clock.arrow.circlepath"
+        case .healthPolicy:
+            return "stethoscope"
+        }
+    }
+
+    private var eventIconColor: Color {
+        switch syncEvent.eventType {
+        case .fullSync:
+            return .blue
+        case .recurringPolicy:
+            return .blue
+        case .healthPolicy:
+            return .purple
         }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Image(systemName: syncEvent.eventType == .fullSync ? "gearshape.arrow.triangle.2.circlepath" : "clock.arrow.circlepath")
-                    .foregroundColor(.blue)
+
+                Image(systemName: eventIcon)
+                    .foregroundColor(eventIconColor)
                 Text(eventLabel)
                     .font(.headline)
                 Spacer()
@@ -796,6 +1312,17 @@ struct SyncEventRow: View {
             }
         }
         .padding(.vertical, 2)
+        .padding(.bottom, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.accentColor.opacity(isHovered && !isSelected ? 0.2 : 0))
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
+
     }
     
     private var statusIcon: some View {

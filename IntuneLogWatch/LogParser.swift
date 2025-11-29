@@ -135,7 +135,7 @@ class LogParser: ObservableObject {
                 let combinedContent = try await readAndCombineLogFiles(logFiles)
                 var analysis = await parseLogContent(combinedContent)
                 
-                let sourceTitle = "Local Intune Logs (\(logFiles.count) files)"
+                let sourceTitle = "Local Intune Logs: '/Library/Logs/Microsoft/Intune/IntuneMDMDaemon *.log' (\(logFiles.count) files)"
                 analysis.sourceTitle = sourceTitle
                 
                 // Add warning if agent is missing
@@ -145,6 +145,7 @@ class LogParser: ObservableObject {
                         totalEntries: analysis.totalEntries,
                         parseErrors: analysis.parseErrors + ["WARNING: Intune Agent not found at \(intuneAgentPath). Device may have been unenrolled from Intune."],
                         sourceTitle: analysis.sourceTitle,
+                        allEntries: analysis.allEntries,
                         environment: analysis.environment,
                         region: analysis.region,
                         asu: analysis.asu,
@@ -325,6 +326,7 @@ class LogParser: ObservableObject {
             totalEntries: entries.count,
             parseErrors: parseErrors,
             sourceTitle: "",
+            allEntries: entries,
             environment: enrollmentInfo.environment,
             region: enrollmentInfo.region,
             asu: enrollmentInfo.asu,
@@ -390,6 +392,10 @@ class LogParser: ObservableObject {
         var recurringPolicyGroups: [String: [LogEntry]] = [:] // PolicyID -> entries
         var recurringPolicyStartTimes: [String: Date] = [:] // PolicyID -> start time
 
+        // Track health policy events separately by domain
+        var healthPolicyGroups: [String: [LogEntry]] = [:] // Domain -> entries
+        var healthPolicyStartTimes: [String: Date] = [:] // Domain -> start time
+
         for entry in entries {
             // Handle FullSyncWorkflow events
             if entry.component == "FullSyncWorkflow" && entry.message.contains("Starting sidecar gateway service checkin") {
@@ -425,13 +431,19 @@ class LogParser: ObservableObject {
                 currentEventType = nil
 
             } else if syncStartTime != nil && currentEventType == .fullSync {
-                currentSyncEntries.append(entry)
+                // Exclude health check entries from sync events
+                let isHealthCheckEntry = entry.component == "HealthCheckWorkflow" ||
+                    (entry.component == "ExecutionClock" && entry.healthCheckContext != nil)
+
+                if !isHealthCheckEntry {
+                    currentSyncEntries.append(entry)
+                }
             }
 
             // Handle recurring script policy events
             if entry.component == "ScriptPolicyRunner" && entry.message.contains("Running recurring script policy") {
                 guard let policyId = entry.policyId else { continue }
-
+                
                 // Check if there's an existing recurring policy event for this policyId that needs to be finalized
                 if let existingEntries = recurringPolicyGroups[policyId],
                    !existingEntries.isEmpty,
@@ -445,7 +457,7 @@ class LogParser: ObservableObject {
                     )
                     syncEvents.append(recurringEvent)
                 }
-
+                
                 // Start a new recurring policy event
                 recurringPolicyGroups[policyId] = [entry]
                 recurringPolicyStartTimes[policyId] = entry.timestamp
@@ -475,6 +487,64 @@ class LogParser: ObservableObject {
                 // Add entry to the recurring policy event
                 recurringPolicyGroups[policyId]?.append(entry)
             }
+
+            // Handle health check policy events
+            if entry.component == "HealthCheckWorkflow" && entry.message.contains("Starting health check") {
+                guard let domain = entry.healthDomain else { continue }
+
+                // Check if there's an existing health event for this domain that needs to be finalized
+                if let existingEntries = healthPolicyGroups[domain],
+                   !existingEntries.isEmpty,
+                   let existingStartTime = healthPolicyStartTimes[domain] {
+                    // Finalize the previous occurrence of this health check
+                    let healthEvent = await buildSyncEvent(
+                        eventType: .healthPolicy,
+                        startTime: existingStartTime,
+                        endTime: existingEntries.last?.timestamp,
+                        entries: existingEntries
+                    )
+                    syncEvents.append(healthEvent)
+                }
+
+                // Start a new health check event
+                healthPolicyGroups[domain] = [entry]
+                healthPolicyStartTimes[domain] = entry.timestamp
+
+            } else if entry.component == "HealthCheckWorkflow" && entry.message.contains("Completed health check") {
+                guard let domain = entry.healthDomain else { continue }
+
+                // Add the "Completed health check" entry but don't finalize yet
+                if healthPolicyGroups[domain] != nil {
+                    healthPolicyGroups[domain]?.append(entry)
+                }
+
+            } else if entry.component == "ExecutionClock" && entry.healthCheckContext != nil {
+                // This is the final ExecutionClock entry with "Context: health check - [domain]"
+                guard let domain = entry.healthCheckContext else { continue }
+
+                if var existingEntries = healthPolicyGroups[domain] {
+                    existingEntries.append(entry)
+
+                    if let startTime = healthPolicyStartTimes[domain] {
+                        let healthEvent = await buildSyncEvent(
+                            eventType: .healthPolicy,
+                            startTime: startTime,
+                            endTime: entry.timestamp,
+                            entries: existingEntries
+                        )
+                        syncEvents.append(healthEvent)
+                    }
+
+                    // Clear this domain from tracking
+                    healthPolicyGroups.removeValue(forKey: domain)
+                    healthPolicyStartTimes.removeValue(forKey: domain)
+                }
+            } else if entry.component == "HealthCheckWorkflow" {
+                // Add any other HealthCheckWorkflow entries to the current health check if one is active
+                if let domain = entry.healthDomain, healthPolicyGroups[domain] != nil {
+                    healthPolicyGroups[domain]?.append(entry)
+                }
+            }
         }
 
         // Finalize any remaining full sync event
@@ -498,6 +568,19 @@ class LogParser: ObservableObject {
                     entries: entries
                 )
                 syncEvents.append(recurringEvent)
+            }
+        }
+
+        // Finalize any remaining health check events
+        for (domain, entries) in healthPolicyGroups {
+            if !entries.isEmpty, let startTime = healthPolicyStartTimes[domain] {
+                let healthEvent = await buildSyncEvent(
+                    eventType: .healthPolicy,
+                    startTime: startTime,
+                    endTime: entries.last?.timestamp,
+                    entries: entries
+                )
+                syncEvents.append(healthEvent)
             }
         }
 
@@ -529,7 +612,7 @@ class LogParser: ObservableObject {
         
         for (policyId, policyEntries) in policyMap {
             let sortedEntries = policyEntries.sorted { $0.timestamp < $1.timestamp }
-            
+
             let type = PolicyType.fromComponent(sortedEntries.first?.component)
             let bundleId = sortedEntries.compactMap { $0.bundleId }.first
             let appName = sortedEntries.compactMap { $0.appName }.first
@@ -537,12 +620,13 @@ class LogParser: ObservableObject {
             let appIntent = sortedEntries.compactMap { $0.appIntent }.first
             let scriptType = sortedEntries.compactMap { $0.scriptType }.first
             let executionContext = sortedEntries.compactMap { $0.executionContext }.first
-            
+            let healthDomain = sortedEntries.compactMap { $0.healthDomain }.first
+
             let startTime = sortedEntries.first?.timestamp
             let endTime = getEndTime(for: sortedEntries, type: type)
-            
+
             let status = determineStatus(for: sortedEntries, type: type)
-            
+
             let policy = PolicyExecution(
                 policyId: policyId,
                 type: type,
@@ -552,6 +636,7 @@ class LogParser: ObservableObject {
                 appIntent: appIntent,
                 scriptType: scriptType,
                 executionContext: executionContext,
+                healthDomain: healthDomain,
                 status: status,
                 startTime: startTime,
                 endTime: endTime,
@@ -574,6 +659,14 @@ class LogParser: ObservableObject {
                 return entry.timestamp
             } else {
                 return entries.last?.timestamp
+            }
+        case .health:
+            // Look for the ExecutionClock entry with health check context
+            if let entry = entries.last(where: { $0.component == "ExecutionClock" && $0.healthCheckContext != nil }) {
+                return entry.timestamp
+            } else {
+                // Fallback to "Completed health check" if ExecutionClock entry not found
+                return entries.last { $0.message.contains("Completed health check") }?.timestamp
             }
         case .unknown:
             return entries.last?.timestamp
@@ -678,7 +771,7 @@ class LogParser: ObservableObject {
         for line in lines {
             if line.contains("ObserveNetworkInterface") {
                 totalChecks += 1
-                
+
                 if line.contains("No internet connection") {
                     noConnectionCount += 1
                 } else if line.contains("Internet connection available. Context:") {
@@ -691,11 +784,14 @@ class LogParser: ObservableObject {
                             let cleanInterface = interfaceString
                                 .replacingOccurrences(of: "[\"", with: "")
                                 .replacingOccurrences(of: "\"]", with: "")
-                            
+
                             // Handle multiple interfaces separated by commas
                             let interfaces = cleanInterface.components(separatedBy: "\", \"")
-                            for interface in interfaces {
-                                let cleanedInterface = interface.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                            // Only count the first interface to avoid double-counting
+                            // Each network check should only count once
+                            if let firstInterface = interfaces.first {
+                                let cleanedInterface = firstInterface.trimmingCharacters(in: .whitespacesAndNewlines)
                                 interfaceStats[cleanedInterface, default: 0] += 1
                             }
                         }
@@ -714,15 +810,29 @@ class LogParser: ObservableObject {
     }
     
     private func determineStatus(for entries: [LogEntry], type: PolicyType) -> PolicyStatus {
+        // For health checks, use the ExecutionClock status if available
+        if type == .health {
+            if let healthStatus = entries.compactMap({ $0.healthCheckStatus }).first {
+                switch healthStatus.lowercased() {
+                case "success":
+                    return .completed
+                case "failure":
+                    return .failed
+                default:
+                    break
+                }
+            }
+        }
+
         if entries.contains(where: { $0.level == .error }) {
             return .failed
         }
-        
+
         if entries.contains(where: { $0.message.contains("Not running script policy because this policy has already been run.") }) || entries.contains(where: { $0.message.contains("Finished management script.") })
         {
             return .completed
         }
-            
+
         if entries.contains(where: { $0.level == .warning }) {
             if getEndTime(for: entries, type: type) != nil {
                 return .warning
@@ -730,7 +840,7 @@ class LogParser: ObservableObject {
                 return .running
             }
         }
-        
+
         if getEndTime(for: entries, type: type) != nil {
             if entries.contains(where: { $0.message.contains("Status: Success") }) ||
                entries.contains(where: { $0.message.contains("Handling app policy finished") })
@@ -740,7 +850,7 @@ class LogParser: ObservableObject {
                 return .warning
             }
         }
-        
+
         return .running
     }
     
@@ -821,6 +931,8 @@ extension PolicyType {
             return .app
         case "ScriptPolicyRunner", "AdHocScriptProcessor":
             return .script
+        case "HealthCheckWorkflow":
+            return .health
         default:
             return .unknown
         }
