@@ -529,7 +529,9 @@ struct IntuneLogWatchApp: App {
                                     appearancePreference = .system
                                 }
                             } else {
-                                appearancePreference = preference
+                                DispatchQueue.main.async {
+                                    appearancePreference = preference
+                                }
                             }
                         } ) {
                             HStack {
