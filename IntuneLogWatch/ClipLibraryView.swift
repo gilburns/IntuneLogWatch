@@ -92,13 +92,15 @@ struct ClipLibraryView: View {
     @ObservedObject var libraryManager = ClipLibraryManager.shared
     @State private var searchText = ""
     @State private var selectedEvent: ClippedPolicyEvent?
-    @State private var sortOption: SortOption = .dateNewest
+    @State private var sortOption: SortOption = .dateClippedNewest
     @State private var showingDeleteConfirmation = false
     @State private var eventToDelete: ClippedPolicyEvent?
     
     enum SortOption: String, CaseIterable {
-        case dateNewest = "Date (Newest First)"
-        case dateOldest = "Date (Oldest First)"
+        case dateClippedNewest = "Clipped Date (Newest First)"
+        case dateClippedOldest = "Clipped Date (Oldest First)"
+        case dateEventNewest = "Event Date (Newest First)"
+        case dateEventOldest = "Event Date (Oldest First)"
         case nameAZ = "Name (A-Z)"
         case nameZA = "Name (Z-A)"
     }
@@ -117,10 +119,14 @@ struct ClipLibraryView: View {
         
         // Sort
         switch sortOption {
-        case .dateNewest:
+        case .dateClippedNewest:
             events.sort { $0.clippedDate > $1.clippedDate }
-        case .dateOldest:
+        case .dateClippedOldest:
             events.sort { $0.clippedDate < $1.clippedDate }
+        case .dateEventNewest:
+            events.sort { $0.policyExecution.startTime! > $1.policyExecution.startTime! }
+        case .dateEventOldest:
+            events.sort { $0.policyExecution.startTime! < $1.policyExecution.startTime! }
         case .nameAZ:
             events.sort { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
         case .nameZA:
@@ -152,6 +158,7 @@ struct ClipLibraryView: View {
                             .foregroundColor(.secondary)
                         TextField("Search clips...", text: $searchText)
                             .textFieldStyle(.plain)
+                            .font(.system(.title3))
                         if !searchText.isEmpty {
                             Button(action: { searchText = "" }) {
                                 Image(systemName: "xmark.circle.fill")
@@ -191,12 +198,6 @@ struct ClipLibraryView: View {
                 .padding(.trailing, 16)
                 .padding(.top, 2)
                 .padding(.bottom, 8)
-
-//                // Search and Sort Controls
-//                VStack(spacing: 8) {
-//                    
-//                }
-//                .padding()
                 
                 Divider()
                     .padding(.top, 0)
@@ -790,6 +791,7 @@ struct ClippedEventDetailView: View {
                 
                 statusBadge
             }
+            .padding(.top, -10)
             
             HStack(spacing: 16) {
                 if let startTime = policy.startTime {
@@ -810,6 +812,7 @@ struct ClippedEventDetailView: View {
                 
                 Spacer()
             }
+            .padding(.bottom, -10)
             
             HStack(spacing: 16) {
                 copyablePolicyId
