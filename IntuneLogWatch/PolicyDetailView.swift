@@ -267,16 +267,36 @@ struct PolicyDetailView: View {
                 .padding(.bottom, -2)
                 
                 HStack() {
-                    Text(policy.policyId)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .textSelection(.enabled)
-                        .lineLimit(1)
-
+                    if policy.policyId == "00000000-0000-0000-0000-000000000000" {
+                        Text(policy.policyId)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .textSelection(.enabled)
+                            .lineLimit(1)
+                    } else {
+                        Button(action: {
+                            let intuneUrl = generateIntunePortalUrl(for: policy)
+                            NSWorkspace.shared.open(URL(string: intuneUrl)!)
+                        }) {
+                            Text(policy.policyId).underline()
+                                .foregroundColor(Color.blue)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }.buttonStyle(PlainButtonStyle())
+                        .onHover { inside in
+                            if inside {
+                                NSCursor.pointingHand.push()
+                            } else {
+                                NSCursor.pop()
+                            }
+                        }
+                        .help("Click to open this policy in the Intune portal: \(generateIntunePortalUrl(for: policy))")
+                    }
                 }
             }
             
             Spacer()
+                .frame(width: 40)
             
             VStack(alignment: .leading, spacing: 4) {
                 
@@ -287,7 +307,7 @@ struct PolicyDetailView: View {
                     .foregroundColor(.secondary)
                     .padding(.bottom, -6)
                 }
-
+                
                 HStack(alignment: .center) {
                     Button(action: {
                         copyPolicyId()
@@ -323,6 +343,16 @@ struct PolicyDetailView: View {
                             }) {
                                 Label("Copy Intune Portal URL", systemImage: "globe")
                             }
+                            
+                            Divider()
+
+                            Button(action: {
+                                let intuneUrl = generateIntunePortalUrl(for: policy)
+                                NSWorkspace.shared.open(URL(string: intuneUrl)!)
+                            }) {
+                                Label("Open Intune Portal URL", systemImage: "globe.fill")
+                            }
+
                         }
                     }
                 }
@@ -340,8 +370,8 @@ struct PolicyDetailView: View {
     }
 
     private func copyIntunePortalUrl() {
-        let apiUrl = generateIntunePortalUrl(for: policy)
-        copyToClipboard(text: apiUrl, displayText: "Intune Portal URL")
+        let intuneUrl = generateIntunePortalUrl(for: policy)
+        copyToClipboard(text: intuneUrl, displayText: "Intune Portal URL")
     }
 
     private func copyToClipboard(text: String, displayText: String) {
@@ -393,9 +423,9 @@ struct PolicyDetailView: View {
         case .script:
             // Check if it's a custom attribute or regular script based on scriptType
             if let scriptType = policy.scriptType, scriptType == "Custom Attribute" {
-                return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/customAttributes"
+                return "\(baseUrl)/?ref=AdminCenter#view/Microsoft_Intune_DeviceSettings/ConfigureCustomAttributesPolicyMenuBladeViewModel/~/overview/id/\(guid)/displayName/"
             } else {
-                return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/scripts"
+                return "\(baseUrl)/?ref=AdminCenter#view/Microsoft_Intune_DeviceSettings/ConfigureWMPolicyMenuBlade/~/overview/policyId/\(guid)/policyType~/1"
             }
         case .health:
             return "Not Supported"

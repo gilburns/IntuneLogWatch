@@ -249,7 +249,7 @@ struct ClipLibraryView: View {
                 }
                 .padding(8)
             }
-            .frame(minWidth: 260.0)
+            .frame(minWidth: 310.0)
         } detail: {
             // Detail View
             if let event = selectedEvent {
@@ -317,6 +317,10 @@ struct ClipEventRow: View {
     let onDelete: () -> Void
     @State private var isHovered: Bool = false
 
+    private var policy: PolicyExecution {
+        event.policyExecution.toPolicyExecution()
+    }
+
     private var statusColor: Color {
         switch event.policyExecution.status {
         case .completed: return .green
@@ -329,78 +333,95 @@ struct ClipEventRow: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(event.displayName)
-                        .font(.headline)
-                        .lineLimit(1)
-
-                    Spacer()
-
+            HStack{
+                VStack{
                     Circle()
                         .fill(statusColor)
                         .frame(width: 8, height: 8)
+                        .offset(x: -5, y: -4 - (event.notes.isEmpty ? 0 : 12))
+
                 }
+                
+                VStack {
+                    AppIconView(
+                        bundleId: policy.bundleId,
+                        policyType: policy.type,
+                        size: 42
+                    )
+                    .offset(x: 0, y: -4 - (event.notes.isEmpty ? 0 : 12))
 
-                Grid(alignment: .leading) {
-                    GridRow {
-                        Text("Event:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                }
+                .padding(.leading, -6)
 
-                        Text(formatDate(event.policyExecution.startTime!))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(event.displayName)
+                            .font(.headline)
+                            .lineLimit(1)
 
-                        if event.policyExecution.hasErrors || event.policyExecution.hasWarnings {
-                            HStack (alignment: .top, spacing: 8) {
-                                EmptyView()
-                                Image(systemName: event.policyExecution.hasErrors ? "exclamationmark.circle.fill" : "exclamationmark.triangle.fill")
-                                    .font(.caption2)
-                                    .foregroundColor(event.policyExecution.hasErrors ? .red : .orange)
-                            }
-                        } else {
-                            EmptyView()
-                        }
-                        
-                    }
-                    GridRow {
-                        Text("Clipped:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Spacer()
 
-                        Text(formatDate(event.clippedDate))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        EmptyView()
-                        
                     }
 
-                    if !event.notes.isEmpty {
-                        Divider()
-                            .gridCellUnsizedAxes(.horizontal)
-
+                    Grid(alignment: .leading) {
                         GridRow {
-                            Text("Notes:")
+                            Text("Event:")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
 
-                            Text(event.notes)
-                                .font(.caption2)
+                            Text(formatDate(event.policyExecution.startTime!))
+                                .font(.caption)
                                 .foregroundColor(.secondary)
-                                .lineLimit(1)
+
+                            if event.policyExecution.hasErrors || event.policyExecution.hasWarnings {
+                                HStack (alignment: .top, spacing: 8) {
+                                    EmptyView()
+                                    Image(systemName: event.policyExecution.hasErrors ? "exclamationmark.circle.fill" : "exclamationmark.triangle.fill")
+                                        .font(.caption2)
+                                        .foregroundColor(event.policyExecution.hasErrors ? .red : .orange)
+                                }
+                            } else {
+                                EmptyView()
+                            }
+                            
+                        }
+                        GridRow {
+                            Text("Clipped:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            Text(formatDate(event.clippedDate))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
 
                             EmptyView()
                             
                         }
+
+                        if !event.notes.isEmpty {
+                            Divider()
+                                .gridCellUnsizedAxes(.horizontal)
+
+                            GridRow {
+                                Text("Notes:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                Text(event.notes)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+
+                                EmptyView()
+                                
+                            }
+                        }
+
+
                     }
-
-
                 }
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
-
             // Hover action buttons
             if isHovered {
                 HStack(spacing: 2) {
@@ -427,7 +448,7 @@ struct ClipEventRow: View {
                     .help("Delete clip")
                 }
                 .padding(8)
-                .offset(x: -6, y: -26 - (event.notes.isEmpty ? 0 : 24))
+                .offset(x: 12, y: -24 - (event.notes.isEmpty ? 0 : 24))
                 .transition(.opacity)
             }
         }
@@ -880,12 +901,31 @@ struct ClippedEventDetailView: View {
                 .padding(.bottom, -2)
                 
                 HStack() {
-                    Text(policy.policyId)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .textSelection(.enabled)
-                        .lineLimit(1)
-                    
+                    if policy.policyId == "00000000-0000-0000-0000-000000000000" {
+                        Text(policy.policyId)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .textSelection(.enabled)
+                            .lineLimit(1)
+                    } else {
+                        Button(action: {
+                            let intuneUrl = generateIntunePortalUrl(for: policy)
+                            NSWorkspace.shared.open(URL(string: intuneUrl)!)
+                        }) {
+                            Text(policy.policyId).underline()
+                                .foregroundColor(Color.blue)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }.buttonStyle(PlainButtonStyle())
+                        .onHover { inside in
+                            if inside {
+                                NSCursor.pointingHand.push()
+                            } else {
+                                NSCursor.pop()
+                            }
+                        }
+                        .help("Click to open this policy in the Intune portal: \(generateIntunePortalUrl(for: policy))")
+                    }
                 }
             }
             
@@ -937,6 +977,16 @@ struct ClippedEventDetailView: View {
                             }) {
                                 Label("Copy Intune Portal URL", systemImage: "globe")
                             }
+                            
+                            Divider()
+
+                            Button(action: {
+                                let intuneUrl = generateIntunePortalUrl(for: policy)
+                                NSWorkspace.shared.open(URL(string: intuneUrl)!)
+                            }) {
+                                Label("Open Intune Portal URL", systemImage: "globe.fill")
+                            }
+
                         }
                     }
                 }
@@ -1007,9 +1057,9 @@ struct ClippedEventDetailView: View {
         case .script:
             // Check if it's a custom attribute or regular script based on scriptType
             if let scriptType = policy.scriptType, scriptType == "Custom Attribute" {
-                return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/customAttributes"
+                return "\(baseUrl)/?ref=AdminCenter#view/Microsoft_Intune_DeviceSettings/ConfigureCustomAttributesPolicyMenuBladeViewModel/~/overview/id/\(guid)/displayName/"
             } else {
-                return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/scripts"
+                return "\(baseUrl)/?ref=AdminCenter#view/Microsoft_Intune_DeviceSettings/ConfigureWMPolicyMenuBlade/~/overview/policyId/\(guid)/policyType~/1"
             }
         case .health:
             return "Not Supported"
@@ -1018,7 +1068,7 @@ struct ClippedEventDetailView: View {
             return "\(baseUrl)/#view/Microsoft_Intune_DeviceSettings/DevicesMacOsMenu/~/scripts"
         }
     }
-    
+
     private var policyIssueStatus: some View {
         VStack(alignment: .leading) {
             
