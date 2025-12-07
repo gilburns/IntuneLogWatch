@@ -42,19 +42,197 @@ struct IntuneLogWatchApp: App {
     @State private var analysisExpanded: Bool = true
     @AppStorage("appearancePreference") private var appearancePreference: AppearancePreference = .system
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.openWindow) private var openWindow
 
     init() {
         // Set up Sparkle updater
         updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
     }
-    
+
     class AppDelegate: NSObject, NSApplicationDelegate {
+        enum BulkImportStrategy {
+            case ask
+            case replaceAll
+            case skipAll
+        }
+
         func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
             return true
         }
-        
+
         func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
             return true
+        }
+
+        // Handle opening .ilwclip files (modern method)
+        func application(_ application: NSApplication, open urls: [URL]) {
+            print("AppDelegate: application(_:open:) called with \(urls.count) URLs")
+
+            let isBulkImport = urls.count > 1
+            var bulkStrategy: BulkImportStrategy = .ask
+            var anySuccessfulImports = false
+
+            for url in urls {
+                print("AppDelegate: Processing URL: \(url.path)")
+                guard url.pathExtension == "ilwclip" else {
+                    print("AppDelegate: Skipping non-ilwclip file: \(url.pathExtension)")
+                    continue
+                }
+
+                print("AppDelegate: Importing clip from \(url.path)")
+
+                // Import the clip
+                let result = ClipLibraryManager.shared.importEvent(from: url)
+
+                switch result {
+                case .success:
+                    print("AppDelegate: Successfully imported clip")
+                    anySuccessfulImports = true
+
+                case .duplicateExists(let existingEvent):
+                    print("AppDelegate: Duplicate clip detected")
+
+                    // Handle based on bulk import strategy
+                    if bulkStrategy == .skipAll {
+                        print("AppDelegate: Skipping duplicate (Skip All)")
+                        continue
+                    } else if bulkStrategy == .replaceAll {
+                        print("AppDelegate: Replacing duplicate (Replace All)")
+                        let replaceResult = ClipLibraryManager.shared.importEvent(from: url, overwrite: true)
+                        if case .success = replaceResult {
+                            print("AppDelegate: Successfully replaced clip")
+                            anySuccessfulImports = true
+                        }
+                        continue
+                    }
+
+                    // Show alert asking user what to do
+                    let (userChoice, didReplace) = self.showDuplicateClipAlert(
+                        existingEvent: existingEvent,
+                        importURL: url,
+                        isBulkImport: isBulkImport
+                    )
+
+                    // Track if this individual replace succeeded
+                    if didReplace {
+                        anySuccessfulImports = true
+                    }
+
+                    // Update strategy if user chose Replace All or Skip All
+                    if let newStrategy = userChoice {
+                        bulkStrategy = newStrategy
+                    }
+
+                case .invalidFileType:
+                    print("AppDelegate: Invalid file type")
+                    DispatchQueue.main.async {
+                        self.showErrorAlert(title: "Invalid File", message: "The selected file is not a valid IntuneLogWatch clip file.")
+                    }
+
+                case .failed(let error):
+                    print("AppDelegate: Import failed with error: \(error)")
+                    DispatchQueue.main.async {
+                        self.showErrorAlert(title: "Import Failed", message: "Failed to import clip: \(error.localizedDescription)")
+                    }
+                }
+            }
+
+            // After all imports, clean up and open Clip Library if any succeeded
+            if anySuccessfulImports {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Close only empty/untitled windows that were auto-created
+                    for window in NSApp.windows {
+                        if window.title.isEmpty {
+                            print("AppDelegate: Closing auto-created empty window")
+                            window.close()
+                        }
+                    }
+
+                    // Open the Clip Library window to show the imported clips
+                    print("AppDelegate: Opening Clip Library after successful imports")
+                    NotificationCenter.default.post(name: .openClipLibrary, object: nil)
+                }
+            }
+        }
+
+        private func showDuplicateClipAlert(existingEvent: ClippedPolicyEvent, importURL: URL, isBulkImport: Bool) -> (BulkImportStrategy?, Bool) {
+            let alert = NSAlert()
+            alert.messageText = "Clip Already Exists"
+            alert.informativeText = "A clip named \"\(existingEvent.displayName)\" already exists in your library. Do you want to replace it with the imported version?"
+            alert.alertStyle = .warning
+
+            if isBulkImport {
+                // Bulk import: show Replace All / Skip All options
+                alert.addButton(withTitle: "Replace")
+                alert.addButton(withTitle: "Replace All")
+                alert.addButton(withTitle: "Skip")
+                alert.addButton(withTitle: "Skip All")
+            } else {
+                // Single file: simple Replace / Cancel
+                alert.addButton(withTitle: "Replace")
+                alert.addButton(withTitle: "Cancel")
+            }
+
+            let response = alert.runModal()
+
+            if isBulkImport {
+                switch response {
+                case .alertFirstButtonReturn:
+                    // Replace (this one only)
+                    print("AppDelegate: User chose to replace this clip")
+                    let result = ClipLibraryManager.shared.importEvent(from: importURL, overwrite: true)
+                    let didSucceed = if case .success = result { true } else { false }
+                    if !didSucceed {
+                        showErrorAlert(title: "Replace Failed", message: "Failed to replace the existing clip.")
+                    }
+                    return (nil, didSucceed) // Continue asking
+
+                case .alertSecondButtonReturn:
+                    // Replace All
+                    print("AppDelegate: User chose Replace All")
+                    let result = ClipLibraryManager.shared.importEvent(from: importURL, overwrite: true)
+                    let didSucceed = if case .success = result { true } else { false }
+                    return (.replaceAll, didSucceed)
+
+                case .alertThirdButtonReturn:
+                    // Skip (this one only)
+                    print("AppDelegate: User chose to skip this clip")
+                    return (nil, false) // Continue asking
+
+                default:
+                    // Skip All (fourth button)
+                    print("AppDelegate: User chose Skip All")
+                    return (.skipAll, false)
+                }
+            } else {
+                // Single file mode
+                if response == .alertFirstButtonReturn {
+                    // Replace
+                    print("AppDelegate: User chose to replace existing clip")
+                    let result = ClipLibraryManager.shared.importEvent(from: importURL, overwrite: true)
+
+                    if case .success = result {
+                        print("AppDelegate: Successfully replaced clip")
+                        return (nil, true)
+                    } else {
+                        showErrorAlert(title: "Replace Failed", message: "Failed to replace the existing clip.")
+                        return (nil, false)
+                    }
+                } else {
+                    // Cancel
+                    print("AppDelegate: User cancelled import")
+                    return (nil, false)
+                }
+            }
+        }
+
+        private func showErrorAlert(title: String, message: String) {
+            let alert = NSAlert()
+            alert.messageText = title
+            alert.informativeText = message
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
         }
     }
 
@@ -349,7 +527,7 @@ struct IntuneLogWatchApp: App {
     }
     
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             ContentView(
                 showingCertificateInspector: $showingCertificateInspector,
                 sidebarVisibility: $sidebarVisibility,
@@ -361,10 +539,12 @@ struct IntuneLogWatchApp: App {
             .onReceive(NotificationCenter.default.publisher(for: .showErrorCodesReference)) { _ in
                 showErrorCodesReference()
             }
+            .handlesExternalEvents(preferring: [], allowing: [])  // Don't handle external events in this view
         }
+        .handlesExternalEvents(matching: [])  // Don't create windows for external file events
         .windowStyle(DefaultWindowStyle())
 
-        WindowGroup("Clip Library", id: "clip-library") {
+        Window("Clip Library", id: "clip-library") {
             ClipLibraryWindowWrapper()
                 .preferredColorScheme(appearancePreference.colorScheme)
         }
@@ -385,11 +565,7 @@ struct IntuneLogWatchApp: App {
 
             CommandGroup(replacing: .newItem) {
                 Button(action: {
-                    NSApp.sendAction(
-                        #selector(NSWindowController().newWindowForTab(_:)),
-                        to: nil,
-                        from: nil
-                    )
+                    openWindow(id: "main")
                 }) {
                     Label("New Window", systemImage: "macwindow.badge.plus")
                 }
