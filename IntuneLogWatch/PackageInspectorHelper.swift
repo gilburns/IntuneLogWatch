@@ -359,7 +359,7 @@ struct PackageReceiptView: View {
                     Button(action: {
                         exportPackageReport()
                     }) {
-                        Label("Export Report", systemImage: "square.and.arrow.up")
+                        Label("Export Report", systemImage: "arrow.up.doc")
                     }
                     .buttonStyle(BorderedButtonStyle())
                     .keyboardShortcut(.init("e", modifiers: [.command, .shift]))
