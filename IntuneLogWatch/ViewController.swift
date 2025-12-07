@@ -152,7 +152,7 @@ struct ContentView: View {
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .openClipLibrary)) { _ in
-                // Open clip library window
+                // Open clip library window (Window scene ensures only one instance)
                 openWindow(id: "clip-library")
             }
             .onReceive(NotificationCenter.default.publisher(for: .reloadLocalLogs)) { _ in
@@ -256,6 +256,12 @@ struct ContentView: View {
                 .scaleEffect(sidebarVisibility != .doubleColumn ? 0.5 : 1)
                 .allowsHitTesting(sidebarVisibility == .doubleColumn)
                 .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
+
+                Image(systemName: "watch.analog")
+                    .foregroundColor(.accentColor)
+                    .font(.system(size: 18))
+                    .tooltip("IntuneLogWatch: This view shows you all the events loaded from the selected log file. You can view events and policies by clicking on them.")
+                
             }
         }
         
