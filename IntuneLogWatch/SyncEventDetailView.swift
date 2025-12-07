@@ -631,7 +631,7 @@ struct PolicyRow: View {
                 Button(action: {
                     PolicyExportHelper.exportPolicyLogs(policy: policy, syncEvent: nil)
                 }) {
-                    Image(systemName: "square.and.arrow.up")
+                    Image(systemName: "arrow.up.doc")
                         .foregroundColor(.white)
                         .font(.caption)
                         .padding(4)
