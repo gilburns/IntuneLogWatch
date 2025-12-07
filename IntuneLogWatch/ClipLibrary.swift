@@ -236,7 +236,7 @@ class ClipLibraryManager: ObservableObject {
     // MARK: - Save Event
 
     func saveEvent(_ event: ClippedPolicyEvent) {
-        let filename = "\(event.id.uuidString).json"
+        let filename = "\(event.id.uuidString).ilwclip"
         let fileURL = storageDirectory.appendingPathComponent(filename)
 
         do {
@@ -259,7 +259,7 @@ class ClipLibraryManager: ObservableObject {
     func loadAllEvents() {
         do {
             let files = try fileManager.contentsOfDirectory(at: storageDirectory, includingPropertiesForKeys: nil)
-            let jsonFiles = files.filter { $0.pathExtension == "json" }
+            let jsonFiles = files.filter { $0.pathExtension == "ilwclip" }
 
             var events: [ClippedPolicyEvent] = []
             let decoder = JSONDecoder()
@@ -284,7 +284,7 @@ class ClipLibraryManager: ObservableObject {
     // MARK: - Update Event
 
     func updateEvent(_ event: ClippedPolicyEvent) {
-        let filename = "\(event.id.uuidString).json"
+        let filename = "\(event.id.uuidString).ilwclip"
         let fileURL = storageDirectory.appendingPathComponent(filename)
 
         do {
@@ -306,7 +306,7 @@ class ClipLibraryManager: ObservableObject {
     // MARK: - Delete Event
 
     func deleteEvent(_ event: ClippedPolicyEvent) {
-        let filename = "\(event.id.uuidString).json"
+        let filename = "\(event.id.uuidString).ilwclip"
         let fileURL = storageDirectory.appendingPathComponent(filename)
 
         do {
@@ -314,6 +314,63 @@ class ClipLibraryManager: ObservableObject {
             clippedEvents.removeAll { $0.id == event.id }
         } catch {
             print("Failed to delete event: \(error)")
+        }
+    }
+
+    // MARK: - Import Event
+
+    enum ImportResult {
+        case success
+        case duplicateExists(ClippedPolicyEvent)
+        case invalidFileType
+        case failed(Error)
+    }
+
+    func importEvent(from url: URL, overwrite: Bool = false) -> ImportResult {
+        guard url.pathExtension == "ilwclip" else {
+            print("Invalid file type: \(url.pathExtension)")
+            return .invalidFileType
+        }
+
+        do {
+            // Load and decode the clip
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let event = try decoder.decode(ClippedPolicyEvent.self, from: data)
+
+            // Check if clip already exists
+            if let existingEvent = clippedEvents.first(where: { $0.id == event.id }) {
+                if !overwrite {
+                    print("Clip already exists: \(event.id)")
+                    return .duplicateExists(existingEvent)
+                } else {
+                    // Remove existing clip before importing
+                    print("Overwriting existing clip: \(event.id)")
+                    deleteEvent(existingEvent)
+                }
+            }
+
+            // Copy file to storage directory
+            let filename = "\(event.id.uuidString).ilwclip"
+            let destURL = storageDirectory.appendingPathComponent(filename)
+
+            // Remove existing file if overwriting
+            if FileManager.default.fileExists(atPath: destURL.path) {
+                try FileManager.default.removeItem(at: destURL)
+            }
+
+            try FileManager.default.copyItem(at: url, to: destURL)
+
+            // Add to in-memory array
+            clippedEvents.append(event)
+            clippedEvents.sort { $0.clippedDate > $1.clippedDate }
+
+            print("Successfully imported clip: \(event.displayName)")
+            return .success
+        } catch {
+            print("Failed to import clip: \(error)")
+            return .failed(error)
         }
     }
 

@@ -6,5 +6,50 @@
 	<string>https://intuneomator.org/intunelogwatch/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>hRolY2EIcxYuEYgVCkCyS2DQzvXHplU7BHIthJdtyqg=</string>
+
+	<!-- Document Types -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>IntuneLogWatch Clip</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.gilburns.intunelogwatch.clip</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Exported Type Identifiers -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.item</string>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>IntuneLogWatch Clip</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.gilburns.intunelogwatch.clip</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>ilwclip</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-intunelogwatch-clip</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

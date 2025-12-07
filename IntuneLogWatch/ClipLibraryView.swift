@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import ObjectiveC
 
 // MARK: - Window Wrapper (for opening from menu)
 
@@ -301,7 +302,7 @@ struct ClipLibraryView: View {
         let fileManager = FileManager.default
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let clipDir = appSupport.appendingPathComponent("IntuneLogWatch/ClippedEvents", isDirectory: true)
-        let filename = "\(event.id.uuidString).json"
+        let filename = "\(event.id.uuidString).ilwclip"
         let fileURL = clipDir.appendingPathComponent(filename)
         
         // Reveal the specific file in Finder
@@ -431,7 +432,7 @@ struct ClipEventRow: View {
                             .font(.system(size: 11))
                             .foregroundColor(.white)
                             .padding(4)
-                            .background(Color.blue.opacity(0.6))
+                            .background(Color.blue.opacity(0.7))
                             .clipShape(Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -442,7 +443,7 @@ struct ClipEventRow: View {
                             .font(.system(size: 11))
                             .foregroundColor(.white)
                             .padding(4)
-                            .background(Color.red.opacity(0.6))
+                            .background(Color.red.opacity(0.7))
                             .clipShape(Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -649,52 +650,6 @@ struct ClippedEventDetailView: View {
                                 }
                             }
                         }
-
-//                        HStack(spacing: 6) {
-//                            Image(systemName: "scissors")
-//                                .font(.caption)
-//                                .foregroundColor(.blue)
-//                            
-//                            Text("Clipped: \(formatDateTime(event.clippedDate))")
-//                                .font(.caption)
-//                                .foregroundColor(.secondary)
-//                        }
-//                        
-//                        // Notes
-//                        if isEditing {
-//                            VStack(alignment: .leading, spacing: 4) {
-//                                HStack(spacing: 6) {
-//                                    Image(systemName: "doc")
-//                                        .font(.caption)
-//                                        .foregroundColor(.blue)
-//                                    
-//                                    Text("Notes:")
-//                                        .font(.caption2)
-//                                        .foregroundColor(.secondary)
-//                                }
-//
-//                                TextEditor(text: $editedNotes)
-//                                    .frame(height: 60)
-//                                    .border(Color.gray.opacity(0.3), width: 1)
-//                                    .cornerRadius(4)
-//                            }
-//                        } else {
-//                            if !editedNotes.isEmpty {
-//                                HStack(spacing: 6) {
-//                                    Image(systemName: "doc")
-//                                        .font(.caption)
-//                                        .foregroundColor(.blue)
-//                                    
-//                                    Text("Notes:")
-//                                        .font(.caption2)
-//                                        .foregroundColor(.secondary)
-//                                }
-//                                Text(editedNotes)
-//                                    .font(.caption)
-//                                    .foregroundColor(.secondary)
-//                                    .padding(.top, -4)
-//                            }
-//                        }
                     }
                     
                     Spacer()
@@ -835,6 +790,7 @@ struct ClippedEventDetailView: View {
                     policyTypeTiles
                     
                 }
+                
             }
             .padding(.bottom, -4)
             
@@ -928,6 +884,39 @@ struct ClippedEventDetailView: View {
                             }
                         }
                         .help("Click to open this policy in the Intune portal: \(generateIntunePortalUrl(for: policy))")
+                        .contextMenu {
+                            if policy.policyId != "00000000-0000-0000-0000-000000000000" {
+                                Button(action: {
+                                    copyPolicyId()
+                                }) {
+                                    Label("Copy Policy ID", systemImage: "doc.on.doc")
+                                }
+                                
+                                Divider()
+                                
+                                Button(action: {
+                                    copyGraphApiUrl()
+                                }) {
+                                    Label("Copy Graph API URL", systemImage: "link")
+                                }
+                                
+                                Button(action: {
+                                    copyIntunePortalUrl()
+                                }) {
+                                    Label("Copy Intune Portal URL", systemImage: "globe")
+                                }
+                                
+                                Divider()
+
+                                Button(action: {
+                                    let intuneUrl = generateIntunePortalUrl(for: policy)
+                                    NSWorkspace.shared.open(URL(string: intuneUrl)!)
+                                }) {
+                                    Label("Open Intune Portal URL", systemImage: "globe.fill")
+                                }
+
+                            }
+                        }
                     }
                 }
             }
@@ -1327,7 +1316,7 @@ struct ClippedEventDetailView: View {
                         Button(action: {
                             PolicyExportHelper.exportPolicyLogs(policy: policy, syncEvent: nil)
                         }) {
-                            Image(systemName: "square.and.arrow.up")
+                            Image(systemName: "arrow.up.doc")
                                 .foregroundColor(.white)
                                 .font(.caption)
                                 .padding(4)
@@ -1365,9 +1354,8 @@ struct ClippedEventDetailView: View {
                         }
                         .buttonStyle(PressedButtonStyle())
                         .help("View \(policy.displayName) log entries")
-                        
+
                     }
-                    
                 }
             }
         }
@@ -1555,7 +1543,7 @@ struct ClippedEventDetailView: View {
             return .gray
         }
     }
-    
+
     // Helper method to provide selection-aware colors
     private func selectionAwareColor(_ originalColor: Color, fallback: Color) -> Color {
         // Use fallback color for better contrast when item might be selected
@@ -1567,5 +1555,5 @@ struct ClippedEventDetailView: View {
         // Increase opacity slightly for better visibility on selection
         return min(baseOpacity + 0.1, 0.4)
     }
-    
+
 }

@@ -291,6 +291,39 @@ struct PolicyDetailView: View {
                             }
                         }
                         .help("Click to open this policy in the Intune portal: \(generateIntunePortalUrl(for: policy))")
+                        .contextMenu {
+                            if policy.policyId != "00000000-0000-0000-0000-000000000000" {
+                                Button(action: {
+                                    copyPolicyId()
+                                }) {
+                                    Label("Copy Policy ID", systemImage: "doc.on.doc")
+                                }
+                                
+                                Divider()
+                                
+                                Button(action: {
+                                    copyGraphApiUrl()
+                                }) {
+                                    Label("Copy Graph API URL", systemImage: "link")
+                                }
+                                
+                                Button(action: {
+                                    copyIntunePortalUrl()
+                                }) {
+                                    Label("Copy Intune Portal URL", systemImage: "globe")
+                                }
+                                
+                                Divider()
+
+                                Button(action: {
+                                    let intuneUrl = generateIntunePortalUrl(for: policy)
+                                    NSWorkspace.shared.open(URL(string: intuneUrl)!)
+                                }) {
+                                    Label("Open Intune Portal URL", systemImage: "globe.fill")
+                                }
+
+                            }
+                        }
                     }
                 }
             }
@@ -698,11 +731,11 @@ struct PolicyDetailView: View {
                         Button(action: {
                             PolicyExportHelper.exportPolicyLogs(policy: policy, syncEvent: nil)
                         }) {
-                            Image(systemName: "square.and.arrow.up")
+                            Image(systemName: "arrow.up.doc")
                                 .foregroundColor(.white)
                                 .font(.caption)
                                 .padding(4)
-                                .padding(.bottom, 3)
+                                .padding(.bottom, 1)
                                 .background(
                                     Circle()
                                         .fill(Color.green)
@@ -724,7 +757,7 @@ struct PolicyDetailView: View {
                                 .foregroundColor(.white)
                                 .font(.caption)
                                 .padding(4)
-                                .padding(.bottom, 1)
+                                .padding(.bottom, -1)
                                 .background(
                                     Circle()
                                         .fill(Color.blue)
