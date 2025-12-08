@@ -8,12 +8,12 @@
 import SwiftUI
 import AppKit
 
-class AppIconHelper: ObservableObject {
+class AppIconHelper {
     static let shared = AppIconHelper()
-    
+
     private var iconCache: [String: NSImage] = [:]
     private let cacheQueue = DispatchQueue(label: "com.intunelogwatch.iconCache", attributes: .concurrent)
-    
+
     private init() {}
     
     func getIcon(for bundleId: String) -> NSImage? {
@@ -88,8 +88,7 @@ struct AppIconView: View {
     let bundleId: String?
     let policyType: PolicyType
     let size: CGFloat
-    
-    @StateObject private var iconHelper = AppIconHelper.shared
+
     @State private var appIcon: NSImage?
     
     var body: some View {
@@ -149,10 +148,10 @@ struct AppIconView: View {
             appIcon = nil
             return
         }
-        
+
         DispatchQueue.global(qos: .userInitiated).async {
-            let icon = iconHelper.getIcon(for: bundleId)
-            
+            let icon = AppIconHelper.shared.getIcon(for: bundleId)
+
             DispatchQueue.main.async {
                 self.appIcon = icon
             }
