@@ -2,7 +2,7 @@
 //  PackageInspectorHelper.swift
 //  IntuneLogWatch
 //
-//  Created by Gil Burns on 8/11/25.
+//  Created by Gil Burns on 11/29/25.
 //
 
 import Foundation
