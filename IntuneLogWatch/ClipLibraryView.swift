@@ -90,13 +90,14 @@ struct ClipEventDialog: View {
 // MARK: - Clip Library Window
 
 struct ClipLibraryView: View {
-    @ObservedObject var libraryManager = ClipLibraryManager.shared
+    @ObservedObject private var libraryManager = ClipLibraryManager.shared
     @State private var searchText = ""
     @State private var selectedEvent: ClippedPolicyEvent?
     @State private var sortOption: SortOption = .dateClippedNewest
     @State private var showingDeleteConfirmation = false
     @State private var eventToDelete: ClippedPolicyEvent?
-    
+    @State private var filteredAndSortedEvents: [ClippedPolicyEvent] = []
+
     enum SortOption: String, CaseIterable {
         case dateClippedNewest = "Clipped Date (Newest First)"
         case dateClippedOldest = "Clipped Date (Oldest First)"
@@ -105,10 +106,10 @@ struct ClipLibraryView: View {
         case nameAZ = "Name (A-Z)"
         case nameZA = "Name (Z-A)"
     }
-    
-    var filteredAndSortedEvents: [ClippedPolicyEvent] {
+
+    private func updateFilteredEvents() {
         var events = libraryManager.clippedEvents
-        
+
         // Filter by search text
         if !searchText.isEmpty {
             events = events.filter { event in
@@ -117,7 +118,7 @@ struct ClipLibraryView: View {
                 event.policyExecution.policyId.localizedCaseInsensitiveContains(searchText)
             }
         }
-        
+
         // Sort
         switch sortOption {
         case .dateClippedNewest:
@@ -133,8 +134,8 @@ struct ClipLibraryView: View {
         case .nameZA:
             events.sort { $0.displayName.localizedCompare($1.displayName) == .orderedDescending }
         }
-        
-        return events
+
+        filteredAndSortedEvents = events
     }
     
     var body: some View {
@@ -280,7 +281,19 @@ struct ClipLibraryView: View {
                     .tooltip("This view shows you all the log events that have been clipped from your Intune policy logs. You can manage the clips here.")
             }
         }
-        
+        .onAppear {
+            updateFilteredEvents()
+        }
+        .onChange(of: searchText) { _, _ in
+            updateFilteredEvents()
+        }
+        .onChange(of: sortOption) { _, _ in
+            updateFilteredEvents()
+        }
+        .onChange(of: libraryManager.clippedEvents.count) { _, _ in
+            // Update when events are added or removed
+            updateFilteredEvents()
+        }
         .alert("Delete Clipped Event?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
@@ -489,7 +502,6 @@ struct ClippedEventDetailView: View {
     @State private var copiedText: String = ""
     @State private var packageReceiptInfo: PackageReceiptInfo?
     @State private var showingClipDialog = false
-    @ObservedObject var libraryManager = ClipLibraryManager.shared
     
     // Store policy as a let property so LogEntry IDs remain stable
     private let policy: PolicyExecution
@@ -715,8 +727,8 @@ struct ClippedEventDetailView: View {
             clippedDate: event.clippedDate,
             policyExecution: event.policyExecution
         )
-        
-        libraryManager.updateEvent(updatedEvent)
+
+        ClipLibraryManager.shared.updateEvent(updatedEvent)
         isEditing = false
     }
     
