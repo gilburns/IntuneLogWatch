@@ -216,6 +216,7 @@ class ClipLibraryManager: ObservableObject {
 
     @Published var clippedEvents: [ClippedPolicyEvent] = []
 
+    private var hasLoadedInitialEvents = false
     private let fileManager = FileManager.default
     private var storageDirectory: URL {
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -230,7 +231,11 @@ class ClipLibraryManager: ObservableObject {
     }
 
     private init() {
-        loadAllEvents()
+        // Load events asynchronously to avoid triggering @Published during init
+        DispatchQueue.main.async { [weak self] in
+            self?.loadAllEvents()
+            self?.hasLoadedInitialEvents = true
+        }
     }
 
     // MARK: - Save Event
