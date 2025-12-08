@@ -1324,10 +1324,9 @@ struct SyncEventRow: View {
                 .fill(Color.accentColor.opacity(isHovered && !isSelected ? 0.2 : 0))
         )
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isHovered = hovering
-            }
+            isHovered = hovering
         }
+        .animation(.easeInOut(duration: 0.2), value: isHovered)
 
     }
     
