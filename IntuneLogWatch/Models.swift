@@ -57,6 +57,16 @@ enum PolicyStatus: String, CaseIterable {
     }
 }
 
+// MARK: - Deployment Channel
+
+enum DeploymentChannel: String, CaseIterable, Codable {
+    case managedLOB = "Managed LOB"   // Native MDM channel (mdmclient)
+    case agent = "Agent"               // Sidecar/IME (IntuneMDMDaemon)
+    case unknown = "Unknown"
+
+    var displayName: String { rawValue }
+}
+
 struct LogEntry: Identifiable, Hashable {
     let id = UUID()
     let timestamp: Date
@@ -412,6 +422,7 @@ struct PolicyExecution: Identifiable, Hashable {
     let scriptType: String? // Custom Attribute or Script Policy
     let executionContext: String? // root or user
     let healthDomain: String? // Domain name for health checks
+    let deploymentChannel: DeploymentChannel // LOB vs Agent channel
     let status: PolicyStatus
     let startTime: Date?
     let endTime: Date?

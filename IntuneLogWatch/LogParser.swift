@@ -278,9 +278,7 @@ class LogParser: ObservableObject {
                 // Process the previous entry if it exists
                 if let current = currentEntry {
                     if let entry = buildLogEntry(from: current.components, additionalLines: current.additionalLines, rawLines: [current.components.joined(separator: " | ")] + current.additionalLines) {
-                        if entry.component != "AppPolicyResultsReporter" {
-                            entries.append(entry)
-                        }
+                        entries.append(entry)
                     } else {
                         parseErrors.append("Line \(index): Failed to parse multi-line log entry")
                     }
@@ -637,6 +635,7 @@ class LogParser: ObservableObject {
                 scriptType: scriptType,
                 executionContext: executionContext,
                 healthDomain: healthDomain,
+                deploymentChannel: .agent,
                 status: status,
                 startTime: startTime,
                 endTime: endTime,
