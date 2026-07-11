@@ -1,3 +1,6 @@
+![](https://img.shields.io/github/v/release/gilburns/IntuneLogWatch)&nbsp;![](https://img.shields.io/github/downloads/gilburns/IntuneLogWatch/latest/total)&nbsp;![](https://img.shields.io/badge/macOS-14.6%2B-success)&nbsp;![](https://img.shields.io/github/license/gilburns/IntuneLogWatch)
+
+
 # IntuneLogWatch
 
 **A macOS application for analyzing Microsoft Intune logs with human-readable insights**
