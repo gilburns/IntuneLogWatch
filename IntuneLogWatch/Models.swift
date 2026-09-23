@@ -466,7 +466,7 @@ enum SyncEventType: String {
 
     var displayName: String {
         switch self {
-        case .fullSync: return "Sync Event (FullSyncWorkflow)"
+        case .fullSync: return "Sync Event (SyncWorkflow)"
         case .recurringPolicy: return "Recurring Event"
         case .healthPolicy: return "Health Event"
         }
