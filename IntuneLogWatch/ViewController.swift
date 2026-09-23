@@ -10,8 +10,20 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var parser = LogParser()
-    @State private var selectedSyncEvent: SyncEvent?
+    @StateObject private var lobEngine = LOBCorrelationEngine()
+    @State private var selectedEvent: SidebarEvent?
     @State private var selectedPolicy: PolicyExecution?
+
+    // Convenience accessors for compatibility with existing detail views
+    private var selectedSyncEvent: SyncEvent? {
+        if case .agentSync(let event) = selectedEvent { return event }
+        return nil
+    }
+    private var selectedLOBEvent: LOBAppEvent? {
+        if case .lobInstall(let event) = selectedEvent { return event }
+        return nil
+    }
+
     @State private var showingFilePicker = false
     @Binding var showingCertificateInspector: Bool
     @Binding var sidebarVisibility: NavigationSplitViewVisibility
@@ -33,16 +45,18 @@ struct ContentView: View {
         case syncOnly = "sync"
         case recurringOnly = "recurring"
         case healthOnly = "health"
+        case lobOnly = "lob"
 
         var displayName: String {
             switch self {
             case .syncOnly: return "Sync Events"
             case .recurringOnly: return "Recurring Events"
             case .healthOnly: return "Health Events"
+            case .lobOnly: return "LOB Installs"
             }
         }
 
-        func displayNameWithCount(syncCount: Int, recurringCount: Int, healthCount: Int) -> String {
+        func displayNameWithCount(syncCount: Int, recurringCount: Int, healthCount: Int, lobCount: Int) -> String {
             switch self {
             case .syncOnly:
                 return "Sync\nEvents\n(\(syncCount))"
@@ -50,17 +64,21 @@ struct ContentView: View {
                 return "Recurring\nEvents\n(\(recurringCount))"
             case .healthOnly:
                 return "Health\nEvents\n(\(healthCount))"
+            case .lobOnly:
+                return "LOB\nInstalls\n(\(lobCount))"
             }
         }
 
         func toolTipForFilter() -> String {
             switch self {
             case .syncOnly:
-                return "Sync Events"
+                return "Sync Events (⌘1)"
             case .recurringOnly:
-                return "Recurring Events"
+                return "Recurring Events (⌘2)"
             case .healthOnly:
-                return "Health Events"
+                return "Health Events (⌘3)"
+            case .lobOnly:
+                return "LOB Installs (⌘4)"
             }
         }
 
@@ -69,6 +87,7 @@ struct ContentView: View {
             case .syncOnly: return "1"
             case .recurringOnly: return "2"
             case .healthOnly: return "3"
+            case .lobOnly: return "4"
             }
         }
     }
@@ -92,21 +111,52 @@ struct ContentView: View {
             _eventFilter = State(initialValue: filter)
         }
     }
-    
+
+    private var navigationTitle: String {
+        if eventFilter == .lobOnly {
+            if let analysis = lobEngine.analysis {
+                return "LOB Installs (\(analysis.totalEvents) events)"
+            }
+            return "LOB Installs"
+        }
+        return parser.analysis?.sourceTitle ?? "IntuneLogWatch LOB"
+    }
+
     
     var body: some View {
         
         GeometryReader { geometry in
             
             NavigationSplitView(columnVisibility: $sidebarVisibility) {
-                sidebar.frame(minWidth: 300)
+                sidebar
+                .frame(minWidth: 300)
             } content: {
-                syncEventDetail
+                switch selectedEvent {
+                case .agentSync:
+                    syncEventDetail
+                case .lobInstall(let event):
+                    LOBDetailView(event: event)
+                case nil:
+                    VStack {
+                        Image(systemName: "sidebar.left")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        Text("Select an Event")
+                            .font(.headline)
+                        Text("Choose an event from the sidebar to view its details")
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             } detail: {
-                policyDetail
-                    .frame(minWidth: 400)
+                if case .agentSync = selectedEvent {
+                    policyDetail
+                        .frame(minWidth: 400)
+                } else {
+                    EmptyView()
+                }
             }
-            .navigationTitle(parser.analysis?.sourceTitle ?? "Intune Log Watch")
+            .navigationTitle(navigationTitle)
             .fileImporter(
                 isPresented: $showingFilePicker,
                 allowedContentTypes: [.log, .plainText],
@@ -126,10 +176,15 @@ struct ContentView: View {
                 if parser.analysis == nil && parser.error == nil {
                     parser.loadLocalIntuneLogs()
                 }
-                
+
+                // Also load LOB data in background
+                if lobEngine.analysis == nil && lobEngine.error == nil {
+                    lobEngine.loadLOBData()
+                }
+
                 // Capture the window height on appearance
                 windowHeight = geometry.size.height
-                
+
                 // Add local event monitor for mouse movement
                 NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) { event in
                     self.handleMouseMoved(event, windowHeight: geometry.size.height)
@@ -139,7 +194,7 @@ struct ContentView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openLogFile)) { _ in
                 // Trigger the same action as the toolbar button
-                selectedSyncEvent = nil
+                selectedEvent = nil
                 selectedPolicy = nil
                 parser.analysis = nil
                 parser.error = nil
@@ -157,9 +212,11 @@ struct ContentView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .reloadLocalLogs)) { _ in
                 // Trigger the same action as the reload button
-                selectedSyncEvent = nil
+                selectedEvent = nil
                 selectedPolicy = nil
                 parser.loadLocalIntuneLogs()
+                // Also reload LOB data
+                lobEngine.loadLOBData()
             }
             .onReceive(NotificationCenter.default.publisher(for: .focusSearchField)) { _ in
                 // Handle search focus at the top level
@@ -176,9 +233,11 @@ struct ContentView: View {
                 // Auto-select first sync event when parsing completes
                 if !newValue, let analysis = parser.analysis, selectedSyncEvent == nil {
                     let sortedEvents = sortedSyncEvents(analysis.syncEvents)
-                    selectedSyncEvent = sortedEvents.first
+                    if let first = sortedEvents.first {
+                        selectedEvent = .agentSync(first)
+                    }
                     syncEventListFocused = true
-                    
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         withAnimation(.spring(duration: 1.0, bounce: 0.5, blendDuration: 1.0)) {
                             infoViewVisible = false
@@ -201,7 +260,7 @@ struct ContentView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Open Log File…", systemImage: "arrow.up.right") {
-                    selectedSyncEvent = nil
+                    selectedEvent = nil
                     selectedPolicy = nil
                     parser.analysis = nil
                     parser.error = nil
@@ -218,9 +277,10 @@ struct ContentView: View {
                 .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
 
                 Button("Reload Local Logs…", systemImage: "arrow.clockwise") {
-                    selectedSyncEvent = nil
+                    selectedEvent = nil
                     selectedPolicy = nil
                     parser.loadLocalIntuneLogs()
+                    lobEngine.loadLOBData()
                 }
                 .disabled(parser.isLoading)
                 .help("Reload Local Logs…")
@@ -281,7 +341,7 @@ struct ContentView: View {
                 ProgressView("Parsing log file...")
 //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let analysis = parser.analysis {
-                
+
                 Group {
                     appInfoHeader()
                     enrollmentHeader(analysis)
@@ -289,19 +349,26 @@ struct ContentView: View {
                     analysisHeader(analysis)
 
                     filterControls(analysis: analysis)
-                    sortControls
+                    if eventFilter != .lobOnly {
+                        sortControls
+                    }
 
                 }
                 .background(Color(NSColor.controlBackgroundColor))
 
-                
-                if #available(macOS 14.0, *) {
-                    List(sortedSyncEvents(analysis.syncEvents), selection: $selectedSyncEvent) { syncEvent in
-                        SyncEventRow(
-                            syncEvent: syncEvent,
-                            isSelected: selectedSyncEvent?.id == syncEvent.id
-                        )
-                        .tag(syncEvent)
+
+                if eventFilter == .lobOnly {
+                    lobEventList
+                } else if #available(macOS 14.0, *) {
+                    let wrappedEvents = sortedSyncEvents(analysis.syncEvents).map { SidebarEvent.agentSync($0) }
+                    List(wrappedEvents, selection: $selectedEvent) { event in
+                        if case .agentSync(let syncEvent) = event {
+                            SyncEventRow(
+                                syncEvent: syncEvent,
+                                isSelected: selectedEvent?.id == syncEvent.id
+                            )
+                            .tag(event)
+                        }
                     }
                     .focused($syncEventListFocused)
                     .onKeyPress(.rightArrow) {
@@ -315,7 +382,9 @@ struct ContentView: View {
                         // Auto-select the first sync event when the list appears
                         if selectedSyncEvent == nil {
                             let sortedEvents = sortedSyncEvents(analysis.syncEvents)
-                            selectedSyncEvent = sortedEvents.first
+                            if let first = sortedEvents.first {
+                                selectedEvent = .agentSync(first)
+                            }
                             syncEventListFocused = true
                         }
                     }
@@ -323,6 +392,13 @@ struct ContentView: View {
                     // Fallback on earlier versions
                 }
 
+            } else if eventFilter == .lobOnly {
+                Group {
+                    appInfoHeader()
+                    filterControls(analysis: nil)
+                }
+                .background(Color(NSColor.controlBackgroundColor))
+                lobEventList
             } else if let error = parser.error {
                 VStack {
                     Image(systemName: "exclamationmark.triangle")
@@ -353,7 +429,7 @@ struct ContentView: View {
             ToolbarItemGroup(placement: .primaryAction) {
                 Spacer()
                 Button("Open Log File…", systemImage: "arrow.up.right") {
-                    selectedSyncEvent = nil
+                    selectedEvent = nil
                     selectedPolicy = nil
                     parser.analysis = nil
                     parser.error = nil
@@ -370,9 +446,10 @@ struct ContentView: View {
                 .animation(.easeInOut(duration: 0.25), value: sidebarVisibility)
 
                 Button("Reload Local Logs…", systemImage: "arrow.clockwise") {
-                    selectedSyncEvent = nil
+                    selectedEvent = nil
                     selectedPolicy = nil
                     parser.loadLocalIntuneLogs()
+                    lobEngine.loadLOBData()
                 }
                 .disabled(parser.isLoading)
                 .help("Reload Local Logs…")
@@ -882,6 +959,73 @@ struct ContentView: View {
         .background(Color(NSColor.controlBackgroundColor))
     }
 
+    // MARK: - LOB Event List (shown when lobOnly filter is active)
+
+    private var lobEventList: some View {
+        Group {
+            if lobEngine.isLoading {
+                VStack {
+                    Spacer()
+                    ProgressView("Querying LOB installs...")
+                    Spacer()
+                }
+            } else if let error = lobEngine.error {
+                VStack(spacing: 12) {
+                    Spacer()
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.orange)
+                    Text("Unable to Load LOB Data")
+                        .font(.headline)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Button("Retry") {
+                        lobEngine.loadLOBData()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Spacer()
+                }
+                .padding()
+            } else if let analysis = lobEngine.analysis, !analysis.events.isEmpty {
+                let wrappedEvents = analysis.events.map { SidebarEvent.lobInstall($0) }
+                if #available(macOS 14.0, *) {
+                    List(wrappedEvents, selection: $selectedEvent) { event in
+                        if case .lobInstall(let lobEvent) = event {
+                            LOBEventRow(event: lobEvent)
+                                .tag(event)
+                        }
+                    }
+                } else {
+                    List(wrappedEvents) { event in
+                        if case .lobInstall(let lobEvent) = event {
+                            LOBEventRow(event: lobEvent)
+                                .onTapGesture { selectedEvent = event }
+                        }
+                    }
+                }
+            } else {
+                VStack(spacing: 12) {
+                    Spacer()
+                    Image(systemName: "shippingbox")
+                        .font(.system(size: 40))
+                        .foregroundColor(.secondary)
+                    Text("No LOB App Events")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                    Text("No managed PKG deployments detected.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Spacer()
+                }
+                .padding()
+            }
+        }
+    }
+
     private func analysisHeader(_ analysis: LogAnalysis) -> some View {
         VStack(alignment: .leading, spacing: 2) {
 
@@ -957,6 +1101,40 @@ struct ContentView: View {
                     .padding(.trailing, 10)
                     .padding(.bottom, 6)
 
+                    // LOB stats
+                    if let lobAnalysis = lobEngine.analysis, lobAnalysis.totalEvents > 0 {
+                        Divider()
+                            .padding(.leading, 18)
+                            .padding(.trailing, 40)
+                            .padding(.bottom, 6)
+
+                        HStack {
+                            Image(systemName: "shippingbox.fill")
+                                .foregroundColor(.indigo)
+                                .font(.caption)
+                            Text("LOB Installs:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("\(lobAnalysis.totalEvents)")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                            if lobAnalysis.completedEvents > 0 {
+                                Label("\(lobAnalysis.completedEvents)", systemImage: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                            if lobAnalysis.failedEvents > 0 {
+                                Label("\(lobAnalysis.failedEvents)", systemImage: "xmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                            Spacer()
+                        }
+                        .padding(.leading, 20)
+                        .padding(.trailing, 10)
+                        .padding(.bottom, 6)
+                    }
+
                 }
              }
             .font(.headline)
@@ -964,7 +1142,7 @@ struct ContentView: View {
 
             Divider()
             .padding(.bottom, 6)
-            
+
         }
         .background(Color(NSColor.controlBackgroundColor))
     }
@@ -1021,10 +1199,11 @@ struct ContentView: View {
         }
     }
     
-    private func filterControls(analysis: LogAnalysis) -> some View {
-        let syncCount = analysis.syncEvents.filter { $0.eventType == .fullSync }.count
-        let recurringCount = analysis.syncEvents.filter { $0.eventType == .recurringPolicy }.count
-        let healthCount = analysis.syncEvents.filter { $0.eventType == .healthPolicy }.count
+    private func filterControls(analysis: LogAnalysis?) -> some View {
+        let syncCount = analysis?.syncEvents.filter { $0.eventType == .fullSync }.count ?? 0
+        let recurringCount = analysis?.syncEvents.filter { $0.eventType == .recurringPolicy }.count ?? 0
+        let healthCount = analysis?.syncEvents.filter { $0.eventType == .healthPolicy }.count ?? 0
+        let lobCount = lobEngine.analysis?.totalEvents ?? 0
 
         return VStack(spacing: 0) {
 
@@ -1037,14 +1216,14 @@ struct ContentView: View {
             }
             .padding(.horizontal)
             .padding(.vertical, 2)
-            
+
             HStack(spacing: 4) {
                 ForEach(EventFilter.allCases, id: \.self) { filter in
                     Button(action: {
                         eventFilter = filter
                     }) {
-                        
-                        Text(filter.displayNameWithCount(syncCount: syncCount, recurringCount: recurringCount, healthCount: healthCount))
+
+                        Text(filter.displayNameWithCount(syncCount: syncCount, recurringCount: recurringCount, healthCount: healthCount, lobCount: lobCount))
                             .multilineTextAlignment(.center)
                             .font(.caption)
                             .padding(.horizontal, 4)
@@ -1068,51 +1247,36 @@ struct ContentView: View {
                 UserDefaults.standard.set(newValue.rawValue, forKey: "EventFilterPreference")
 
                 // Clear selection first
-                selectedSyncEvent = nil
+                selectedEvent = nil
                 selectedPolicy = nil
 
-                // Delay the selection to allow the List to update its content first
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    let filteredEvents = sortedSyncEvents(analysis.syncEvents)
-                    if !filteredEvents.isEmpty {
-                        selectedSyncEvent = filteredEvents.first
+                if newValue == .lobOnly {
+                    // LOB filter — load data if needed
+                    if lobEngine.analysis == nil && !lobEngine.isLoading {
+                        lobEngine.loadLOBData()
+                    }
+                } else if let analysis = analysis {
+                    // Agent filter — auto-select first event
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        let filteredEvents = sortedSyncEvents(analysis.syncEvents)
+                        if let first = filteredEvents.first {
+                            selectedEvent = .agentSync(first)
+                        }
                     }
                 }
             }
             HStack(spacing: 4) {
-                Button(action: {}) {
-                    Text("⌘1")
-                        .font(.caption)
-                        .foregroundColor(eventFilter == .syncOnly ? .blue : .secondary)
-                        .padding(.horizontal, 4)
-                        .frame(maxWidth: .infinity)
-
+                ForEach(Array(EventFilter.allCases.enumerated()), id: \.element) { index, filter in
+                    Button(action: {}) {
+                        Text("⌘\(index + 1)")
+                            .font(.caption)
+                            .foregroundColor(eventFilter == filter ? .blue : .secondary)
+                            .padding(.horizontal, 4)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .background(Color(NSColor.controlBackgroundColor))
+                    .buttonStyle(.borderless)
                 }
-                .background(Color(NSColor.controlBackgroundColor))
-                .buttonStyle(.borderless)
-
-                Button(action: {}) {
-                    Text("⌘2")
-                        .font(.caption)
-                        .foregroundColor(eventFilter == .recurringOnly ? .blue : .secondary)
-                        .padding(.horizontal, 4)
-                        .frame(maxWidth: .infinity)
-
-                }
-                .background(Color(NSColor.controlBackgroundColor))
-                .buttonStyle(.borderless)
-
-                Button(action: {}) {
-                    Text("⌘3")
-                        .font(.caption)
-                        .foregroundColor(eventFilter == .healthOnly ? .blue : .secondary)
-                        .padding(.horizontal, 4)
-                        .frame(maxWidth: .infinity)
-
-                }
-                .background(Color(NSColor.controlBackgroundColor))
-                .buttonStyle(.borderless)
-
             }
             .padding(.horizontal)
             .padding(.vertical, 2)
@@ -1189,15 +1353,14 @@ struct ContentView: View {
         // First, apply the filter
         var filteredEvents = syncEvents
         switch eventFilter {
-//        case .all:
-//            // Show only Sync and Recurring events (exclude health events as they're too frequent)
-//            filteredEvents = syncEvents.filter { $0.eventType == .fullSync || $0.eventType == .recurringPolicy }
         case .syncOnly:
             filteredEvents = syncEvents.filter { $0.eventType == .fullSync }
         case .recurringOnly:
             filteredEvents = syncEvents.filter { $0.eventType == .recurringPolicy }
         case .healthOnly:
             filteredEvents = syncEvents.filter { $0.eventType == .healthPolicy }
+        case .lobOnly:
+            return [] // LOB events handled separately
         }
 
         // Then, apply the sort

@@ -692,6 +692,9 @@ struct PolicyRow: View {
 
     private var policyTypeTiles: some View {
         HStack(spacing: 4) {
+            // Deployment channel badge
+            ChannelBadge(channel: policy.deploymentChannel)
+
             // Main policy type
             Text(policy.type.displayName)
                 .font(.caption)

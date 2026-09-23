@@ -99,11 +99,9 @@ struct PolicyDetailView: View {
 
                 }
                 Spacer()
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .trailing, spacing: 4) {
                     statusBadge
-                    Text("")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    ChannelBadge(channel: policy.deploymentChannel)
                 }
             }
             .padding(.bottom, -4)

@@ -62,6 +62,7 @@ struct PolicyExecutionSnapshot: Codable, Hashable {
     let scriptType: String?
     let executionContext: String?
     let healthDomain: String?
+    let deploymentChannel: String?
 
     init(from policy: PolicyExecution) {
         self.policyId = policy.policyId
@@ -83,6 +84,7 @@ struct PolicyExecutionSnapshot: Codable, Hashable {
         self.scriptType = policy.scriptType
         self.executionContext = policy.executionContext
         self.healthDomain = policy.healthDomain
+        self.deploymentChannel = policy.deploymentChannel.rawValue
     }
 
     // Convert back to PolicyExecution for viewing
@@ -97,6 +99,7 @@ struct PolicyExecutionSnapshot: Codable, Hashable {
             scriptType: scriptType,
             executionContext: executionContext,
             healthDomain: healthDomain,
+            deploymentChannel: DeploymentChannel(rawValue: deploymentChannel ?? "Agent") ?? .agent,
             status: status.toPolicyStatus(),
             startTime: startTime,
             endTime: endTime,
