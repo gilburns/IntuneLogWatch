@@ -307,7 +307,9 @@ class LogParser: ObservableObject {
         // Process the final entry
         if let current = currentEntry {
             if let entry = buildLogEntry(from: current.components, additionalLines: current.additionalLines, rawLines: [current.components.joined(separator: " | ")] + current.additionalLines) {
-                entries.append(entry)
+                if entry.component != "AppPolicyResultsReporter" {
+                    entries.append(entry)
+                }
             } else {
                 parseErrors.append("Final entry: Failed to parse multi-line log entry")
             }
