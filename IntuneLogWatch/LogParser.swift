@@ -382,6 +382,10 @@ class LogParser: ObservableObject {
         )
     }
     
+    // Component name for full sync entries. Older agents log "FullSyncWorkflow";
+    // newer agents log "SyncWorkFlow".
+    private static let syncWorkflowComponents: Set<String> = ["FullSyncWorkflow", "SyncWorkFlow"]
+
     private func extractSyncEvents(from entries: [LogEntry]) async -> [SyncEvent] {
         var syncEvents: [SyncEvent] = []
         var currentSyncEntries: [LogEntry] = []
@@ -397,8 +401,9 @@ class LogParser: ObservableObject {
         var healthPolicyStartTimes: [String: Date] = [:] // Domain -> start time
 
         for entry in entries {
-            // Handle FullSyncWorkflow events
-            if entry.component == "FullSyncWorkflow" && entry.message.contains("Starting sidecar gateway service checkin") {
+            // Handle FullSyncWorkflow / SyncWorkFlow events
+            let isSyncWorkflowEntry = Self.syncWorkflowComponents.contains(entry.component)
+            if isSyncWorkflowEntry && entry.message.contains("Starting sidecar gateway service checkin") {
                 if !currentSyncEntries.isEmpty, let startTime = syncStartTime, let eventType = currentEventType {
                     let syncEvent = await buildSyncEvent(
                         eventType: eventType,
@@ -413,7 +418,7 @@ class LogParser: ObservableObject {
                 syncStartTime = entry.timestamp
                 currentEventType = .fullSync
 
-            } else if entry.component == "FullSyncWorkflow" && entry.message.contains("Finished sidecar gateway service checkin") {
+            } else if isSyncWorkflowEntry && entry.message.contains("Finished sidecar gateway service checkin") {
                 currentSyncEntries.append(entry)
 
                 if let startTime = syncStartTime, let eventType = currentEventType {
